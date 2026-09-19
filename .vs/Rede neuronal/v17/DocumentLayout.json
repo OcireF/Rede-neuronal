@@ -1,0 +1,121 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|c:\\users\\frederico\\source\\repos\\rede neuronal\\rede neuronal\\camadacalculo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|solutionrelative:rede neuronal\\camadacalculo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|c:\\users\\frederico\\source\\repos\\rede neuronal\\rede neuronal\\neuronio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|solutionrelative:rede neuronal\\neuronio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|c:\\users\\frederico\\source\\repos\\rede neuronal\\rede neuronal\\redeneuronal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|solutionrelative:rede neuronal\\redeneuronal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{14F07A86-0847-43A7-B997-678467C1410D}|testes\\testes.csproj|c:\\users\\frederico\\source\\repos\\rede neuronal\\testes\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{14F07A86-0847-43A7-B997-678467C1410D}|testes\\testes.csproj|solutionrelative:testes\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|c:\\users\\frederico\\source\\repos\\rede neuronal\\rede neuronal\\funcoaativacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|solutionrelative:rede neuronal\\funcoaativacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|c:\\users\\frederico\\source\\repos\\rede neuronal\\rede neuronal\\entrypoint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{329E29FC-01BD-4CDD-B88F-4504A6732399}|Rede neuronal\\Rede neuronal.csproj|solutionrelative:rede neuronal\\entrypoint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\testes\\Program.cs",
+              "RelativeDocumentMoniker": "testes\\Program.cs",
+              "ToolTip": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\testes\\Program.cs",
+              "RelativeToolTip": "testes\\Program.cs",
+              "ViewState": "AQIAABYAAAAAAAAAAAAIwB8AAAAgAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-18T15:46:28.847Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Entrypoint.cs",
+              "DocumentMoniker": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\Entrypoint.cs",
+              "RelativeDocumentMoniker": "Rede neuronal\\Entrypoint.cs",
+              "ToolTip": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\Entrypoint.cs",
+              "RelativeToolTip": "Rede neuronal\\Entrypoint.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-18T15:26:38.568Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RedeNeuronal.cs",
+              "DocumentMoniker": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\RedeNeuronal.cs",
+              "RelativeDocumentMoniker": "Rede neuronal\\RedeNeuronal.cs",
+              "ToolTip": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\RedeNeuronal.cs",
+              "RelativeToolTip": "Rede neuronal\\RedeNeuronal.cs",
+              "ViewState": "AQIAAAQAAAAAAAAAAAApwCEAAAA1AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-18T13:58:16.862Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "FuncoaAtivacao.cs",
+              "DocumentMoniker": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\FuncoaAtivacao.cs",
+              "RelativeDocumentMoniker": "Rede neuronal\\FuncoaAtivacao.cs",
+              "ToolTip": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\FuncoaAtivacao.cs",
+              "RelativeToolTip": "Rede neuronal\\FuncoaAtivacao.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAuwBEAAAAZAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-14T15:45:03.54Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CamadaCalculo.cs",
+              "DocumentMoniker": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\CamadaCalculo.cs",
+              "RelativeDocumentMoniker": "Rede neuronal\\CamadaCalculo.cs",
+              "ToolTip": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\CamadaCalculo.cs",
+              "RelativeToolTip": "Rede neuronal\\CamadaCalculo.cs",
+              "ViewState": "AgIAACwAAAAAAAAAAAAgwDcAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-14T15:23:29.632Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Neuronio.cs",
+              "DocumentMoniker": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\Neuronio.cs",
+              "RelativeDocumentMoniker": "Rede neuronal\\Neuronio.cs",
+              "ToolTip": "C:\\Users\\Frederico\\source\\repos\\Rede neuronal\\Rede neuronal\\Neuronio.cs",
+              "RelativeToolTip": "Rede neuronal\\Neuronio.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-14T15:08:44.209Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

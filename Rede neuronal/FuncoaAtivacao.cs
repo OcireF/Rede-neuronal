@@ -11,11 +11,11 @@ namespace Rede_neuronal
         public FuncoaAtivacao() { }
         public int FucaoAtivar(double entrada)
         {
-            if(entrada < 0)
+            if(entrada < 0) //< 0
                 return 0;
             else
             {
-                return 1;
+                return 1; //>= 1
             }
         }
         public int Dirivada(double entrada)

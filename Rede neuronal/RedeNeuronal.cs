@@ -9,25 +9,22 @@ namespace Rede_neuronal
     public class RedeNeuronal
     {
         public CamadaDensa[] camadaCalculos;
-        //public int[][] transito; // entradas e saidas.
+        public int[] camada1;
         public RedeNeuronal(int[] forma,FuncoaAtivacao f) {
             camadaCalculos = new CamadaDensa[forma.Length-1];// O "-1" é porque a primeira camada não é de calculo
-            //transito = new int[forma.Length][]; //entradas e saidas
-            //transito[0] = new int[forma[0]]; // tamanho da Camada de entrada.
+            camada1 = new int[forma[0]]; // inicia a camada de entrada
             for(int i = 0; i < forma.Length-1; i++) //cria todas as camadas -1 a "a camada de entrada"
             {
-                //transito[i+1] = new int[forma[i+1]]; //criar as saidas desta camada.
                 camadaCalculos[i] = new CamadaDensa(forma[i], forma[i + 1], f); //inicia a camada 
             }
         }
+        //contrutor para ter pesos e pendores já pre defenidos
         public RedeNeuronal(int[] forma, FuncoaAtivacao f, double[][][] pesos, double[][] pendores)
         {
             camadaCalculos = new CamadaDensa[forma.Length - 1];// O "-1" é porque a primeira camada não é de calculo
-            //transito = new int[forma.Length][]; //entradas e saidas
-            //transito[0] = new int[forma[0]]; // tamanho da Camada de entrada.
+            camada1 = new int[forma[0]]; // inicia a camada de entrada
             for (int i = 0; i < forma.Length - 1; i++) //cria todas as camadas -1 a "a camada de entrada"
             {
-                //transito[i + 1] = new int[forma[i + 1]]; //criar as saidas desta camada.
                 camadaCalculos[i] = new CamadaDensa(forma[i], forma[i + 1], f, pesos[i], pendores[i]); //inicia a camada 
             }
         }

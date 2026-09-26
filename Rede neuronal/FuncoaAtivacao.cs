@@ -6,21 +6,9 @@ using System.Threading.Tasks;
 
 namespace Rede_neuronal
 {
-    public class FuncoaAtivacao
+    public interface FuncoaAtivacao
     {
-        public FuncoaAtivacao() { }
-        public int FucaoAtivar(double entrada)
-        {
-            if(entrada < 0) //< 0
-                return 0;
-            else
-            {
-                return 1; //>= 1
-            }
-        }
-        public int Dirivada(double entrada)
-        { 
-            return 0; 
-        }
+        public int FucaoAtivar(double entrada);
+        public int Dirivada(double entrada);
     }
 }

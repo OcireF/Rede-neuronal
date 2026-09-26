@@ -3,8 +3,8 @@
     public class Neuronio
     {
         private FuncoaAtivacao ativador;
-        public double[] pesos;
-        public double pendore;
+        public double[] pesos; //pesos do neuronio (w)
+        public double pendore; //pendore do neuronio (b)
         public int saida = 0; //saida do neuronio (y)
 
 

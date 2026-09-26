@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Rede neuronal": {
+      "commandName": "Project",
+      "debugEngines": "managed,native"
+    }
+  }
+}

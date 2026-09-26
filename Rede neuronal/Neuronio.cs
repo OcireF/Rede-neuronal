@@ -11,7 +11,7 @@
         //Constructor para criar um neuronio com pesos e pendores randomicos
         public Neuronio(int numeroEntradas, FuncoaAtivacao a)
         {
-            InitRandomPesosAndPendores(numeroEntradas);
+            InitRandomPesosAndPendores(numeroEntradas); //inicializa pesos e pendores randomicos
             ativador = a;
         }
 
@@ -23,6 +23,7 @@
             ativador = a;
         }
 
+        //inicializa pesos e pendores randomicos
         private void InitRandomPesosAndPendores(int numeroEntradas)
         {
             pesos = new double[numeroEntradas]; //inializa a variavel [numeroEntradas]
@@ -42,14 +43,14 @@
             double produtoEscalar = ProdutoEscalar(entradas); // (x * w)
             double h = produtoEscalar + pendore;            // h = (x * w) + b
             saida = ativador.FucaoAtivar(h);                //corre a funcao ativadora para ter o "y"
-            return saida;                                   //corre a funcao ativadora
+            return saida;
         }
 
         //calcula o produto escalar entre as entradas e os pesos
         public double ProdutoEscalar(int[] entradas)
         {
             double soma = 0;
-            for (int i = 0; i < entradas.Length; i++)
+            for (int i = 0; i < entradas.Length; i++) // soma de todos os produtos (x * w)
             {
                 soma += entradas[i] * pesos[i];
             }

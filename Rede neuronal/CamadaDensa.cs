@@ -11,6 +11,8 @@ namespace Rede_neuronal
 
         private int[] saidas;
         private Neuronio[] neuronios;
+
+        //criar a camada com pesos e pendores aleatorios
         public CamadaDensa(int dimensaoEntrada, int dimensaoSaida, FuncoaAtivacao ativador) {
             saidas = new int[dimensaoSaida]; //inicializa a variavel que guarda todas as saidas da camada
             neuronios = new Neuronio[dimensaoSaida]; // inicia a varia que guarda todos os neuronios
@@ -31,7 +33,7 @@ namespace Rede_neuronal
             }
         }
 
-        //se for preciso trocar os pesos e pendores de uma camada on the fly
+        //se for preciso trocar os pesos e pendores de uma camada on the fly temos esta função
         public void SetPesosAndPendores(double[][] pesos, double[] pendore)
         {
             for (int neuro = 0; neuro < neuronios.Length; neuro++)

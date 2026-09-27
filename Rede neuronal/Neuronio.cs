@@ -1,22 +1,25 @@
-﻿namespace Rede_neuronal
+﻿using Rede_neuronal.Interfaces;
+
+namespace Rede_neuronal
 {
     public class Neuronio
     {
-        private FuncoaAtivacao ativador;
+        private IFuncoaAtivacao ativador;
         public double[] pesos; //pesos do neuronio (w)
         public double pendore; //pendore do neuronio (b)
-        public int saida = 0; //saida do neuronio (y)
+        public double saida = 0; //saida do neuronio (y)
+        public double dirivada = 0; //saida do neuronio (y)
 
 
         //Constructor para criar um neuronio com pesos e pendores randomicos
-        public Neuronio(int numeroEntradas, FuncoaAtivacao a)
+        public Neuronio(int numeroEntradas, IFuncoaAtivacao a)
         {
             InitRandomPesosAndPendores(numeroEntradas); //inicializa pesos e pendores randomicos
             ativador = a;
         }
 
         //Constructor para criar um neuronio com pesos e pendores especificos
-        public Neuronio(double[] pesos, double pendore, FuncoaAtivacao a)
+        public Neuronio(double[] pesos, double pendore, IFuncoaAtivacao a)
         {
             this.pesos = pesos;
             this.pendore = pendore;
@@ -36,18 +39,30 @@
             }
         }
 
+        //adaptar os pesos e pendores com base no erro, entradas e taxa de aprendizagem
+        public void adaptar(double erro, double[] entradas, double taxaAprendizagem)
+        {
+            for(int i = 0; i < entradas.Length; i++)
+            {
+                var variacaoPeso = -taxaAprendizagem * dirivada * erro + entradas[i]; //calcula a variacao do peso (delta w)
+                pesos[i] += variacaoPeso; //atualiza os peso
+            }
+            var variacaoPendor = -taxaAprendizagem * dirivada * erro; //calcula a variacao do pendore (delta b)
+            pendore += variacaoPendor;  //atualiza o pendore
+        }
 
         //correr o neuronio para calcular a saida (y)
-        public int RunNeuronio(int[] entradas)
+        public double RunNeuronio(double[] entradas)
         {
             double produtoEscalar = ProdutoEscalar(entradas); // (x * w)
             double h = produtoEscalar + pendore;            // h = (x * w) + b
             saida = ativador.FucaoAtivar(h);                //corre a funcao ativadora para ter o "y"
+            dirivada = ativador.Dirivada(h);                //corre a funcao derivada para ter o (y')
             return saida;
         }
 
         //calcula o produto escalar entre as entradas e os pesos
-        public double ProdutoEscalar(int[] entradas)
+        public double ProdutoEscalar(double[] entradas)
         {
             double soma = 0;
             for (int i = 0; i < entradas.Length; i++) // soma de todos os produtos (x * w)

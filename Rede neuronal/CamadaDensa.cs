@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rede_neuronal.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace Rede_neuronal
 {
-    public class CamadaDensa
+    public class CamadaDensa : ICamada
     {
 
-        private int[] saidas;
+        private double[] saidas;
         private Neuronio[] neuronios;
 
         //criar a camada com pesos e pendores aleatorios
-        public CamadaDensa(int dimensaoEntrada, int dimensaoSaida, FuncoaAtivacao ativador) {
-            saidas = new int[dimensaoSaida]; //inicializa a variavel que guarda todas as saidas da camada
+        public CamadaDensa(int dimensaoEntrada, int dimensaoSaida, IFuncoaAtivacao ativador) {
+            saidas = new double[dimensaoSaida]; //inicializa a variavel que guarda todas as saidas da camada
             neuronios = new Neuronio[dimensaoSaida]; // inicia a varia que guarda todos os neuronios
             for (int neuro = 0; neuro < dimensaoSaida; neuro++)
             {
@@ -23,9 +24,9 @@ namespace Rede_neuronal
         }
 
         //criar a camada com pesos e pendores Pre-definidos
-        public CamadaDensa(int dimensaoEntrada, int dimensaoSaida, FuncoaAtivacao ativador, double[][] pesos, double[] pendores)
+        public CamadaDensa(int dimensaoEntrada, int dimensaoSaida, IFuncoaAtivacao ativador, double[][] pesos, double[] pendores)
         {
-            saidas = new int[dimensaoSaida]; //inicializa a variavel que guarda todas as saidas da camada
+            saidas = new double[dimensaoSaida]; //inicializa a variavel que guarda todas as saidas da camada
             neuronios = new Neuronio[dimensaoSaida]; // inicia a varia que guarda todos os neuronios
             for (int neuro = 0; neuro < dimensaoSaida; neuro++)
             {
@@ -43,14 +44,32 @@ namespace Rede_neuronal
             }
         }
 
+        //adaptar os pesos e pendores com base nos erros da camada e nas entradas da camada anterior
+        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem)
+        {
+            for (int neuro = 0; neuro < neuronios.Length; neuro++)
+            {
+                neuronios[neuro].adaptar(errosSaida[neuro], entradas, taxaAprendizagem);
+            }
+        }
+
         //calcula as saidas da camada
-        public int[] CalcularSaidas(int[] entradas)
+        public double[] CalcularSaidas(double[] entradas)
         {
             for(int neuro = 0; neuro < neuronios.Length; neuro++) // corre todos os neuronios da camada
             {
                 saidas[neuro] = neuronios[neuro].RunNeuronio(entradas); // escreve cada resutado numa saida
             }
             return saidas;
+        }
+
+        public double[] GetSaidas()
+        {
+            return saidas;
+        }
+        public Neuronio[] GetNeuronios()
+        {
+            return neuronios;
         }
     }
 }

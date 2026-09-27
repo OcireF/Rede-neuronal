@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rede_neuronal
+namespace Rede_neuronal.Interfaces
 {
     //interface para criar funções de ativação personalizadas, cada função de ativação deve implementar esta interface
-    public interface FuncoaAtivacao
+    public interface IFuncoaAtivacao
     {
-        public int FucaoAtivar(double entrada);
-        public int Dirivada(double entrada);
+        public double FucaoAtivar(double entrada);
+        public double Dirivada(double entrada);
     }
 }

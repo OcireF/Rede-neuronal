@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rede_neuronal.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Rede_neuronal
 {
-    public class FucaoAtivadoraStep:FuncoaAtivacao
+    public class FucaoAtivadoraStep:IFuncoaAtivacao
     {
         public FucaoAtivadoraStep() { }
-        public int FucaoAtivar(double entrada)
+        public double FucaoAtivar(double entrada)
         {
             if (entrada < 0) //< 0
                 return 0;
@@ -18,7 +19,7 @@ namespace Rede_neuronal
                 return 1; //>= 1
             }
         }
-        public int Dirivada(double entrada)
+        public double Dirivada(double entrada)
         {
             return 0;
         }

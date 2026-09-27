@@ -4,14 +4,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        /*Console.WriteLine("Textes Parte 1.1");
+        Console.WriteLine("Textes Parte 1.1");
         TesteRedeNeuronalXor();
         Console.WriteLine();
-        TesteRedeNeuronalRandomValues();*/
+        TesteRedeNeuronalRandomValues();
 
         Console.WriteLine("\nTextes Parte 1.2");
         TesteReconhecimentoBarrasVerticais();
-
         BigTreinoRedeBarrasVerticais();
     }
 
@@ -173,7 +172,7 @@ class Program
         //variaveis
         int[] forma = { 9, 3, 1 };
         double taxaAprendizagem = 0.2;
-        int epocas = 1000;
+        int epocas = 10000;
         double erroMaximo = 0.05;
         var fucaoTanh = new FucaoAtivadoraTanh();
 

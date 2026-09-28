@@ -59,7 +59,7 @@ namespace Rede_neuronal
         
         public void RetroPropagar(double[] erro, double taxaAprendizagem)
         {
-            var erroSaida = erro; //guarda o erro da camada atual
+            var erroSaida = erro; //guarda o erro da saida
             for (int Cam = camadas.Length - 1; Cam >= 1; Cam--) //retroPropagar em todas as camadas menos a ultima (camada 1)
             {
                 var saidaAnterior = camadas[Cam - 1].GetSaidas();   //pega a saida da camada anterior "y^(n-1)"
@@ -68,29 +68,19 @@ namespace Rede_neuronal
                 var dimensaoCamadaAtual = camadas[Cam].GetSaidas().Length; //dimensao da camada atual (d^n)
                 var neuroniosCamadaAtual = camadas[Cam].GetNeuronios();    //pega os neuronios da camada atual (neuro^n)
 
-                var erroSaidaAnterior = new double[dimensaoCamadaAnterior]; //inicializa o array de erros (n - 1)
+                double[] erroSaidaAnterior = new double[dimensaoCamadaAnterior]; //inicializa o array de erros (n - 1)
 
-                /*for (int neuro = 0; neuro < dimensaoCamadaAtual; neuro++)
+                for(int i = 0; i < dimensaoCamadaAnterior; i++) //e = i dos slides
                 {
-                    for(int w = 0; w < dimensaoCamadaAnterior; w++)
-                    {
-                        for (int e = 0; e < erroSaida.Length; e++)
-                        {
-                            erroSaidaAnterior[neuro] += neuroniosCamadaAtual[neuro].pesos[w] * erroSaida[e] * neuroniosCamadaAtual[neuro].dirivada;
-                        }
-                    }
-                }*/
-
-                for(int e = 0; e < dimensaoCamadaAnterior; e++) //e = i dos slides
-                {
-                    erroSaidaAnterior[e] = 0;
+                    erroSaidaAnterior[i] = 0;
                     for(int neuro = 0; neuro < dimensaoCamadaAtual; neuro++) // neuro = j dos slides
                     {
-                        erroSaidaAnterior[e] += neuroniosCamadaAtual[neuro].pesos[e] * erroSaida[neuro] * neuroniosCamadaAtual[neuro].derivada;
+                        erroSaidaAnterior[i] += neuroniosCamadaAtual[neuro].pesos[i] * erroSaida[neuro] * neuroniosCamadaAtual[neuro].derivada;
                     }
                 }
 
                 camadas[Cam].AdaptarCamada(erroSaida, saidaAnterior, taxaAprendizagem);
+
                 erroSaida = erroSaidaAnterior;
             }
         }
@@ -105,7 +95,20 @@ namespace Rede_neuronal
             double erroMedio = 0;
             for (int k=0; k < dimensaoVetorPerda; k++) //Soma primeiro antes de fazer 1/K
             {
-                erroMedio += Math.Pow(variacaoErroSaida[k], 2) / dimensaoVetorPerda;
+                erroMedio += (variacaoErroSaida[k] * variacaoErroSaida[k]);
+            }
+
+            erroMedio = erroMedio / dimensaoVetorPerda; // erroMedio/K
+
+            //escreve num ficheiro csv o grafico de erro medio
+            string caminho = Path.Combine(AppContext.BaseDirectory, "erros.csv");
+            try
+            {
+                File.AppendAllText(caminho, erroMedio.ToString(System.Globalization.CultureInfo.CurrentUICulture) + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erro ao escrever: " + ex.Message);
             }
 
             return erroMedio;
@@ -124,7 +127,6 @@ namespace Rede_neuronal
                     
                     if (erro <= erroMaximo)
                     {
-                        Console.WriteLine("erro = " + erro);
                         return true;
                     }
                 }
@@ -145,6 +147,16 @@ namespace Rede_neuronal
             }
 
             return saida;
+        }
+
+        public double[][] Prever(double[][] input)
+        {
+            var saidas = new double[input.Length][];
+            for (int i = 0; i < input.Length; i++) //corre todas as camadas de calculo
+            {
+                saidas[i] = calcRedeNeuronal(input[i]);
+            }
+            return saidas;
         }
     }
 }

@@ -10,9 +10,9 @@ class Program
         TesteRedeNeuronalRandomValues();*/
 
         Console.WriteLine("\nTextes Parte 1.2");
-        //TesteReconhecimentoBarrasVerticais();
+        TesteReconhecimentoBarrasVerticais();
         //BigTreinoRedeBarrasVerticais();
-        TreinoXorMaior();
+        //TreinoXorMaior();
     }
 
     public static void TesteRedeNeuronalXor()
@@ -79,9 +79,9 @@ class Program
     public static RedeNeuronal TreinoRedeBarrasVerticais()
     {
         int[] forma = { 9, 3, 1 };
-        double taxaAprendizagem = 0.2;
+        double taxaAprendizagem = 0.02;
         int epocas = 1000;
-        double erroMaximo = 0.05;
+        double erroMaximo = 0.001;
         var fucaoTanh = new FucaoAtivadoraTanh();
 
         double[][] entradasTreino = {
@@ -95,13 +95,13 @@ class Program
         };
         double[][] saidasTreino =
         {
-            new double[]{0},
+            new double[]{-1},
             new double[]{1},
             new double[]{1},
             new double[]{1},
-            new double[]{0},
-            new double[]{0},
-            new double[]{0}
+            new double[]{-1},
+            new double[]{-1},
+            new double[]{-1}
         };
 
         while (true) {

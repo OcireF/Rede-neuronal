@@ -10,8 +10,9 @@ class Program
         TesteRedeNeuronalRandomValues();*/
 
         Console.WriteLine("\nTextes Parte 1.2");
-        TesteReconhecimentoBarrasVerticais();
+        //TesteReconhecimentoBarrasVerticais();
         //BigTreinoRedeBarrasVerticais();
+        TreinoXorMaior();
     }
 
     public static void TesteRedeNeuronalXor()
@@ -314,12 +315,38 @@ class Program
     public static void TreinoXorMaior()
     {
         int[] forma = { 2, 5, 1 };
-        double taxaAprendizagem = 0.1;
-        int epocas = 1000;
-        double erroMaximo = 0.05;
+        double taxaAprendizagem = 0.01;
+        int epocas = 10000;
+        double erroMaximo = 0.005;
         var fucaoTanh = new FucaoAtivadoraTanh();
-        double[][] entradasTeste = { new double[]{ 0, 0}, new double[] { 0, 1}, new double[] { 1, 0}, new double[] { 1, 1}};
-        double[][] saidasTeste = { new double[] { 0 }, new double[] { 1 }, new double[] { 1 }, new double[] { 0 } };
+        double[][] entradasDeTreino = { new double[]{ 0, 0}, new double[] { 0, 1}, new double[] { 1, 0}, new double[] { 1, 1}};
+        double[][] SaidasEsperada = { new double[] { 0 }, new double[] { 1 }, new double[] { 1 }, new double[] { 0 } };
+
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh); //cria uma rede neuronal
+        while (true)
+        {
+            Console.WriteLine("Treino da rede Barras Verticais (Big Treino)");
+            var foiUmSuceso = rede.Treinar(entradasDeTreino, SaidasEsperada, epocas, erroMaximo, taxaAprendizagem);
+            Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
+            if (foiUmSuceso) // se não foi um sucesso não vale a pena testar o treino
+            {
+                break;
+            }
+            else //caso o treino for um insucesso criamos uma nova rede e tentamos denovo
+            {
+                rede = new RedeNeuronal(forma, fucaoTanh);
+                Console.WriteLine("RIP: descartar Rede e criar outra\n");
+            }
+        }
+
+
+        for (int t = 0; t < entradasDeTreino.Length; t++)
+        {
+            ShowQuadriculas(entradasDeTreino[t], 2);
+            double[] result = rede.calcRedeNeuronal(entradasDeTreino[t]);
+            Console.WriteLine("Result=" + result[0]);
+        }
+
     }
 
 

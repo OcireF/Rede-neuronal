@@ -4,14 +4,14 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Textes Parte 1.1");
+        /*Console.WriteLine("Textes Parte 1.1");
         TesteRedeNeuronalXor();
         Console.WriteLine();
-        TesteRedeNeuronalRandomValues();
+        TesteRedeNeuronalRandomValues();*/
 
         Console.WriteLine("\nTextes Parte 1.2");
         TesteReconhecimentoBarrasVerticais();
-        BigTreinoRedeBarrasVerticais();
+        //BigTreinoRedeBarrasVerticais();
     }
 
     public static void TesteRedeNeuronalXor()
@@ -84,7 +84,7 @@ class Program
         var fucaoTanh = new FucaoAtivadoraTanh();
 
         double[][] entradasTreino = {
-                new double[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0},
                 new double[]{1, 0, 0, 1, 0, 0, 1, 0, 0},
                 new double[]{0, 1, 0, 0, 1, 0, 0, 1, 0},
                 new double[]{0, 0, 1, 0, 0, 1, 0, 0, 1},
@@ -100,7 +100,7 @@ class Program
             new double[]{1},
             new double[]{0},
             new double[]{0},
-            new double[]{0},
+            new double[]{0}
         };
 
         while (true) {
@@ -132,7 +132,7 @@ class Program
                 new double[]{
                     0, 1, 0,
                     0, 1, 0,
-                    0, 0, 0 },
+                    0, 0, 0},
                 new double[]{
                     0, 0, 1,
                     0, 0, 0,
@@ -172,7 +172,7 @@ class Program
         //variaveis
         int[] forma = { 9, 3, 1 };
         double taxaAprendizagem = 0.2;
-        int epocas = 10000;
+        int epocas = 1000;
         double erroMaximo = 0.05;
         var fucaoTanh = new FucaoAtivadoraTanh();
 
@@ -248,7 +248,7 @@ class Program
                 new double[]{
                     0, 1, 0,
                     0, 1, 0,
-                    0, 0, 0 },
+                    0, 0, 0},
                 new double[]{
                     0, 0, 1,
                     0, 0, 0,
@@ -284,8 +284,6 @@ class Program
 
     }
 
-
-
     //codigo apenas para viulizar as imagens que estamos a colocar na rede neuronal
     public static void ShowQuadriculas(double[]image,int largura)
     {
@@ -301,6 +299,27 @@ class Program
                 l = 0;
             }
         }
+    }
+
+    /*  N1 	N2 	N3	Saida(Q)
+        0	0	0	0
+        0	0	1	0
+        0	1	0	1
+        0	1	1	1
+        1	0	0	1
+        1	0	1	1
+        1	1	0	1
+        1	1	1	0
+     */
+    public static void TreinoXorMaior()
+    {
+        int[] forma = { 2, 5, 1 };
+        double taxaAprendizagem = 0.1;
+        int epocas = 1000;
+        double erroMaximo = 0.05;
+        var fucaoTanh = new FucaoAtivadoraTanh();
+        double[][] entradasTeste = { new double[]{ 0, 0}, new double[] { 0, 1}, new double[] { 1, 0}, new double[] { 1, 1}};
+        double[][] saidasTeste = { new double[] { 0 }, new double[] { 1 }, new double[] { 1 }, new double[] { 0 } };
     }
 
 

@@ -10,6 +10,6 @@ namespace Rede_neuronal.Interfaces
     public interface IFuncoaAtivacao
     {
         public double FucaoAtivar(double entrada);
-        public double Dirivada(double entrada);
+        public double Derivada(double entrada);
     }
 }

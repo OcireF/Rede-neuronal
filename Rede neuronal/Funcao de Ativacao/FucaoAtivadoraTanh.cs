@@ -14,9 +14,9 @@ namespace Rede_neuronal
         {
             return Math.Tanh(entrada);
         }
-        public double Dirivada(double entrada)
+        public double Derivada(double entrada)
         {
-            return 1 - Math.Pow(Math.Tanh(entrada),2); // 1 - (tanh(x) elevado a 2)
+            return 1 - (Math.Tanh(entrada) * Math.Tanh(entrada)); // 1 - (tanh(x) elevado a 2)
         }
     }
 }

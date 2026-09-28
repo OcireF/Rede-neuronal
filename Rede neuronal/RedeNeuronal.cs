@@ -51,7 +51,8 @@ namespace Rede_neuronal
             double[] erros = new double[saida.Length];
             for (int i = 0; i < erros.Length; i++)
             {
-                erros[i] = saidaEsperada[i] - saida[i]; //calcula o erro da camada de saida
+                erros[i] = saida[i] - saidaEsperada[i]; //calcula o erro da camada de saida
+                //Console.WriteLine("erro=" + erros[i] + " saida=" + saida[i] + "esperada=" + saidaEsperada[i]);
             }
             return erros;
         }
@@ -80,15 +81,12 @@ namespace Rede_neuronal
                     }
                 }*/
 
-                for(int e = 0; e < dimensaoCamadaAnterior; e++) //calcular todos os erros do array
+                for(int e = 0; e < dimensaoCamadaAnterior; e++) //e = i dos slides
                 {
                     erroSaidaAnterior[e] = 0;
                     for(int neuro = 0; neuro < dimensaoCamadaAtual; neuro++) // neuro = j dos slides
                     {
-                        for (int w = 0; w < dimensaoCamadaAnterior; w++) // w = i dos slides
-                        {
-                            erroSaidaAnterior[e] += neuroniosCamadaAtual[neuro].pesos[w] * erroSaida[neuro] * neuroniosCamadaAtual[neuro].dirivada;
-                        }
+                        erroSaidaAnterior[e] += neuroniosCamadaAtual[neuro].pesos[e] * erroSaida[neuro] * neuroniosCamadaAtual[neuro].derivada;
                     }
                 }
 
@@ -123,8 +121,10 @@ namespace Rede_neuronal
                 {
                     var erroTreino = Adaptar(entradas[i], saidasEsperadas[i], taxaAprendizagem);
                     erro = Math.Max(erro, erroTreino);
+                    
                     if (erro <= erroMaximo)
                     {
+                        Console.WriteLine("erro = " + erro);
                         return true;
                     }
                 }

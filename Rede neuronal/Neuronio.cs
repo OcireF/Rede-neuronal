@@ -8,7 +8,7 @@ namespace Rede_neuronal
         public double[] pesos; //pesos do neuronio (w)
         public double pendore; //pendore do neuronio (b)
         public double saida = 0; //saida do neuronio (y)
-        public double dirivada = 0; //saida do neuronio (y)
+        public double derivada = 0; //derivada do neuronio (y)
 
 
         //Constructor para criar um neuronio com pesos e pendores randomicos
@@ -40,15 +40,15 @@ namespace Rede_neuronal
         }
 
         //adaptar os pesos e pendores com base no erro, entradas e taxa de aprendizagem
-        public void adaptar(double erro, double[] entradas, double taxaAprendizagem)
+        public void Adaptar(double erro, double[] entradas, double taxaAprendizagem)
         {
             for(int i = 0; i < entradas.Length; i++)
             {
-                var variacaoPeso = -taxaAprendizagem * dirivada * erro + entradas[i]; //calcula a variacao do peso (delta w)
-                pesos[i] += variacaoPeso; //atualiza os peso
+                var variacaoPeso = -taxaAprendizagem * derivada * erro * entradas[i]; //calcula a variacao do peso (delta w)
+                pesos[i] += variacaoPeso; //atualiza os peso (w = delta w + w)
             }
-            var variacaoPendor = -taxaAprendizagem * dirivada * erro; //calcula a variacao do pendore (delta b)
-            pendore += variacaoPendor;  //atualiza o pendore
+            var variacaoPendor = -taxaAprendizagem * derivada * erro; //calcula a variacao do pendore (delta b)
+            pendore += variacaoPendor;  //atualiza o pendore (b + delta b)
         }
 
         //correr o neuronio para calcular a saida (y)
@@ -57,7 +57,7 @@ namespace Rede_neuronal
             double produtoEscalar = ProdutoEscalar(entradas); // (x * w)
             double h = produtoEscalar + pendore;            // h = (x * w) + b
             saida = ativador.FucaoAtivar(h);                //corre a funcao ativadora para ter o "y"
-            dirivada = ativador.Dirivada(h);                //corre a funcao derivada para ter o (y')
+            derivada = ativador.Derivada(h);                //corre a funcao derivada para ter o (y')
             return saida;
         }
 

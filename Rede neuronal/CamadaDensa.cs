@@ -49,7 +49,7 @@ namespace Rede_neuronal
         {
             for (int neuro = 0; neuro < neuronios.Length; neuro++)
             {
-                neuronios[neuro].adaptar(errosSaida[neuro], entradas, taxaAprendizagem);
+                neuronios[neuro].Adaptar(errosSaida[neuro], entradas, taxaAprendizagem);
             }
         }
 

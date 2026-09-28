@@ -19,7 +19,7 @@ namespace Rede_neuronal
                 return 1; //>= 1
             }
         }
-        public double Dirivada(double entrada)
+        public double Derivada(double entrada)
         {
             return 0;
         }

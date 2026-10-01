@@ -71,5 +71,20 @@ namespace Rede_neuronal
         {
             return neuronios;
         }
+        public double[][] GetPesos()
+        {
+            var pesos = new double[neuronios.Length][];
+            for (int neuro = 0; neuro < neuronios.Length; neuro++)
+                pesos[neuro] = neuronios[neuro].pesos;
+            return pesos;
+        }
+
+        public double[] GetPendores()
+        {
+            var pendores = new double[neuronios.Length];
+            for (int neuro = 0; neuro < neuronios.Length; neuro++)
+                pendores[neuro] = neuronios[neuro].pendore;
+            return pendores;
+        }
     }
 }

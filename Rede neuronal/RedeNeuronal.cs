@@ -158,5 +158,21 @@ namespace Rede_neuronal
             }
             return saidas;
         }
+
+        public Double[][][] GetPesos()
+        {
+            var pesos = new double[camadas.Length - 1][][];
+            for (int i = 0; i + 1 < camadas.Length ; i++) //+ 1 porque a camada 1 não tem pesos 
+                pesos[i] = camadas[i+1].GetPesos();
+            return pesos;
+        }
+        public Double[][] GetPendores()
+        {
+            var pendores = new double[camadas.Length - 1][];
+            for (int i = 0; i + 1 < camadas.Length; i++) //+ 1 porque a camada 1 não tem pesos 
+                pendores[i] = camadas[i + 1].GetPendores();
+            return pendores;
+        }
+
     }
 }

@@ -13,5 +13,7 @@ namespace Rede_neuronal.Interfaces
         public double[] CalcularSaidas(double[] entradas);
         public double[] GetSaidas();
         public Neuronio[] GetNeuronios();
+        public double[][] GetPesos();
+        public double[] GetPendores();
     }
 }

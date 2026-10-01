@@ -107,10 +107,15 @@ class Program
         while (true) {
             Console.WriteLine("Treino da rede Barras Verticais");
             RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh);
+            Console.WriteLine("Pesos Iniciais:");
+            ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+
             var foiUmSuceso = rede.Treinar(entradasTreino, saidasTreino, epocas, erroMaximo, taxaAprendizagem);
             Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
             if (foiUmSuceso) // se não foi um sucesso não vale a pena testar o treino
             {
+                Console.WriteLine("Pesos finais:");
+                ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
                 return rede;
             }
             else
@@ -280,7 +285,7 @@ class Program
         {
             ShowQuadriculas(entradasTeste[t], 3);
             double[] result = rede.calcRedeNeuronal(entradasTeste[t]);
-            Console.WriteLine("Result=" + result[0]);
+            Console.WriteLine("Result= " + result[0]);
         }
 
     }
@@ -301,6 +306,40 @@ class Program
             }
         }
     }
+
+    public static void ShowPesosPendores(double[][][] pesos, double[][] pendores)
+    {
+        Console.WriteLine("Pesos:\n[ ");
+        for (int i = 0; i < pesos.Length; i++)
+        {
+            Console.WriteLine("\t[ ");
+            for (int j = 0; j < pesos[i].Length; j++)
+            {
+                Console.Write("\t\t[ ");
+                for (int k = 0; k < pesos[i][j].Length ; k++)
+                {
+                    Console.Write(pesos[i][j][k] + "; ");
+                }
+                Console.Write("];\n");
+            }
+            Console.WriteLine("\t];");
+        }
+        Console.WriteLine("]");
+
+        Console.WriteLine("Pendores:\n[ ");
+        for (int i = 0; i < pesos.Length; i++)
+        {
+            Console.Write("\t[ ");
+            for (int j = 0; j < pesos[i].Length; j++)
+            {
+                Console.Write(pendores[i][j] + "; ");
+            }
+            Console.WriteLine("];");
+        }
+        Console.WriteLine("]");
+    }
+
+
 
     /*  N1 	N2 	N3	Saida(Q)
         0	0	0	0

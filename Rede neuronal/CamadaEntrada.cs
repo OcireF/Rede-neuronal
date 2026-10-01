@@ -23,5 +23,7 @@ namespace Rede_neuronal
             return saidas;
         }
         public Neuronio[] GetNeuronios() { return null; }
+        public double[][] GetPesos() { return null; }
+        public double[] GetPendores() { return null; }
     }
 }

@@ -70,7 +70,6 @@ namespace Rede_neuronal
                 soma += entradas[i] * pesos[i];
             }
             return soma;
-
         }
 
 

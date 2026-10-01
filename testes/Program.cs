@@ -1,18 +1,61 @@
 ﻿using Rede_neuronal;
+using System.Diagnostics;
 
 class Program
 {
+    static bool showPesosPendores = false;
+    static bool showArt = false;
+    static int decimalCases = 3;
     static void Main(string[] args)
     {
-        /*Console.WriteLine("Textes Parte 1.1");
-        TesteRedeNeuronalXor();
-        Console.WriteLine();
-        TesteRedeNeuronalRandomValues();*/
 
-        Console.WriteLine("\nTextes Parte 1.2");
-        TesteReconhecimentoBarrasVerticais();
-        //BigTreinoRedeBarrasVerticais();
-        //TreinoXorMaior();
+        int test = 0;
+        while(test != 99)
+        {
+            test = 0;
+            Console.WriteLine(
+                "\nTextes Parte 1.1\n" +
+                "(1) - Rede Neuronal Xor (preValues)\n" +
+                "(2) - Rede Neuronal Random Pesos e Pendores\n" +
+                "Textes Parte 1.2\n" +
+                "(3) - Reconhecimento de Barras Verticais\n" +
+                "(4) - BigInput(treino) Reconhecimento de Barras Verticais\n" +
+                "(5) - treinamento para o Xor [2,5,1]\n" +
+                "(10) - Show Pesos e Pendores\n" +
+                "(11) - Show Barras Verticais Art\n" +
+                "(99) - Exit\n"
+                );
+            Console.Write("Choice: ");
+            test = Convert.ToInt32(Console.ReadLine());
+            switch(test) 
+                {
+                //Textes Parte 1.1
+                case 1:
+                    TesteRedeNeuronalXor();
+                    break;
+                case 2:
+                    TesteRedeNeuronalRandomValues();
+                    break;
+                //Textes Parte 1.2
+                case 3:
+                    TesteReconhecimentoBarrasVerticais();
+                    break;
+                case 4:
+                    BigTreinoRedeBarrasVerticais();
+                    break;
+                case 5:
+                    TreinoXorMaior();
+                    break;
+                //Extras
+                case 10:
+                    showPesosPendores = !showPesosPendores;
+                    break;
+                case 11:
+                    showArt = !showArt;
+                    break;
+                //Exit
+            }
+        } 
     }
 
     public static void TesteRedeNeuronalXor()
@@ -107,15 +150,21 @@ class Program
         while (true) {
             Console.WriteLine("Treino da rede Barras Verticais");
             RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh);
-            Console.WriteLine("Pesos Iniciais:");
-            ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+            if (showPesosPendores)
+            {
+                Console.WriteLine("Pesos Iniciais:");
+                ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+            }
 
             var foiUmSuceso = rede.Treinar(entradasTreino, saidasTreino, epocas, erroMaximo, taxaAprendizagem);
             Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
             if (foiUmSuceso) // se não foi um sucesso não vale a pena testar o treino
             {
-                Console.WriteLine("Pesos finais:");
-                ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+                if (showPesosPendores)
+                {
+                    Console.WriteLine("Pesos finais:");
+                    ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+                }
                 return rede;
             }
             else
@@ -157,19 +206,24 @@ class Program
                     1, 1, 0 },
                 new double[]{
                     1, 0, 0,
-                    1, 0, 1,
+                    1, 0, 0,
                     1, 0, 0 },
                 new double[]{
                     0, 1, 0,
                     0, 1, 0,
-                    0, 1, 0 } 
+                    0, 1, 0 },
+                new double[]{
+                    0, 0, 1,
+                    0, 0, 1,
+                    0, 0, 1 }
         };
+        string[] saidasEsperadas = { "66%", "66%", "66%", "-50%", "-50%", "-50", "100%", "100%" , "100%"};
 
         for(int t = 0; t < entradasTeste.Length; t++)
         {
             ShowQuadriculas(entradasTeste[t], 3);
             double[] result = rede.calcRedeNeuronal(entradasTeste[t]);
-            Console.WriteLine("Result=" + result[0]);
+            Console.WriteLine("Esperado= " + saidasEsperadas[t] + "\nResult= " + ShowPercentagens(result[0]));
         }
     }
 
@@ -290,57 +344,6 @@ class Program
 
     }
 
-    //codigo apenas para viulizar as imagens que estamos a colocar na rede neuronal
-    public static void ShowQuadriculas(double[]image,int largura)
-    {
-        int l = 0;
-
-        for (int i = 0; i < image.Length; i++)
-        {
-            Console.Write(image[i]);
-            l++;
-            if (l == largura) 
-            {
-                Console.Write("\n");
-                l = 0;
-            }
-        }
-    }
-
-    public static void ShowPesosPendores(double[][][] pesos, double[][] pendores)
-    {
-        Console.WriteLine("Pesos:\n[ ");
-        for (int i = 0; i < pesos.Length; i++)
-        {
-            Console.WriteLine("\t[ ");
-            for (int j = 0; j < pesos[i].Length; j++)
-            {
-                Console.Write("\t\t[ ");
-                for (int k = 0; k < pesos[i][j].Length ; k++)
-                {
-                    Console.Write(pesos[i][j][k] + "; ");
-                }
-                Console.Write("];\n");
-            }
-            Console.WriteLine("\t];");
-        }
-        Console.WriteLine("]");
-
-        Console.WriteLine("Pendores:\n[ ");
-        for (int i = 0; i < pesos.Length; i++)
-        {
-            Console.Write("\t[ ");
-            for (int j = 0; j < pesos[i].Length; j++)
-            {
-                Console.Write(pendores[i][j] + "; ");
-            }
-            Console.WriteLine("];");
-        }
-        Console.WriteLine("]");
-    }
-
-
-
     /*  N1 	N2 	N3	Saida(Q)
         0	0	0	0
         0	0	1	0
@@ -388,5 +391,69 @@ class Program
 
     }
 
+    //codigo apenas para viulizar as imagens que estamos a colocar na rede neuronal
+    public static void ShowQuadriculas(double[] image, int largura)
+    {
+        if (!showArt)
+            return;
 
+        int l = 0;
+
+        for (int i = 0; i < image.Length; i++)
+        {
+            Console.BackgroundColor = ConsoleColor.White; //reset quando troca de linha
+            Console.ForegroundColor = ConsoleColor.Blue;
+            if (image[i] == 1) //"█"
+                Console.Write("██");
+            else
+                Console.Write("  ");
+            //Console.Write(image[i]);
+            l++;
+            if (l == largura)
+            {
+                Console.ResetColor(); // isto é feito aqui para que não exista 1 linha embaixo que tem a cor errada
+                Console.WriteLine("");
+                l = 0;
+            }
+        }
+        Console.ResetColor(); //reseta as cores
+    }
+
+    public static void ShowPesosPendores(double[][][] pesos, double[][] pendores)
+    {
+        Console.WriteLine("Pesos:\n[ ");
+        for (int i = 0; i < pesos.Length; i++)
+        {
+            Console.WriteLine("\t[ ");
+            for (int j = 0; j < pesos[i].Length; j++)
+            {
+                Console.Write("\t\t[ ");
+                for (int k = 0; k < pesos[i][j].Length; k++)
+                {
+                    Console.Write(pesos[i][j][k] + "; ");
+                }
+                Console.Write("];\n");
+            }
+            Console.WriteLine("\t];");
+        }
+        Console.WriteLine("]");
+
+        Console.WriteLine("Pendores:\n[ ");
+        for (int i = 0; i < pesos.Length; i++)
+        {
+            Console.Write("\t[ ");
+            for (int j = 0; j < pesos[i].Length; j++)
+            {
+                Console.Write(pendores[i][j] + "; ");
+            }
+            Console.WriteLine("];");
+        }
+        Console.WriteLine("]");
+    }
+
+    public static string ShowPercentagens(double d)
+    {
+        double n = d * 100;
+        return n.ToString($"F{decimalCases}") + "%";
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Rede_neuronal;
+using System.ComponentModel;
 using System.Diagnostics;
 
 class Program
@@ -6,6 +7,12 @@ class Program
     static bool showPesosPendores = false;
     static bool showArt = false;
     static int decimalCases = 3;
+    static string traningErrorsFileName = null;
+    //Variaveis dos treinos:
+    static double taxaAprendizagem = 0.02; //velocidade do treino
+    static int epocas = 1000; // Epocas para treinar
+    static double erroMaximo = 0.001; //0,1%
+
     static void Main(string[] args)
     {
 
@@ -23,6 +30,8 @@ class Program
                 "(5) - treinamento para o Xor [2,5,1]\n" +
                 "(10) - Show Pesos e Pendores\n" +
                 "(11) - Show Barras Verticais Art\n" +
+                "(12) - Save Training Errors\n" +
+                "(13) - Change Training Parameters\n" +
                 "(99) - Exit\n"
                 );
             Console.Write("Choice: ");
@@ -53,7 +62,21 @@ class Program
                 case 11:
                     showArt = !showArt;
                     break;
-                //Exit
+                case 12: // Save Training Errors
+                    Console.Write("FileName:");
+                    traningErrorsFileName = Console.ReadLine();
+                    break;
+                case 13: // Change Training Parameters
+                    Console.Write("Taxa Aprendizagem ("+ taxaAprendizagem + "):"); //change training values
+                    taxaAprendizagem = Convert.ToDouble(Console.ReadLine());
+
+                    Console.Write("Epocas (" + epocas + "):");
+                    epocas = Convert.ToInt32(Console.ReadLine());
+
+                    Console.Write("erroMaximo (" + erroMaximo + "):");
+                    erroMaximo = Convert.ToDouble(Console.ReadLine());
+                    break;
+                    //Exit
             }
         } 
     }
@@ -122,9 +145,9 @@ class Program
     public static RedeNeuronal TreinoRedeBarrasVerticais()
     {
         int[] forma = { 9, 3, 1 };
-        double taxaAprendizagem = 0.02;
+        /*double taxaAprendizagem = 0.02;
         int epocas = 1000;
-        double erroMaximo = 0.001;
+        double erroMaximo = 0.05;//0.001;*/
         var fucaoTanh = new FucaoAtivadoraTanh();
 
         double[][] entradasTreino = {
@@ -149,7 +172,7 @@ class Program
 
         while (true) {
             Console.WriteLine("Treino da rede Barras Verticais");
-            RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh);
+            RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, traningErrorsFileName); //só escreve no ficheiro se o filename for diferente de null
             if (showPesosPendores)
             {
                 Console.WriteLine("Pesos Iniciais:");
@@ -231,9 +254,9 @@ class Program
     {
         //variaveis
         int[] forma = { 9, 3, 1 };
-        double taxaAprendizagem = 0.2;
+        /*double taxaAprendizagem = 0.2;
         int epocas = 1000;
-        double erroMaximo = 0.05;
+        double erroMaximo = 0.05;*/
         var fucaoTanh = new FucaoAtivadoraTanh();
 
         //pega imagens aleatorias reais
@@ -344,22 +367,12 @@ class Program
 
     }
 
-    /*  N1 	N2 	N3	Saida(Q)
-        0	0	0	0
-        0	0	1	0
-        0	1	0	1
-        0	1	1	1
-        1	0	0	1
-        1	0	1	1
-        1	1	0	1
-        1	1	1	0
-     */
     public static void TreinoXorMaior()
     {
         int[] forma = { 2, 5, 1 };
-        double taxaAprendizagem = 0.01;
+        /*double taxaAprendizagem = 0.01;
         int epocas = 10000;
-        double erroMaximo = 0.005;
+        double erroMaximo = 0.005;*/
         var fucaoTanh = new FucaoAtivadoraTanh();
         double[][] entradasDeTreino = { new double[]{ 0, 0}, new double[] { 0, 1}, new double[] { 1, 0}, new double[] { 1, 1}};
         double[][] SaidasEsperada = { new double[] { 0 }, new double[] { 1 }, new double[] { 1 }, new double[] { 0 } };

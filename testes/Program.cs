@@ -49,22 +49,25 @@ class Program
                     break;
                 //Textes Parte 1.2
                 case 3:
+                    ShowParameters();
                     TesteReconhecimentoBarrasVerticais();
                     break;
                 case 4:
+                    ShowParameters();
                     BigTreinoRedeBarrasVerticais();
                     break;
                 case 5:
+                    ShowParameters();
                     TreinoXorMaior();
                     break;
                 //Extras
                 case 10:
                     showPesosPendores = !showPesosPendores;
-                    Console.Write("showPesosPendores " + showPesosPendores);
+                    Console.WriteLine("showPesosPendores " + showPesosPendores);
                     break;
                 case 11:
                     showArt = !showArt;
-                    Console.Write("showArt " + showArt);
+                    Console.WriteLine("showArt " + showArt);
                     break;
                 case 12: // Save Training Errors
                     Console.Write("FileName:");
@@ -495,4 +498,13 @@ class Program
         double n = d * 100;
         return n.ToString($"F{decimalCases}") + "%";
     }
+    //codigo para dar print dos parametros de treino atuais
+    public static void ShowParameters()
+    {
+        Console.WriteLine(
+            "Taxa Aprendizagem (" + taxaAprendizagem + ")\n" +
+            "Epocas (" + epocas + ")\n" +
+            "erroMaximo (" + erroMaximo + ")");
+    }
+
 }

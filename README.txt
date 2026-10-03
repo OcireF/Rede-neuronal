@@ -56,6 +56,17 @@ e depois:
    dotnet run --project ".\testes"
 
 
+Ficheiros gerados (.csv)
+------------------------
+
+Os ficheiros .csv guardados quando o programa corre ficam na pasta de
+saída do projeto "testes":
+
+   "Rede-neuronal-main\Rede-neuronal-main\testes\bin\Debug\net8.0"
+
+(Se o programa for executado em modo Release, a pasta será
+ ...\testes\bin\Release\net8.0.)
+
 Notas
 -----
 

@@ -63,6 +63,7 @@ namespace Rede_neuronal
             return saidas;
         }
 
+        //Funções para capturar dados da rede
         public double[] GetSaidas()
         {
             return saidas;

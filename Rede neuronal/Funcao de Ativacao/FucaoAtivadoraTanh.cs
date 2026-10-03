@@ -12,7 +12,7 @@ namespace Rede_neuronal
         public FucaoAtivadoraTanh() { }
         public double FucaoAtivar(double entrada)
         {
-            return Math.Tanh(entrada);
+            return Math.Tanh(entrada); //tanh(x)
         }
         public double Derivada(double entrada)
         {

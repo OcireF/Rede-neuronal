@@ -12,8 +12,8 @@ namespace Rede_neuronal
     {
         public ICamada[] camadas; //array de camadas de calculo (input layer e camadas densas
         public string traningErrorsFileName; //file onde guarda os valores dos erros
-        public bool writeErrors = false; //bool para saber se vamos escrever os erros
-        private bool firstLine = true;
+        public bool writeErrors = false; //bool para saber se vamos escrever os erros medios e pendores num .csv
+        private bool firstLine = true; //bool para saber se é a primeira linha da escrita
 
         //Construtor para guardar os updates do erros, num ficheiro especificado
         public RedeNeuronal(int[] forma, IFuncoaAtivacao f, string traningErrorsFileName) : this(forma, f)
@@ -67,6 +67,7 @@ namespace Rede_neuronal
             }
         }
 
+        //Calculo do array de erros da saida
         public double[] delta_saida(double[] saida, double[] saidaEsperada)
         {
             double[] erros = new double[saida.Length];
@@ -77,6 +78,7 @@ namespace Rede_neuronal
             return erros;
         }
         
+        //Algoritmo de RetroPropagação
         public void RetroPropagar(double[] erro, double taxaAprendizagem)
         {
             var erroSaida = erro; //guarda o erro da saida
@@ -88,39 +90,39 @@ namespace Rede_neuronal
                 var dimensaoCamadaAtual = camadas[Cam].GetSaidas().Length; //dimensao da camada atual (d^n)
                 var neuroniosCamadaAtual = camadas[Cam].GetNeuronios();    //pega os neuronios da camada atual (neuro^n)
 
-                double[] erroSaidaAnterior = new double[dimensaoCamadaAnterior]; //inicializa o array de erros (n - 1)
+                double[] erroSaidaAnterior = new double[dimensaoCamadaAnterior]; //inicializa o array de erros^(n - 1)
 
                 for(int i = 0; i < dimensaoCamadaAnterior; i++) //e = i dos slides
                 {
-                    erroSaidaAnterior[i] = 0;
+                    erroSaidaAnterior[i] = 0; //start value at 0
                     for(int neuro = 0; neuro < dimensaoCamadaAtual; neuro++) // neuro = j dos slides
                     {
                         erroSaidaAnterior[i] += neuroniosCamadaAtual[neuro].pesos[i] * erroSaida[neuro] * neuroniosCamadaAtual[neuro].derivada;
                     }
                 }
 
-                camadas[Cam].AdaptarCamada(erroSaida, saidaAnterior, taxaAprendizagem);
+                camadas[Cam].AdaptarCamada(erroSaida, saidaAnterior, taxaAprendizagem); //adptar os pesos e pendores da camada
 
-                erroSaida = erroSaidaAnterior;
+                erroSaida = erroSaidaAnterior; // no proximo loop o erro da saida Anterior, é o novo erro de saida
             }
         }
 
         public double Adaptar(double[] entradaTreino , double[] saidaEsperada , double taxaAprendizagem)
         {
-            var saidaDaRede = calcRedeNeuronal(entradaTreino);
-            var variacaoErroSaida = delta_saida(saidaDaRede, saidaEsperada);
-            RetroPropagar(variacaoErroSaida, taxaAprendizagem);
+            var saidaDaRede = calcRedeNeuronal(entradaTreino); //cacular a saida da rede
+            var variacaoErroSaida = delta_saida(saidaDaRede, saidaEsperada); //calcular o erro de saida da rede
+            RetroPropagar(variacaoErroSaida, taxaAprendizagem); //RetroPropagar o erro para recalcular os pesos e pendores da rede toda
 
             int dimensaoVetorPerda = variacaoErroSaida.Length; // Dimensão do vector de perda (K)
             double erro = 0;
             for (int k=0; k < dimensaoVetorPerda; k++) //Soma primeiro antes de fazer 1/K
             {
-                erro += (variacaoErroSaida[k] * variacaoErroSaida[k]);
+                erro += (variacaoErroSaida[k] * variacaoErroSaida[k]); //soma do quadrado de todos os erros de saida
             }
 
             var erroMedio = erro / dimensaoVetorPerda; // erroMedio = erro/K
 
-            //escreve num ficheiro csv o grafico de erro medio
+            //Codigo de escrever num ficheiro csv o grafico de erro medio, pesos e pendores
             if (writeErrors)
             {
                 string caminho = Path.Combine(AppContext.BaseDirectory, traningErrorsFileName + ".csv");
@@ -148,7 +150,7 @@ namespace Rede_neuronal
                         Console.WriteLine("Erro ao escrever: " + ex.Message);
                     }
                 }
-
+                //escrita dos dados no .csv
                 string linha = erroMedio.ToString(System.Globalization.CultureInfo.CurrentUICulture) + ";"; // erro;
                 for (int i = 0; i < pesos.Length; i++)
                     for (int j = 0; j < pesos[i].Length; j++)
@@ -171,24 +173,25 @@ namespace Rede_neuronal
             return erroMedio;
         }
 
+        //treino da rede
         public bool Treinar(double[][] entradas, double[][] saidasEsperadas, int numeroEpocas, double erroMaximo, double taxaAprendizagem)
         {
-            for(int e = 0; e < numeroEpocas; e++)
+            for(int e = 0; e < numeroEpocas; e++) // fazer numeroEpocas treinos
             {
-                double erro = 0;
+                double erro = 0; //erro começa a 0 até provas do contrario
                 
                 for(int i = 0; i < entradas.Length; i++) // loop até ao final das entradas (nota as saidasEsperadas devem ter o mesmo tamanho)
                 {
-                    var erroTreino = Adaptar(entradas[i], saidasEsperadas[i], taxaAprendizagem);
-                    erro = Math.Max(erro, erroTreino);
+                    var erroTreino = Adaptar(entradas[i], saidasEsperadas[i], taxaAprendizagem); //ada+tar a rede e capturar o erro do treino
+                    erro = Math.Max(erro, erroTreino); //guarda o erro maior
                     
-                    if (erro <= erroMaximo)
+                    if (erro <= erroMaximo) //Caso o erro da epoca for menor que o erroMaximo retorna True, o treino foi um sucesso :)
                     {
                         return true;
                     }
                 }
             }
-            return false;
+            return false; //Caso acabar todas a epocas e o erro for maior que o "erroMximo" returnamos o treino como um não sucesso :(
         }
 
 
@@ -206,16 +209,18 @@ namespace Rede_neuronal
             return saida;
         }
 
+        //Codigo para correr a rede multiplas veses e calcular todas as suas saidas
         public double[][] Prever(double[][] input)
         {
             var saidas = new double[input.Length][];
-            for (int i = 0; i < input.Length; i++) //corre todas as camadas de calculo
+            for (int i = 0; i < input.Length; i++) //corre todos os inputs e guarda todos os outputs
             {
                 saidas[i] = calcRedeNeuronal(input[i]);
             }
             return saidas;
         }
 
+        //Funções para capturar os Pesos e Pendores da rede Atual
         public Double[][][] GetPesos()
         {
             var pesos = new double[camadas.Length - 1][][];

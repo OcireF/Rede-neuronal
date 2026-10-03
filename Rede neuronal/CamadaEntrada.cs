@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rede_neuronal
 {
+    //Camada de entrada
     public class CamadaEntrada : ICamada
     {
         private double[] saidas;

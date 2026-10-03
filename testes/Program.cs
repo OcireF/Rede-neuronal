@@ -6,8 +6,8 @@ class Program
 {
     static bool showPesosPendores = false;
     static bool showArt = false;
-    static int decimalCases = 3;
-    static string traningErrorsFileName = null;
+    static int decimalCases = 3; //isto é para a apresentação de percentagens na consola
+    static string trainingErrorsFileName = null;
     //Variaveis dos treinos:
     static double taxaAprendizagem = 0.02; //velocidade do treino
     static int epocas = 1000; // Epocas para treinar
@@ -24,12 +24,14 @@ class Program
                 "\nTextes Parte 1.1\n" +
                 "(1) - Rede Neuronal Xor (preValues)\n" +
                 "(2) - Rede Neuronal Random Pesos e Pendores\n" +
+                "\n" +
                 "Textes Parte 1.2\n" +
                 "(3) - Reconhecimento de Barras Verticais\n" +
                 "(4) - BigInput(treino) Reconhecimento de Barras Verticais\n" +
                 "(5) - treinamento para o Xor [2,5,1]\n" +
+                "\n" +
                 "(10) - Show Pesos e Pendores\n" +
-                "(11) - Show Barras Verticais Art\n" +
+                "(11) - Show Art Barras Verticais\n" +
                 "(12) - Save Training Errors\n" +
                 "(13) - Change Training Parameters\n" +
                 "(99) - Exit\n"
@@ -58,13 +60,15 @@ class Program
                 //Extras
                 case 10:
                     showPesosPendores = !showPesosPendores;
+                    Console.Write("showPesosPendores " + showPesosPendores);
                     break;
                 case 11:
                     showArt = !showArt;
+                    Console.Write("showArt " + showArt);
                     break;
                 case 12: // Save Training Errors
                     Console.Write("FileName:");
-                    traningErrorsFileName = Console.ReadLine();
+                    trainingErrorsFileName = Console.ReadLine();
                     break;
                 case 13: // Change Training Parameters
                     Console.Write("Taxa Aprendizagem ("+ taxaAprendizagem + "):"); //change training values
@@ -172,7 +176,7 @@ class Program
 
         while (true) {
             Console.WriteLine("Treino da rede Barras Verticais");
-            RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, traningErrorsFileName); //só escreve no ficheiro se o filename for diferente de null
+            RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName); //só escreve no ficheiro se o filename for diferente de null
             if (showPesosPendores)
             {
                 Console.WriteLine("Pesos Iniciais:");
@@ -261,7 +265,19 @@ class Program
 
         //pega imagens aleatorias reais
         Random r = new Random();
-        var numeroDeImagens = 332;                //numero de imagens a testar
+        Console.Write("Numero De Imagens de Treino(1-511): ");
+        var numeroDeImagens = Convert.ToInt32(Console.ReadLine());       //numero de imagens a testar
+        if(numeroDeImagens == null || numeroDeImagens <= 0)
+        {
+            Console.WriteLine("impossible Value");
+            return;
+        }
+        else if(numeroDeImagens > 511)
+        {
+            Console.WriteLine("Default to max (511)");
+            numeroDeImagens = 511;
+        }
+
         int[] allImages = Enumerable.Range(0, 511).ToArray();           //gera uma array de {0 a 511}
         r.Shuffle(allImages);                                           //mistura todas as imagens no array
 
@@ -290,21 +306,24 @@ class Program
             {
                 imagem[b] = (imagensTreino[i] >> b) & 1; //Capturar o valor de "b" bit
             }
+            ShowQuadriculas(imagem,3); //mostra as imagens geradas
+            Console.WriteLine("Imagem:" + imagensTreino[i]); // e o seu numero
 
             entradasDeTreino[i] = imagem;
-
-            if(imagensTreino[i] == 73 || imagensTreino[i] == 146 || imagensTreino[i] == 292) //nota isto é apenas porque temos um numero limitado de imagens que são linhas verticais
+            //if(imagensTreino[i] == 73 || imagensTreino[i] == 146 || imagensTreino[i] == 292) //nota isto é apenas porque temos um numero limitado de imagens que são linhas verticais
+            if ((imagensTreino[i] & 73) == 73 || (imagensTreino[i] & 146) == 146 || (imagensTreino[i] & 292) == 292) //checa todas as linhas verticais mesmo as com ruido 
             {
+                //Console.WriteLine("Tem Linha Verical");
                 SaidasEsperada[i] = new double[]{ 1 } ;
             }
             else //saida não é uma linha vertical
             {
-                SaidasEsperada[i] = new double[] { 0 };
+                SaidasEsperada[i] = new double[] { -1 };
             }
 
         }
 
-        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh); //cria uma rede neuronal
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh,trainingErrorsFileName); //cria uma rede neuronal
         while (true)
         {
             Console.WriteLine("Treino da rede Barras Verticais (Big Treino)");
@@ -314,9 +333,9 @@ class Program
             {
                 break;
             }
-            else //caso o treino foir um insucesso criamos uma nova rede e tentamos denovo
+            else //caso o treino for um insucesso criamos uma nova rede e tentamos denovo
             {
-                rede = new RedeNeuronal(forma, fucaoTanh);
+                rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName);
                 Console.WriteLine("RIP: descartar Rede e criar outra\n");
             }
         }
@@ -350,19 +369,23 @@ class Program
                     1, 1, 0 },
                 new double[]{
                     1, 0, 0,
-                    1, 0, 1,
+                    1, 0, 0,
                     1, 0, 0 },
                 new double[]{
                     0, 1, 0,
                     0, 1, 0,
-                    0, 1, 0 }
+                    0, 1, 0 },
+                new double[]{
+                    0, 0, 1,
+                    0, 0, 1,
+                    0, 0, 1 }
         };
 
         for (int t = 0; t < entradasTeste.Length; t++)
         {
             ShowQuadriculas(entradasTeste[t], 3);
             double[] result = rede.calcRedeNeuronal(entradasTeste[t]);
-            Console.WriteLine("Result= " + result[0]);
+            Console.WriteLine("Result= " + ShowPercentagens(result[0]));
         }
 
     }
@@ -377,10 +400,10 @@ class Program
         double[][] entradasDeTreino = { new double[]{ 0, 0}, new double[] { 0, 1}, new double[] { 1, 0}, new double[] { 1, 1}};
         double[][] SaidasEsperada = { new double[] { 0 }, new double[] { 1 }, new double[] { 1 }, new double[] { 0 } };
 
-        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh); //cria uma rede neuronal
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh,trainingErrorsFileName); //cria uma rede neuronal
         while (true)
         {
-            Console.WriteLine("Treino da rede Barras Verticais (Big Treino)");
+            Console.WriteLine("Treino do Big Xor");
             var foiUmSuceso = rede.Treinar(entradasDeTreino, SaidasEsperada, epocas, erroMaximo, taxaAprendizagem);
             Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
             if (foiUmSuceso) // se não foi um sucesso não vale a pena testar o treino
@@ -389,7 +412,7 @@ class Program
             }
             else //caso o treino for um insucesso criamos uma nova rede e tentamos denovo
             {
-                rede = new RedeNeuronal(forma, fucaoTanh);
+                rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName);
                 Console.WriteLine("RIP: descartar Rede e criar outra\n");
             }
         }
@@ -399,12 +422,12 @@ class Program
         {
             ShowQuadriculas(entradasDeTreino[t], 2);
             double[] result = rede.calcRedeNeuronal(entradasDeTreino[t]);
-            Console.WriteLine("Result=" + result[0]);
+            Console.WriteLine("Result=" + ShowPercentagens(result[0]));
         }
 
     }
 
-    //codigo apenas para viulizar as imagens que estamos a colocar na rede neuronal
+    //codigo apenas para visualizar as imagens que estamos a colocar na rede neuronal
     public static void ShowQuadriculas(double[] image, int largura)
     {
         if (!showArt)
@@ -432,6 +455,8 @@ class Program
         Console.ResetColor(); //reseta as cores
     }
 
+    //apresenta na consola os pesos e pendores, (não é a forma mais limpa, mas ajuda a visualizar)
+    //mais tarde tambem podera os guardar num ficheiro
     public static void ShowPesosPendores(double[][][] pesos, double[][] pendores)
     {
         Console.WriteLine("Pesos:\n[ ");
@@ -464,6 +489,7 @@ class Program
         Console.WriteLine("]");
     }
 
+    //transforma apenas numeros(double) em percentagens com as decimalCases predefenidas no codigo
     public static string ShowPercentagens(double d)
     {
         double n = d * 100;

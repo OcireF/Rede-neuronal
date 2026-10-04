@@ -7,6 +7,8 @@ namespace Rede_neuronal
         private IFuncoaAtivacao ativador;
         public double[] pesos; //pesos do neuronio (w)
         public double pendore; //pendore do neuronio (b)
+        public double[] deltaW;
+        public double deltaB = 0;
         public double saida = 0; //saida do neuronio (y)
         public double derivada = 0; //derivada do neuronio (y)
 
@@ -22,6 +24,7 @@ namespace Rede_neuronal
         public Neuronio(double[] pesos, double pendore, IFuncoaAtivacao a)
         {
             this.pesos = pesos;
+            deltaW = new double[pesos.Length]; //isto ja inicia o array todo a 0
             this.pendore = pendore;
             ativador = a;
         }
@@ -29,7 +32,8 @@ namespace Rede_neuronal
         //inicializa pesos e pendores randomicos
         private void InitRandomPesosAndPendores(int numeroEntradas)
         {
-            pesos = new double[numeroEntradas]; //inializa a variavel [numeroEntradas]
+            pesos = new double[numeroEntradas]; //inicializa a variavel [numeroEntradas]
+            deltaW = new double[numeroEntradas]; //inicializa a a variação dos Pesos com o array a "0"
             var rand = new Random();
             pendore = rand.NextDouble() * 2 - 1; //random pendore (-1 a 1) nota: o -1 é para acertar o (o a 2)
 
@@ -40,15 +44,17 @@ namespace Rede_neuronal
         }
 
         //adaptar os pesos e pendores com base no erro, entradas e taxa de aprendizagem
-        public void Adaptar(double erro, double[] entradas, double taxaAprendizagem)
+        public void Adaptar(double erro, double[] entradas, double taxaAprendizagem, double fatorMomento)
         {
             for(int i = 0; i < entradas.Length; i++)
             {
-                var variacaoPeso = -taxaAprendizagem * derivada * erro * entradas[i]; //calcula a variacao do peso (delta w)
-                pesos[i] += variacaoPeso; //atualiza os peso (w = delta w + w)
+                var momentoPesos = fatorMomento * deltaW[i]; // Mw= beta * deltaW
+                deltaW[i] = -taxaAprendizagem * derivada * erro * entradas[i] + momentoPesos; //calcula a variacao do peso "delta w = - alfa * derivada * erro*y(n-1)"
+                pesos[i] += deltaW[i]; //atualiza os peso (w = delta w + w)
             }
-            var variacaoPendor = -taxaAprendizagem * derivada * erro; //calcula a variacao do pendore (delta b)
-            pendore += variacaoPendor;  //atualiza o pendore (b + delta b)
+            var momentoPendor = fatorMomento * deltaB; // Mb = beta * deltaB
+            deltaB = -taxaAprendizagem * derivada * erro + momentoPendor; //calcula a variacao do pendore "delta b "
+            pendore += deltaB;  //atualiza o pendore (b + delta b)
         }
 
         //correr o neuronio para calcular a saida (y)

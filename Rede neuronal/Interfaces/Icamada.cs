@@ -10,7 +10,7 @@ namespace Rede_neuronal.Interfaces
     public interface ICamada
     {
         public void SetPesosAndPendores(double[][] pesos, double[] pendore);
-        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem);
+        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem, double fatorMomento);
         public double[] CalcularSaidas(double[] entradas);
         public double[] GetSaidas();
         public Neuronio[] GetNeuronios();

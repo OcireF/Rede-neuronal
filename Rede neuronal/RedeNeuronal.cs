@@ -16,7 +16,7 @@ namespace Rede_neuronal
         private bool firstLine = true; //bool para saber se é a primeira linha da escrita
 
         //Construtor para guardar os updates do erros, num ficheiro especificado
-        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, string traningErrorsFileName) : this(forma, f)
+        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, string traningErrorsFileName, double[][][] pesos = null, double[][] pendores = null) : this(forma, f, pesos, pendores)
         {
             if (traningErrorsFileName != null)
             {
@@ -33,22 +33,32 @@ namespace Rede_neuronal
         }
 
         //construtor para criar a rede neuronal com pesos e pendores aleatorios
-        public RedeNeuronal(int[] forma,IFuncoaAtivacao f) {
+        /*public RedeNeuronal(int[] forma,IFuncoaAtivacao f) {
             camadas = new ICamada[forma.Length];   // inicia o Array de todas as camadas
             camadas[0] = new CamadaEntrada();      // inicia a camada de entrada
             for (int i = 1; i < forma.Length; i++)             //cria todas as camadas Densas
             {
                 camadas[i] = new CamadaDensa(forma[i-1], forma[i], f); //inicia a camada (tamanhoEntrada,TamanhoSaida, funcaoAtivacao)
             }
-        }
-        //contrutor para ter pesos e pendores já pre defenidos
-        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, double[][][] pesos, double[][] pendores)
+        }*/
+        //contrutor para criar a rede neuronal
+        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, double[][][] pesos = null, double[][] pendores = null)
         {
             camadas = new ICamada[forma.Length]; // inicia o Array de todas as camadas
-            camadas[0] = new CamadaEntrada();                        // inicia a camada de entrada
-            for (int i = 1; i < forma.Length; i++)          //cria todas as camadas Densas
+            camadas[0] = new CamadaEntrada();    // inicia a camada de entrada
+            if (pesos != null && pendores != null)
             {
-                camadas[i] = new CamadaDensa(forma[i-1], forma[i], f, pesos[i-1], pendores[i-1]); //inicia a camada (tamanhoEntrada,TamanhoSaida, funcaoAtivacao, pesos, pendores) 
+                for (int i = 1; i < forma.Length; i++)          //cria todas as camadas Densas com valores pre defenidos
+                {
+                    camadas[i] = new CamadaDensa(forma[i - 1], forma[i], f, pesos[i - 1], pendores[i - 1]); //inicia a camada (tamanhoEntrada,TamanhoSaida, funcaoAtivacao, pesos, pendores) 
+                }
+            }
+            else
+            {
+                for (int i = 1; i < forma.Length; i++)             //cria todas as camadas Densas com valores aleatorios
+                {
+                    camadas[i] = new CamadaDensa(forma[i - 1], forma[i], f); //inicia a camada (tamanhoEntrada,TamanhoSaida, funcaoAtivacao)
+                }
             }
         }
 
@@ -79,7 +89,7 @@ namespace Rede_neuronal
         }
         
         //Algoritmo de RetroPropagação
-        public void RetroPropagar(double[] erro, double taxaAprendizagem)
+        public void RetroPropagar(double[] erro, double taxaAprendizagem, double fatorMomento)
         {
             var erroSaida = erro; //guarda o erro da saida
             for (int Cam = camadas.Length - 1; Cam >= 1; Cam--) //retroPropagar em todas as camadas menos a ultima (camada 1)
@@ -101,17 +111,17 @@ namespace Rede_neuronal
                     }
                 }
 
-                camadas[Cam].AdaptarCamada(erroSaida, saidaAnterior, taxaAprendizagem); //adptar os pesos e pendores da camada
+                camadas[Cam].AdaptarCamada(erroSaida, saidaAnterior, taxaAprendizagem, fatorMomento); //adptar os pesos e pendores da camada
 
                 erroSaida = erroSaidaAnterior; // no proximo loop o erro da saida Anterior, é o novo erro de saida
             }
         }
 
-        public double Adaptar(double[] entradaTreino , double[] saidaEsperada , double taxaAprendizagem)
+        public double Adaptar(double[] entradaTreino , double[] saidaEsperada , double taxaAprendizagem, double fatorMomento)
         {
             var saidaDaRede = calcRedeNeuronal(entradaTreino); //cacular a saida da rede
             var variacaoErroSaida = delta_saida(saidaDaRede, saidaEsperada); //calcular o erro de saida da rede
-            RetroPropagar(variacaoErroSaida, taxaAprendizagem); //RetroPropagar o erro para recalcular os pesos e pendores da rede toda
+            RetroPropagar(variacaoErroSaida, taxaAprendizagem, fatorMomento); //RetroPropagar o erro para recalcular os pesos e pendores da rede toda
 
             int dimensaoVetorPerda = variacaoErroSaida.Length; // Dimensão do vector de perda (K)
             double erro = 0;
@@ -122,59 +132,13 @@ namespace Rede_neuronal
 
             var erroMedio = erro / dimensaoVetorPerda; // erroMedio = erro/K
 
-            //Codigo de escrever num ficheiro csv o grafico de erro medio, pesos e pendores
-            if (writeErrors)
-            {
-                string caminho = Path.Combine(AppContext.BaseDirectory, traningErrorsFileName + ".csv");
-                double[][][] pesos = GetPesos();
-                double[][] pendores = GetPendores();
-
-                if (firstLine) //se for a primeira linha escrevemos as labels
-                {
-                    string labels = "ErroMedio;";
-                    for (int i = 0; i < pesos.Length; i++)
-                        for (int j = 0; j < pesos[i].Length; j++)
-                            for (int k = 0; k < pesos[i][j].Length; k++)
-                                labels += "peso["+i+"]["+j+"]["+k+"];";
-                    for (int i = 0; i < pendores.Length; i++)
-                        for (int j = 0; j < pendores[i].Length; j++)
-                            labels += "pendor["+i+"]["+j+"];";
-                    firstLine = false;
-
-                    try
-                    {
-                        File.AppendAllText(caminho, labels + Environment.NewLine);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Erro ao escrever: " + ex.Message);
-                    }
-                }
-                //escrita dos dados no .csv
-                string linha = erroMedio.ToString(System.Globalization.CultureInfo.CurrentUICulture) + ";"; // erro;
-                for (int i = 0; i < pesos.Length; i++)
-                    for (int j = 0; j < pesos[i].Length; j++)
-                        for (int k = 0; k < pesos[i][j].Length; k++)
-                            linha += pesos[i][j][k].ToString(CultureInfo.CurrentUICulture) + ";";
-                for (int i = 0; i < pendores.Length; i++)
-                    for (int j = 0; j < pendores[i].Length; j++)
-                        linha += pendores[i][j].ToString(CultureInfo.CurrentUICulture) + ";";
-
-                try
-                {
-                    File.AppendAllText(caminho, linha + Environment.NewLine);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Erro ao escrever: " + ex.Message);
-                }
-            }
+            
 
             return erroMedio;
         }
 
         //treino da rede
-        public bool Treinar(double[][] entradas, double[][] saidasEsperadas, int numeroEpocas, double erroMaximo, double taxaAprendizagem)
+        public bool Treinar(double[][] entradas, double[][] saidasEsperadas, int numeroEpocas, double erroMaximo, double taxaAprendizagem, double fatorMomento = 0)  //valor default para o Momento
         {
             for(int e = 0; e < numeroEpocas; e++) // fazer numeroEpocas treinos
             {
@@ -182,14 +146,16 @@ namespace Rede_neuronal
                 
                 for(int i = 0; i < entradas.Length; i++) // loop até ao final das entradas (nota as saidasEsperadas devem ter o mesmo tamanho)
                 {
-                    var erroTreino = Adaptar(entradas[i], saidasEsperadas[i], taxaAprendizagem); //ada+tar a rede e capturar o erro do treino
+                    var erroTreino = Adaptar(entradas[i], saidasEsperadas[i], taxaAprendizagem, fatorMomento); //ada+tar a rede e capturar o erro do treino
                     erro = Math.Max(erro, erroTreino); //guarda o erro maior
                     
                     if (erro <= erroMaximo) //Caso o erro da epoca for menor que o erroMaximo retorna True, o treino foi um sucesso :)
                     {
+                        SaveErrorPesosPendoresInFile(erro); //caso finalise escreve o ultimo erros pesos e pendores 
                         return true;
                     }
                 }
+                SaveErrorPesosPendoresInFile(erro); //escreve todos as epocas
             }
             return false; //Caso acabar todas a epocas e o erro for maior que o "erroMximo" returnamos o treino como um não sucesso :(
         }
@@ -234,6 +200,57 @@ namespace Rede_neuronal
             for (int i = 0; i + 1 < camadas.Length; i++) //+ 1 porque a camada 1 não tem pesos 
                 pendores[i] = camadas[i + 1].GetPendores();
             return pendores;
+        }
+
+        public void SaveErrorPesosPendoresInFile(double erro)
+        {
+            //Codigo de escrever num ficheiro csv o grafico de erro medio, pesos e pendores
+            if (writeErrors)
+            {
+                string caminho = Path.Combine(AppContext.BaseDirectory, traningErrorsFileName + ".csv");
+                double[][][] pesos = GetPesos();
+                double[][] pendores = GetPendores();
+
+                if (firstLine) //se for a primeira linha escrevemos as labels
+                {
+                    string labels = "ErroMedio;";
+                    for (int i = 0; i < pesos.Length; i++)
+                        for (int j = 0; j < pesos[i].Length; j++)
+                            for (int k = 0; k < pesos[i][j].Length; k++)
+                                labels += "peso[" + i + "][" + j + "][" + k + "];";
+                    for (int i = 0; i < pendores.Length; i++)
+                        for (int j = 0; j < pendores[i].Length; j++)
+                            labels += "pendor[" + i + "][" + j + "];";
+                    firstLine = false;
+
+                    try
+                    {
+                        File.AppendAllText(caminho, labels + Environment.NewLine);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Erro ao escrever: " + ex.Message);
+                    }
+                }
+                //escrita dos dados no .csv
+                string linha = erro.ToString(System.Globalization.CultureInfo.CurrentUICulture) + ";"; // erro;
+                for (int i = 0; i < pesos.Length; i++)
+                    for (int j = 0; j < pesos[i].Length; j++)
+                        for (int k = 0; k < pesos[i][j].Length; k++)
+                            linha += pesos[i][j][k].ToString(CultureInfo.CurrentUICulture) + ";";
+                for (int i = 0; i < pendores.Length; i++)
+                    for (int j = 0; j < pendores[i].Length; j++)
+                        linha += pendores[i][j].ToString(CultureInfo.CurrentUICulture) + ";";
+
+                try
+                {
+                    File.AppendAllText(caminho, linha + Environment.NewLine);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Erro ao escrever: " + ex.Message);
+                }
+            }
         }
 
     }

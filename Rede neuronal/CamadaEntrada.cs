@@ -13,7 +13,7 @@ namespace Rede_neuronal
         private double[] saidas;
 
         public void SetPesosAndPendores(double[][] pesos, double[] pendore) { }
-        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem) { }
+        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem, double fatorMomento) { }
         public double[] CalcularSaidas(double[] entradas) 
         {
             saidas = entradas;

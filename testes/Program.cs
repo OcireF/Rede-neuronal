@@ -10,6 +10,7 @@ class Program
     static string trainingErrorsFileName = null;
     //Variaveis dos treinos:
     static double taxaAprendizagem = 0.02; //velocidade do treino
+    static double fatorMomento = 0.02; // fartor de movimento
     static int epocas = 1000; // Epocas para treinar
     static double erroMaximo = 0.001; //0,1%
 
@@ -28,7 +29,10 @@ class Program
                 "Textes Parte 1.2\n" +
                 "(3) - Reconhecimento de Barras Verticais\n" +
                 "(4) - BigInput(treino) Reconhecimento de Barras Verticais\n" +
+                "\n" +
+                "Textes Parte 1.3\n" +
                 "(5) - treinamento para o Xor [2,5,1]\n" +
+                "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta=0\n" +
                 "\n" +
                 "(10) - Show Pesos e Pendores\n" +
                 "(11) - Show Art Barras Verticais\n" +
@@ -56,9 +60,14 @@ class Program
                     ShowParameters();
                     BigTreinoRedeBarrasVerticais();
                     break;
+                //Textes Parte 1.3
                 case 5:
                     ShowParameters();
                     TreinoXorMaior();
+                    break;
+                case 6:
+                    ShowParameters();
+                    TreinoXorDuplaRede();
                     break;
                 //Extras
                 case 10:
@@ -77,10 +86,13 @@ class Program
                     Console.Write("Taxa Aprendizagem ("+ taxaAprendizagem + "):"); //change training values
                     taxaAprendizagem = Convert.ToDouble(Console.ReadLine());
 
+                    Console.Write("Fator Momento (" + fatorMomento + "):");
+                    fatorMomento = Convert.ToDouble(Console.ReadLine());
+
                     Console.Write("Epocas (" + epocas + "):");
                     epocas = Convert.ToInt32(Console.ReadLine());
 
-                    Console.Write("erroMaximo (" + erroMaximo + "):");
+                    Console.Write("Erro Maximo (" + erroMaximo + "):");
                     erroMaximo = Convert.ToDouble(Console.ReadLine());
                     break;
                     //Exit
@@ -407,7 +419,7 @@ class Program
         while (true)
         {
             Console.WriteLine("Treino do Big Xor");
-            var foiUmSuceso = rede.Treinar(entradasDeTreino, SaidasEsperada, epocas, erroMaximo, taxaAprendizagem);
+            var foiUmSuceso = rede.Treinar(entradasDeTreino, SaidasEsperada, epocas, erroMaximo, taxaAprendizagem, fatorMomento);
             Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
             if (foiUmSuceso) // se não foi um sucesso não vale a pena testar o treino
             {
@@ -429,6 +441,53 @@ class Program
         }
 
     }
+
+    public static void TreinoXorDuplaRede()
+    {
+        int[] forma = { 2, 5, 1 };
+        var fucaoTanh = new FucaoAtivadoraTanh();
+        double[][] entradasDeTreino = { new double[] { 0, 0 }, new double[] { 0, 1 }, new double[] { 1, 0 }, new double[] { 1, 1 } };
+        double[][] SaidasEsperada = { new double[] { 0 }, new double[] { 1 }, new double[] { 1 }, new double[] { 0 } };
+
+        RedeNeuronal redeBeta = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName + "Beta"); //cria uma rede neuronal para gerar os pesos e pendores aleatorios
+        RedeNeuronal redeNoBeta = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName + "noBeta", redeBeta.GetPesos(),redeBeta.GetPendores()); //duplicada da rede com os mesmos pesos e pendores
+
+        if (showPesosPendores)
+        {
+            Console.WriteLine("Pesos Iniciais Beta:");
+            ShowPesosPendores(redeBeta.GetPesos(), redeBeta.GetPendores());
+            Console.WriteLine("Pesos Iniciais Beta = 0:");
+            ShowPesosPendores(redeNoBeta.GetPesos(), redeNoBeta.GetPendores());
+        }
+
+        var foiUmSuceso = false;
+        while (!foiUmSuceso) //treina até for um sucesso
+        {
+            Console.WriteLine("Treino do Big Xor com beta");
+            foiUmSuceso = redeBeta.Treinar(entradasDeTreino, SaidasEsperada, epocas, erroMaximo, taxaAprendizagem, fatorMomento);
+            Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
+        }
+
+        foiUmSuceso = false;
+        while (!foiUmSuceso) //treina até for um sucesso
+        {
+            Console.WriteLine("Treino do Big Xor com beta = 0");
+            foiUmSuceso = redeNoBeta.Treinar(entradasDeTreino, SaidasEsperada, epocas, erroMaximo, taxaAprendizagem, 0);
+            Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
+        }
+
+        for (int t = 0; t < entradasDeTreino.Length; t++)
+        {
+            ShowQuadriculas(entradasDeTreino[t], 2);
+            double[] resultBeta = redeBeta.calcRedeNeuronal(entradasDeTreino[t]);
+            double[] resultNoBeta = redeNoBeta.calcRedeNeuronal(entradasDeTreino[t]);
+
+            Console.WriteLine("Beta Result=" + ShowPercentagens(resultBeta[0]));
+            Console.WriteLine("NoBeta Result=" + ShowPercentagens(resultNoBeta[0]));
+        }
+
+    }
+
 
     //codigo apenas para visualizar as imagens que estamos a colocar na rede neuronal
     public static void ShowQuadriculas(double[] image, int largura)
@@ -503,6 +562,7 @@ class Program
     {
         Console.WriteLine(
             "Taxa Aprendizagem (" + taxaAprendizagem + ")\n" +
+            "Fator Momento (" + fatorMomento + ")\n" +
             "Epocas (" + epocas + ")\n" +
             "erroMaximo (" + erroMaximo + ")");
     }

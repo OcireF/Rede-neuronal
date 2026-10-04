@@ -45,11 +45,11 @@ namespace Rede_neuronal
         }
 
         //adaptar os pesos e pendores com base nos erros da camada e nas entradas da camada anterior
-        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem)
+        public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem, double fatorMomento)
         {
             for (int neuro = 0; neuro < neuronios.Length; neuro++)
             {
-                neuronios[neuro].Adaptar(errosSaida[neuro], entradas, taxaAprendizagem);
+                neuronios[neuro].Adaptar(errosSaida[neuro], entradas, taxaAprendizagem, fatorMomento);
             }
         }
 

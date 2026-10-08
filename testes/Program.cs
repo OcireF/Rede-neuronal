@@ -1,6 +1,4 @@
 ﻿using Rede_neuronal;
-using System.ComponentModel;
-using System.Diagnostics;
 
 class Program
 {
@@ -13,6 +11,8 @@ class Program
     static double fatorMomento = 0.02; // fartor de movimento
     static int epocas = 1000; // Epocas para treinar
     static double erroMaximo = 0.001; //0,1%
+
+    static Random r = new Random(); //gera um randomizer que podemos chamar para os testes
 
     static void Main(string[] args)
     {
@@ -35,7 +35,7 @@ class Program
                 "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta=0\n" +
                 "\n" +
                 "Program\n" +
-                "(7) - Jogo do galo\n" +
+                "(7) - Completar a linha\n" +
                 "\n" +
                 "(10) - Show Pesos e Pendores\n" +
                 "(11) - Show Art Barras Verticais\n" +
@@ -71,6 +71,10 @@ class Program
                 case 6:
                     ShowParameters();
                     TreinoXorDuplaRede();
+                    break;
+                case 7:
+                    ShowParameters();
+                    CompletarLinhas();
                     break;
                 //Extras
                 case 10:
@@ -282,7 +286,6 @@ class Program
         var fucaoTanh = new FucaoAtivadoraTanh();
 
         //pega imagens aleatorias reais
-        Random r = new Random();
         Console.Write("Numero De Imagens de Treino(1-511): ");
         var numeroDeImagens = Convert.ToInt32(Console.ReadLine());       //numero de imagens a testar
         if(numeroDeImagens == null || numeroDeImagens <= 0)
@@ -490,17 +493,144 @@ class Program
         }
 
     }
-    public static void JogoDoGalo()
+
+    //Obj: implementar o jogo do galo com a rede neuronal
+    //AI é o "X", o jogador é o "O"
+    //Objetivo inicial é uma rede que saiba a jogada vencedora
+    public static void CompletarLinhas()
     {
-        //implementar o jogo do galo com a rede neuronal
-        // AI é o "O", o jogador é o "X"
-        //Objetivo inicial é uma rede que saiba a jogada vencedora
-        //depois podemos implementar uma rede que saiba jogar contra o jogador ao longo do tempo, mas isto é mais complicado
+        
 
-        //Forma 9 entradas (9 casas do jogo do galo), 8 jogadas vencedoras, 9 saídas (uma para cada casa do jogo do galo)
-        int[] forma = { 9, 8, 9 };
+        //Forma 9 entradas (9 casas do jogo do galo), 24 combinações de jogadas vencedoras, 9 saídas (uma para cada casa do jogo do galo)
+        int[] forma = { 9, 24, 9 };
+        var fucaoTanh = new FucaoAtivadoraTanh();
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName); //cria uma rede neuronal
 
-        Console.WriteLine("Jogo do Galo");
+        string[][] boards = {
+            // Horizontal, linha de cima (casas 0,1,2)
+            new string[]{ " ","X","X",   " "," "," ",   " "," "," " }, // -> 0
+            new string[]{ "X"," ","X",   " "," "," ",   " "," "," " }, // -> 1
+            new string[]{ "X","X"," ",   " "," "," ",   " "," "," " }, // -> 2
+            // Horizontal, linha do meio (casas 3,4,5)
+            new string[]{ " "," "," ",   " ","X","X",   " "," "," " }, // -> 3
+            new string[]{ " "," "," ",   "X"," ","X",   " "," "," " }, // -> 4
+            new string[]{ " "," "," ",   "X","X"," ",   " "," "," " }, // -> 5
+            // Horizontal, linha de baixo (casas 6,7,8)
+            new string[]{ " "," "," ",   " "," "," ",   " ","X","X" }, // -> 6
+            new string[]{ " "," "," ",   " "," "," ",   "X"," ","X" }, // -> 7
+            new string[]{ " "," "," ",   " "," "," ",   "X","X"," " }, // -> 8
+
+            // Vertical, coluna da esquerda (casas 0,3,6)
+            new string[]{ " "," "," ",   "X"," "," ",   "X"," "," " }, // -> 0
+            new string[]{ "X"," "," ",   " "," "," ",   "X"," "," " }, // -> 3
+            new string[]{ "X"," "," ",   "X"," "," ",   " "," "," " }, // -> 6
+            // Vertical, coluna do meio (casas 1,4,7)
+            new string[]{ " "," "," ",   " ","X"," ",   " ","X"," " }, // -> 1
+            new string[]{ " ","X"," ",   " "," "," ",   " ","X"," " }, // -> 4
+            new string[]{ " ","X"," ",   " ","X"," ",   " "," "," " }, // -> 7
+            // Vertical, coluna da direita (casas 2,5,8)
+            new string[]{ " "," "," ",   " "," ","X",   " "," ","X" }, // -> 2
+            new string[]{ " "," ","X",   " "," "," ",   " "," ","X" }, // -> 5
+            new string[]{ " "," ","X",   " "," ","X",   " "," "," " }, // -> 8
+
+            // Diagonal \ (casas 0,4,8)
+            new string[]{ " "," "," ",   " ","X"," ",   " "," ","X" }, // -> 0
+            new string[]{ "X"," "," ",   " "," "," ",   " "," ","X" }, // -> 4
+            new string[]{ "X"," "," ",   " ","X"," ",   " "," "," " }, // -> 8
+            // Diagonal / (casas 2,4,6)
+            new string[]{ " "," "," ",   " ","X"," ",   "X"," "," " }, // -> 2
+            new string[]{ " "," ","X",   " "," "," ",   "X"," "," " }, // -> 4
+            new string[]{ " "," ","X",   " ","X"," ",   " "," "," " }, // -> 6
+        };
+        string[][] saidasEsperadas = {
+            // Horizontal, linha de cima
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
+            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            // Horizontal, linha do meio
+            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 3
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 5
+            // Horizontal, linha de baixo
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 7
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            // Vertical, coluna da esquerda
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
+            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 3
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+            // Vertical, coluna do meio
+            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 7
+            // Vertical, coluna da direita
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            // Diagonal \
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            // Diagonal /
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+        };
+
+        double[][] trainingBoards = tranlateBoard(boards); //traduz os simbolos para numeros que a rede pode usar
+        double[][] trainingSaidasEsperadas = tranlateBoard(saidasEsperadas); //traduz os simbolos para numeros que a rede pode usar
+
+        //Treino
+        var foiUmSuceso = false;
+        while (!foiUmSuceso) //treina até for um sucesso (simples loop) Nota MODIFICAR
+        {
+            Console.WriteLine("Treino Linhas Vencedoras");
+            foiUmSuceso = rede.Treinar(trainingBoards, trainingSaidasEsperadas, epocas, erroMaximo, taxaAprendizagem, fatorMomento);
+            Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
+        }
+
+        //testes
+        for (int t = 0; t < trainingBoards.Length; t += r.Next(1,5)) //randomicamente salta alguns testos
+        {
+            //Console.WriteLine("Entrada da rede");
+            //ShowQuadriculas(trainingBoards[t], 3);
+
+            //calcular a saida
+            double[] result = rede.calcRedeNeuronal(trainingBoards[t]);
+            double[] newBoard = result.Select(r => r > 0.8 ? 2 : 0) //flaten the exits to 0 or 1
+                .Zip(trainingBoards[t], (r, b) => r + b).ToArray(); //sum the 2 boards
+
+            Console.WriteLine("Novo tabuleiro:");
+            ShowQuadriculas(newBoard, 3);
+
+            Console.WriteLine("---------------");
+        }
+    }
+
+    //função para traduzir board strings para numeros que a rede neuronal pode ler
+    //"O" = "-1" Nada = "0" "X" = "1"
+    public static double[][] tranlateBoard(String[][] board)
+    {
+        double[][] translate = new double[board.Length][];
+        for (int boa = 0; boa < board.Length; boa++) {
+            translate[boa] = new double[board[boa].Length]; //inicialize the board
+            for (int i = 0; i < board[boa].Length; i++)
+            {
+                if (board[boa][i] == "O")
+                {
+                    translate[boa][i] = -1;
+                }
+                else if (board[boa][i] == " ")
+                {
+                    translate[boa][i] = 0;
+                }
+                else if (board[boa][i] == "X")
+                {
+                    translate[boa][i] = 1;
+                }
+            }
+        }
+        return translate;
     }
 
     //codigo apenas para visualizar as imagens que estamos a colocar na rede neuronal
@@ -514,8 +644,12 @@ class Program
         for (int i = 0; i < image.Length; i++)
         {
             Console.BackgroundColor = ConsoleColor.White; //reset quando troca de linha
-            Console.ForegroundColor = ConsoleColor.Blue;
-            if (image[i] == 1) //"█"
+            if (image[i] >= 2) //para testes ver o valor novo
+                Console.ForegroundColor = ConsoleColor.Red;
+            else
+                Console.ForegroundColor = ConsoleColor.Blue;
+
+            if (image[i] >= 0.8) //"█"
                 Console.Write("██");
             else
                 Console.Write("  ");

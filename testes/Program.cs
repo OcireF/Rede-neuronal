@@ -5,7 +5,7 @@ using System.Diagnostics;
 class Program
 {
     static bool showPesosPendores = false;
-    static bool showArt = false;
+    static bool showArt = true; // por default é true para mostrar os graficos
     static int decimalCases = 3; //isto é para a apresentação de percentagens na consola
     static string trainingErrorsFileName = null;
     //Variaveis dos treinos:
@@ -33,6 +33,9 @@ class Program
                 "Textes Parte 1.3\n" +
                 "(5) - treinamento para o Xor [2,5,1]\n" +
                 "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta=0\n" +
+                "\n" +
+                "Program\n" +
+                "(7) - Jogo do galo\n" +
                 "\n" +
                 "(10) - Show Pesos e Pendores\n" +
                 "(11) - Show Art Barras Verticais\n" +
@@ -487,7 +490,18 @@ class Program
         }
 
     }
+    public static void JogoDoGalo()
+    {
+        //implementar o jogo do galo com a rede neuronal
+        // AI é o "O", o jogador é o "X"
+        //Objetivo inicial é uma rede que saiba a jogada vencedora
+        //depois podemos implementar uma rede que saiba jogar contra o jogador ao longo do tempo, mas isto é mais complicado
 
+        //Forma 9 entradas (9 casas do jogo do galo), 8 jogadas vencedoras, 9 saídas (uma para cada casa do jogo do galo)
+        int[] forma = { 9, 8, 9 };
+
+        Console.WriteLine("Jogo do Galo");
+    }
 
     //codigo apenas para visualizar as imagens que estamos a colocar na rede neuronal
     public static void ShowQuadriculas(double[] image, int largura)

@@ -1,4 +1,5 @@
 ﻿using Rede_neuronal;
+using static System.Net.Mime.MediaTypeNames;
 
 class Program
 {
@@ -35,7 +36,8 @@ class Program
                 "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta=0\n" +
                 "\n" +
                 "Program\n" +
-                "(7) - Completar a linha\n" +
+                "(7) - Completar a linha testes\n" +
+                "(8) - jogar contra a AI (completadora de linhas)\n" +
                 "\n" +
                 "(10) - Show Pesos e Pendores\n" +
                 "(11) - Show Art Barras Verticais\n" +
@@ -75,6 +77,9 @@ class Program
                 case 7:
                     ShowParameters();
                     CompletarLinhas();
+                    break;
+                case 8:
+                    JogoContraAI();
                     break;
                 //Extras
                 case 10:
@@ -494,13 +499,8 @@ class Program
 
     }
 
-    //Obj: implementar o jogo do galo com a rede neuronal
-    //AI é o "X", o jogador é o "O"
-    //Objetivo inicial é uma rede que saiba a jogada vencedora
-    public static void CompletarLinhas()
+    public static RedeNeuronal TreinoCompletarLinhas()
     {
-        
-
         //Forma 9 entradas (9 casas do jogo do galo), 24 combinações de jogadas vencedoras, 9 saídas (uma para cada casa do jogo do galo)
         int[] forma = { 9, 24, 9 };
         var fucaoTanh = new FucaoAtivadoraTanh();
@@ -582,29 +582,216 @@ class Program
 
         //Treino
         var foiUmSuceso = false;
-        while (!foiUmSuceso) //treina até for um sucesso (simples loop) Nota MODIFICAR
+        while (true) //treina até for um sucesso (simples loop)
         {
             Console.WriteLine("Treino Linhas Vencedoras");
             foiUmSuceso = rede.Treinar(trainingBoards, trainingSaidasEsperadas, epocas, erroMaximo, taxaAprendizagem, fatorMomento);
             Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
-        }
 
-        //testes
+            if (foiUmSuceso)
+            {
+                if (showPesosPendores)
+                {
+                    Console.WriteLine("Pesos finais:");
+                    ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+                }
+                return rede;
+            }
+            else
+            {
+                Console.WriteLine("RIP: descartar Rede\n");
+            }
+        }
+    }
+
+    //Obj: implementar o jogo do galo com a rede neuronal
+    //AI é o "X", o jogador é o "O"
+    //Objetivo inicial é uma rede que saiba a jogada vencedora
+    public static void CompletarLinhas()
+    {
+        RedeNeuronal rede = TreinoCompletarLinhas(); //Pre Treina a rede para os testes
+
+        //boards de testes usados originalmente usados no teino
+        string[][] boards = {
+            // Horizontal, linha de cima (casas 0,1,2)
+            new string[]{ " ","X","X",   " "," "," ",   " "," "," " }, // -> 0
+            new string[]{ "X"," ","X",   " "," "," ",   " "," "," " }, // -> 1
+            new string[]{ "X","X"," ",   " "," "," ",   " "," "," " }, // -> 2
+            // Horizontal, linha do meio (casas 3,4,5)
+            new string[]{ " "," "," ",   " ","X","X",   " "," "," " }, // -> 3
+            new string[]{ " "," "," ",   "X"," ","X",   " "," "," " }, // -> 4
+            new string[]{ " "," "," ",   "X","X"," ",   " "," "," " }, // -> 5
+            // Horizontal, linha de baixo (casas 6,7,8)
+            new string[]{ " "," "," ",   " "," "," ",   " ","X","X" }, // -> 6
+            new string[]{ " "," "," ",   " "," "," ",   "X"," ","X" }, // -> 7
+            new string[]{ " "," "," ",   " "," "," ",   "X","X"," " }, // -> 8
+
+            // Vertical, coluna da esquerda (casas 0,3,6)
+            new string[]{ " "," "," ",   "X"," "," ",   "X"," "," " }, // -> 0
+            new string[]{ "X"," "," ",   " "," "," ",   "X"," "," " }, // -> 3
+            new string[]{ "X"," "," ",   "X"," "," ",   " "," "," " }, // -> 6
+            // Vertical, coluna do meio (casas 1,4,7)
+            new string[]{ " "," "," ",   " ","X"," ",   " ","X"," " }, // -> 1
+            new string[]{ " ","X"," ",   " "," "," ",   " ","X"," " }, // -> 4
+            new string[]{ " ","X"," ",   " ","X"," ",   " "," "," " }, // -> 7
+            // Vertical, coluna da direita (casas 2,5,8)
+            new string[]{ " "," "," ",   " "," ","X",   " "," ","X" }, // -> 2
+            new string[]{ " "," ","X",   " "," "," ",   " "," ","X" }, // -> 5
+            new string[]{ " "," ","X",   " "," ","X",   " "," "," " }, // -> 8
+
+            // Diagonal \ (casas 0,4,8)
+            new string[]{ " "," "," ",   " ","X"," ",   " "," ","X" }, // -> 0
+            new string[]{ "X"," "," ",   " "," "," ",   " "," ","X" }, // -> 4
+            new string[]{ "X"," "," ",   " ","X"," ",   " "," "," " }, // -> 8
+            // Diagonal / (casas 2,4,6)
+            new string[]{ " "," "," ",   " ","X"," ",   "X"," "," " }, // -> 2
+            new string[]{ " "," ","X",   " "," "," ",   "X"," "," " }, // -> 4
+            new string[]{ " "," ","X",   " ","X"," ",   " "," "," " }, // -> 6
+        };
+        string[][] saidasEsperadas = {
+            // Horizontal, linha de cima
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
+            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            // Horizontal, linha do meio
+            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 3
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 5
+            // Horizontal, linha de baixo
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 7
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            // Vertical, coluna da esquerda
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
+            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 3
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+            // Vertical, coluna do meio
+            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 7
+            // Vertical, coluna da direita
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            // Diagonal \
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            // Diagonal /
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+        };
+
+        double[][] trainingBoards = tranlateBoard(boards); //traduz os simbolos para numeros que a rede pode usar
+        double[][] trainingSaidasEsperadas = tranlateBoard(saidasEsperadas); //traduz os simbolos para numeros que a rede pode usar
+
+        //testes de completar as linhas
         for (int t = 0; t < trainingBoards.Length; t += r.Next(1,5)) //randomicamente salta alguns testos
         {
-            //Console.WriteLine("Entrada da rede");
-            //ShowQuadriculas(trainingBoards[t], 3);
-
             //calcular a saida
-            double[] result = rede.calcRedeNeuronal(trainingBoards[t]);
-            double[] newBoard = result.Select(r => r > 0.8 ? 2 : 0) //flaten the exits to 0 or 1
-                .Zip(trainingBoards[t], (r, b) => r + b).ToArray(); //sum the 2 boards
+            double[] escolhaAI = rede.calcRedeNeuronal(trainingBoards[t]);
 
-            Console.WriteLine("Novo tabuleiro:");
+            /*double[] newBoard = result.Select(r => r == result.Max() ? 2 : 0) //flaten the exits to 0 or 2 (Ai move) apenas o resultado maior da AI
+                .Zip(trainingBoards[t], (r, b) => r + b).ToArray(); //sum the 2 boards*/
+
+            double[] newBoard = PlayBoard(trainingBoards[t], escolhaAI);
+
+            Console.WriteLine("Tabuleiro Resultado:");
             ShowQuadriculas(newBoard, 3);
 
             Console.WriteLine("---------------");
         }
+
+        //random ponto no centro, ver o que faz com isto
+        Console.WriteLine("Teste de ponto no centro do tabuleiro:"); // apenas para testar o que a AI tenta fazer quando não tem linha para completar
+        double[] boardCentro = new double[9];
+        boardCentro[4] = 1;
+        double[] resultCentro = rede.calcRedeNeuronal(boardCentro);
+        double[] newBoardCentro = PlayBoard(boardCentro, resultCentro);
+        ShowQuadriculas(newBoardCentro, 3);
+        Console.WriteLine("---------------");
+
+        //Testes de multiplas linhas
+        Console.WriteLine("Teste de Cruz no centro (+)");
+        double[] boardCrux = new double[9];
+        boardCrux[1] = 1; boardCrux[3] = 1; boardCrux[5] = 1; boardCrux[7] = 1; // +
+        double[] resultCrux = rede.calcRedeNeuronal(boardCrux);
+        double[] newBoardCrux = PlayBoard(boardCrux, resultCrux);
+        ShowQuadriculas(newBoardCrux, 3);
+        Console.WriteLine("---------------");
+
+        Console.WriteLine("Teste de Cruz no centro (x)");
+        double[] boardCrux2 = new double[9];
+        boardCrux2[0] = 1; boardCrux2[2] = 1; boardCrux2[6] = 1; boardCrux2[8] = 1; // x
+        double[] resultCrux2 = rede.calcRedeNeuronal(boardCrux2);
+        double[] newBoardCrux2 = PlayBoard(boardCrux2, resultCrux2);
+        ShowQuadriculas(newBoardCrux2, 3);
+        Console.WriteLine("---------------");
+
+        //teste para ver a AI a completar um tabuleiro
+        Console.WriteLine("Teste try play until full");
+        double[] zeroBoard = new double[9];
+        for(int i = 0; i<zeroBoard.Length; i++)
+        {
+            var AIplay = rede.calcRedeNeuronal(zeroBoard);
+            zeroBoard = PlayBoard(zeroBoard, AIplay);
+            Console.WriteLine("Play = " + i);
+            ShowQuadriculas(zeroBoard, 3);
+            Console.WriteLine("---------------");
+        }
+    }
+    public static void JogoContraAI()
+    {
+        var rede = TreinoCompletarLinhas();
+        double[] board = new double[9];
+        while (true) {
+            ShowQuadriculas(board, 3); //mostra a partida
+            Console.Write("Play = ");
+            var jogada = Convert.ToInt32(Console.ReadLine());
+            if (jogada < 1 || jogada > 9)
+            {
+                Console.WriteLine("Jogada Invalida");
+                continue;
+            }
+
+            if (board[jogada] == 0)
+            {
+                board[jogada] = -2; //nova jogada do Jogador
+            }
+            else
+            {
+                Console.WriteLine("Jogada Invalida");
+                continue;
+            }
+            //jogada da AI
+            var AIplay = rede.calcRedeNeuronal(board);
+            board = PlayBoard(board,AIplay);
+        }
+    }
+
+    //Recebe o board atual, e as escolhas da AI de onde jogar, e tenta fazer esta jogada
+    public static double[] PlayBoard(double[] board, double[] AIplay)
+    {
+        var indexZero = Array.IndexOf(board, 0); //verifica se tem algum lugar que é possivel de escrita
+        if (indexZero == -1) //caso não exista 
+            return board;
+
+        double[] flattenBoard = board.Select(b => (b >= 1 ? 1.0 : (b <= -1 ? -1.0 : 0.0))).ToArray(); //flatten the old values to (-1 ou 0 ou 0)
+
+        while (true) {
+            var index = Array.IndexOf(AIplay, AIplay.Max()); //captura a jogada da AI (aka a que ela deu maior valor)
+            if(flattenBoard[index] == 0)
+            {
+                flattenBoard[index] = 2; //2 ultima jogada da Ai
+                break; //sai do loop
+            }
+            else
+            {
+                AIplay[index] = int.MinValue; //ilimina essa jogada não possivel da AI e tenta ver qual a proxima melhor
+            }
+        }
+        return flattenBoard;
     }
 
     //função para traduzir board strings para numeros que a rede neuronal pode ler
@@ -644,12 +831,24 @@ class Program
         for (int i = 0; i < image.Length; i++)
         {
             Console.BackgroundColor = ConsoleColor.White; //reset quando troca de linha
-            if (image[i] >= 2) //para testes ver o valor novo
-                Console.ForegroundColor = ConsoleColor.Red;
-            else
-                Console.ForegroundColor = ConsoleColor.Blue;
 
-            if (image[i] >= 0.8) //"█"
+            switch (image[i])
+            {
+                case 1:
+                    Console.ForegroundColor = ConsoleColor.Blue; //old value AI
+                    break;
+                case 2:
+                    Console.ForegroundColor = ConsoleColor.Cyan; //new value AI
+                    break;
+                case -1:
+                    Console.ForegroundColor = ConsoleColor.Red; //old value player
+                    break;
+                case -2:
+                    Console.ForegroundColor = ConsoleColor.Magenta; //new value player
+                    break;
+            }
+
+            if (image[i] >= 1 || image[i] <= -1) //"█"
                 Console.Write("██");
             else
                 Console.Write("  ");

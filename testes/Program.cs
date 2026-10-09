@@ -79,7 +79,7 @@ class Program
                     CompletarLinhas();
                     break;
                 case 8:
-                    JogoContraAI();
+                    JogoContraAI(TreinoCompletarLinhas()); //Jogar contra a AI(gera uma nova sempre que jogar denovo)
                     break;
                 //Extras
                 case 10:
@@ -613,74 +613,74 @@ class Program
 
         //boards de testes usados originalmente usados no teino
         string[][] boards = {
-            // Horizontal, linha de cima (casas 0,1,2)
-            new string[]{ " ","X","X",   " "," "," ",   " "," "," " }, // -> 0
-            new string[]{ "X"," ","X",   " "," "," ",   " "," "," " }, // -> 1
-            new string[]{ "X","X"," ",   " "," "," ",   " "," "," " }, // -> 2
-            // Horizontal, linha do meio (casas 3,4,5)
-            new string[]{ " "," "," ",   " ","X","X",   " "," "," " }, // -> 3
-            new string[]{ " "," "," ",   "X"," ","X",   " "," "," " }, // -> 4
-            new string[]{ " "," "," ",   "X","X"," ",   " "," "," " }, // -> 5
-            // Horizontal, linha de baixo (casas 6,7,8)
-            new string[]{ " "," "," ",   " "," "," ",   " ","X","X" }, // -> 6
-            new string[]{ " "," "," ",   " "," "," ",   "X"," ","X" }, // -> 7
-            new string[]{ " "," "," ",   " "," "," ",   "X","X"," " }, // -> 8
+            // Horizontal, linha de cima (casas 1,2,3)
+            new string[]{ " ","X","X",   " "," "," ",   " "," "," " }, // -> 1
+            new string[]{ "X"," ","X",   " "," "," ",   " "," "," " }, // -> 2
+            new string[]{ "X","X"," ",   " "," "," ",   " "," "," " }, // -> 3
+            // Horizontal, linha do meio (casas 4,5,6)
+            new string[]{ " "," "," ",   " ","X","X",   " "," "," " }, // -> 4
+            new string[]{ " "," "," ",   "X"," ","X",   " "," "," " }, // -> 5
+            new string[]{ " "," "," ",   "X","X"," ",   " "," "," " }, // -> 6
+            // Horizontal, linha de baixo (casas 7,8,9)
+            new string[]{ " "," "," ",   " "," "," ",   " ","X","X" }, // -> 7
+            new string[]{ " "," "," ",   " "," "," ",   "X"," ","X" }, // -> 8
+            new string[]{ " "," "," ",   " "," "," ",   "X","X"," " }, // -> 9
 
-            // Vertical, coluna da esquerda (casas 0,3,6)
-            new string[]{ " "," "," ",   "X"," "," ",   "X"," "," " }, // -> 0
-            new string[]{ "X"," "," ",   " "," "," ",   "X"," "," " }, // -> 3
-            new string[]{ "X"," "," ",   "X"," "," ",   " "," "," " }, // -> 6
-            // Vertical, coluna do meio (casas 1,4,7)
-            new string[]{ " "," "," ",   " ","X"," ",   " ","X"," " }, // -> 1
-            new string[]{ " ","X"," ",   " "," "," ",   " ","X"," " }, // -> 4
-            new string[]{ " ","X"," ",   " ","X"," ",   " "," "," " }, // -> 7
-            // Vertical, coluna da direita (casas 2,5,8)
-            new string[]{ " "," "," ",   " "," ","X",   " "," ","X" }, // -> 2
-            new string[]{ " "," ","X",   " "," "," ",   " "," ","X" }, // -> 5
-            new string[]{ " "," ","X",   " "," ","X",   " "," "," " }, // -> 8
+            // Vertical, coluna da esquerda (casas 1,4,7)
+            new string[]{ " "," "," ",   "X"," "," ",   "X"," "," " }, // -> 1
+            new string[]{ "X"," "," ",   " "," "," ",   "X"," "," " }, // -> 4
+            new string[]{ "X"," "," ",   "X"," "," ",   " "," "," " }, // -> 7
+            // Vertical, coluna do meio (casas 2,5,8)
+            new string[]{ " "," "," ",   " ","X"," ",   " ","X"," " }, // -> 2
+            new string[]{ " ","X"," ",   " "," "," ",   " ","X"," " }, // -> 5
+            new string[]{ " ","X"," ",   " ","X"," ",   " "," "," " }, // -> 8
+            // Vertical, coluna da direita (casas 3,6,9)
+            new string[]{ " "," "," ",   " "," ","X",   " "," ","X" }, // -> 3
+            new string[]{ " "," ","X",   " "," "," ",   " "," ","X" }, // -> 6
+            new string[]{ " "," ","X",   " "," ","X",   " "," "," " }, // -> 9
 
-            // Diagonal \ (casas 0,4,8)
-            new string[]{ " "," "," ",   " ","X"," ",   " "," ","X" }, // -> 0
-            new string[]{ "X"," "," ",   " "," "," ",   " "," ","X" }, // -> 4
-            new string[]{ "X"," "," ",   " ","X"," ",   " "," "," " }, // -> 8
-            // Diagonal / (casas 2,4,6)
-            new string[]{ " "," "," ",   " ","X"," ",   "X"," "," " }, // -> 2
-            new string[]{ " "," ","X",   " "," "," ",   "X"," "," " }, // -> 4
-            new string[]{ " "," ","X",   " ","X"," ",   " "," "," " }, // -> 6
+            // Diagonal \ (casas 1,5,9)
+            new string[]{ " "," "," ",   " ","X"," ",   " "," ","X" }, // -> 1
+            new string[]{ "X"," "," ",   " "," "," ",   " "," ","X" }, // -> 5
+            new string[]{ "X"," "," ",   " ","X"," ",   " "," "," " }, // -> 9
+            // Diagonal / (casas 3,5,7)
+            new string[]{ " "," "," ",   " ","X"," ",   "X"," "," " }, // -> 3
+            new string[]{ " "," ","X",   " "," "," ",   "X"," "," " }, // -> 5
+            new string[]{ " "," ","X",   " ","X"," ",   " "," "," " }, // -> 7
         };
         string[][] saidasEsperadas = {
             // Horizontal, linha de cima
-            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
-            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 1
-            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 3
             // Horizontal, linha do meio
-            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 3
-            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
-            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 6
             // Horizontal, linha de baixo
-            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
-            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 7
-            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 7
+            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 8
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 9
             // Vertical, coluna da esquerda
-            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
-            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 3
-            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " "," "," ",   "X"," "," ",   " "," "," " }, // 4
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 7
             // Vertical, coluna do meio
-            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 1
-            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
-            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 7
+            new string[]{ " ","X"," ",   " "," "," ",   " "," "," " }, // 2
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   " "," "," ",   " ","X"," " }, // 8
             // Vertical, coluna da direita
-            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
-            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 5
-            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 3
+            new string[]{ " "," "," ",   " "," ","X",   " "," "," " }, // 6
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 9
             // Diagonal \
-            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 0
-            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
-            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 8
+            new string[]{ "X"," "," ",   " "," "," ",   " "," "," " }, // 1
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   " "," "," ",   " "," ","X" }, // 9
             // Diagonal /
-            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 2
-            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 4
-            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 6
+            new string[]{ " "," ","X",   " "," "," ",   " "," "," " }, // 3
+            new string[]{ " "," "," ",   " ","X"," ",   " "," "," " }, // 5
+            new string[]{ " "," "," ",   " "," "," ",   "X"," "," " }, // 7
         };
 
         double[][] trainingBoards = tranlateBoard(boards); //traduz os simbolos para numeros que a rede pode usar
@@ -741,12 +741,20 @@ class Program
             Console.WriteLine("---------------");
         }
     }
-    public static void JogoContraAI()
+    public static void JogoContraAI(RedeNeuronal rede)
     {
-        var rede = TreinoCompletarLinhas();
+        var player = -1;
+        var ai = 1;
+        Console.WriteLine("Player buttons:\n" +
+            "1 2 3\n" +
+            "4 5 6\n" +
+            "7 8 9");
+        //var rede = TreinoCompletarLinhas();
         double[] board = new double[9];
-        while (true) {
-            ShowQuadriculas(board, 3); //mostra a partida
+
+        ShowQuadriculas(board, 3); //mostra a partida base
+
+        for (int jogadas = 9; jogadas > 0; jogadas--) {
             Console.Write("Play = ");
             var jogada = Convert.ToInt32(Console.ReadLine());
             if (jogada < 1 || jogada > 9)
@@ -754,20 +762,39 @@ class Program
                 Console.WriteLine("Jogada Invalida");
                 continue;
             }
+            var indexJogada = jogada - 1;
 
-            if (board[jogada] == 0)
+            if (board[indexJogada] == 0)
             {
-                board[jogada] = -2; //nova jogada do Jogador
+                board[indexJogada] = -2; //nova jogada do Jogador
             }
             else
             {
                 Console.WriteLine("Jogada Invalida");
                 continue;
             }
+
+            ShowQuadriculas(board, 3); //mostra a partida
+            if(CheckVictory(board, player))
+            {
+                Console.WriteLine("Player Wins");
+                return;
+            }
+
+            Console.WriteLine("Ai play = ");
             //jogada da AI
             var AIplay = rede.calcRedeNeuronal(board);
             board = PlayBoard(board,AIplay);
+
+            ShowQuadriculas(board, 3);
+            if (CheckVictory(board, ai))
+            {
+                Console.WriteLine("AI Wins");
+                return;
+            }
         }
+        Console.WriteLine("Draw");
+        return;
     }
 
     //Recebe o board atual, e as escolhas da AI de onde jogar, e tenta fazer esta jogada
@@ -777,7 +804,7 @@ class Program
         if (indexZero == -1) //caso não exista 
             return board;
 
-        double[] flattenBoard = board.Select(b => (b >= 1 ? 1.0 : (b <= -1 ? -1.0 : 0.0))).ToArray(); //flatten the old values to (-1 ou 0 ou 0)
+        double[] flattenBoard = board.Select(b => (b >= 1 ? 1.0 : (b <= -1 ? -1.0 : 0.0))).ToArray(); //flatten the old values to (-1 ou 0 ou 1)
 
         while (true) {
             var index = Array.IndexOf(AIplay, AIplay.Max()); //captura a jogada da AI (aka a que ela deu maior valor)
@@ -792,6 +819,40 @@ class Program
             }
         }
         return flattenBoard;
+    }
+    public static bool CheckVictory(double[] board, double jogador)
+    {
+        double[] flattenBoard = board.Select(b => (b >= 1 ? 1.0 : (b <= -1 ? -1.0 : 0.0))).ToArray(); //flatten the old values to (-1 ou 0 ou 1)
+
+        //check horizontal
+        for(int i = 0; i < flattenBoard.Length; i += 3)
+        {
+            if (flattenBoard[i] == jogador && flattenBoard[i + 1] == jogador && flattenBoard[i + 2] == jogador)
+            {
+                return true;
+            }
+        }
+
+        //check Vertical
+        for (int i = 0; i < 3; i++)
+        {
+            if (flattenBoard[i] == jogador && flattenBoard[i + 3] == jogador && flattenBoard[i + 6] == jogador)
+            {
+                return true;
+            }
+        }
+
+        //check diagonais
+        if (flattenBoard[0] == jogador && flattenBoard[4] == jogador && flattenBoard[8] == jogador)
+        {
+            return true;
+        }
+        if (flattenBoard[2] == jogador && flattenBoard[4] == jogador && flattenBoard[6] == jogador)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     //função para traduzir board strings para numeros que a rede neuronal pode ler
@@ -834,17 +895,17 @@ class Program
 
             switch (image[i])
             {
-                case 1:
-                    Console.ForegroundColor = ConsoleColor.Blue; //old value AI
-                    break;
-                case 2:
-                    Console.ForegroundColor = ConsoleColor.Cyan; //new value AI
-                    break;
                 case -1:
-                    Console.ForegroundColor = ConsoleColor.Red; //old value player
+                    Console.ForegroundColor = ConsoleColor.DarkBlue; //old value AI
                     break;
                 case -2:
-                    Console.ForegroundColor = ConsoleColor.Magenta; //new value player
+                    Console.ForegroundColor = ConsoleColor.Blue; //new value AI
+                    break;
+                case 1:
+                    Console.ForegroundColor = ConsoleColor.DarkRed; //old value player
+                    break;
+                case 2:
+                    Console.ForegroundColor = ConsoleColor.Red; //new value player
                     break;
             }
 

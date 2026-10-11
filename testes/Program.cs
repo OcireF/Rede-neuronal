@@ -11,8 +11,7 @@ class Program
     static double taxaAprendizagem = 0.02; //velocidade do treino
     static double fatorMomento = 0.05; // fartor de movimento
     static int epocas = 1000; // Epocas para treinar
-    static double erroMaximo = 0.05; //0,1%
-
+    static double erroMaximo = 0.05; //5%
     static Random r = new Random(); //gera um randomizer que podemos chamar para os testes
 
     static void Main(string[] args)
@@ -32,13 +31,13 @@ class Program
                 "(4) - BigInput(treino) Reconhecimento de Barras Verticais\n" +
                 "\n" +
                 "Textes Parte 1.3\n" +
-                "(5) - treinamento para o Xor [2,5,1]\n" +
-                "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta=0\n" +
+                "(5) - Treinamento para o Xor [2,5,1]\n" +
+                "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta = 0\n" +
                 "\n" +
-                "Program\n" +
-                "(7) - Completar a linha testes\n" +
-                "(8) - jogar contra a AI (completadora de linhas)\n" +
-                "(9) - treino o algoritmo minimax(bruteforce allgames)\n" +
+                "Programa\n" +
+                "(7) - Treino de completar a linhas\n" +
+                "(8) - Jogar contra a AI (completadora de linhas)\n" +
+                "(9) - Treino o algoritmo minimax(bruteforce allgames)\n" +
                 "(10) - Jogar contra a AI (treinada com o algoritmo minimax)\n" +
                 "\n" +
                 "(20) - Show Pesos e Pendores\n" +
@@ -617,15 +616,15 @@ class Program
     {
         int[] forma = { 9, 64, 32, 16, 9 };
         var fucaoTanh = new FucaoAtivadoraTanh();
-        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName,null,null,new FucaoAtivadoraLiniar()); //cria uma rede neuronal
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName,null,null,new FucaoAtivadoraLiniar()); //cria uma rede neuronal a (liniar é ativadora da camada de saida)
 
         double[] board = new double[9];
         var dicionario = new Dictionary<string, (double[] x, double[] y)>(); //gera para todos os boards(x) as melhores escolhas (y) 
-        GerarJogoDoGalo(board, 1, dicionario);
+        GerarJogoDoGalo(board, 1, dicionario); //gera todos os jogos possiveis
 
         (double[] x, double[] y)[] trainingdata = dicionario.Values.ToArray();
         r.Shuffle(trainingdata); //suffle the training data
-        Console.Write("Numero de tabuleiros para treinar (Max 4520)=");
+        Console.Write("Numero de tabuleiros para treinar (Sugestão 30-300) (Max 4520) =");
         var boardNumber = Convert.ToInt32(Console.ReadLine());
 
         double[][] trainingBoards = trainingdata.Select(v => v.x).Take(boardNumber).ToArray();
@@ -636,7 +635,7 @@ class Program
         while (true) //treina até for um sucesso (simples loop)
         {
             Console.WriteLine("Treino AI minimax");
-            foiUmSuceso = rede.Treinar(trainingBoards, trainingSaidasEsperadas, epocas, 0.3, 0.01, 0);
+            foiUmSuceso = rede.Treinar(trainingBoards, trainingSaidasEsperadas, epocas, 0.3, 0.01, 0.10); //30% erro 
             Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
 
             if (foiUmSuceso)
@@ -650,7 +649,7 @@ class Program
             }
             else
             {
-                Console.WriteLine("RIP: descartar Rede\n");
+                Console.WriteLine("Rede com erro maior que:" + "30%" + "\n");
                 return rede; //temp para dar trobleShot
             }
         }
@@ -829,8 +828,6 @@ class Program
         }
         double mediaPoints = soma / boardsTestes.Length;
         Console.WriteLine("Media de pontos:" + mediaPoints);
-
-
     }
 
     public static void JogoContraAI(RedeNeuronal rede)
@@ -984,7 +981,7 @@ class Program
                 board[i] = 0;                                    //reseta a casa para usar no proximo loop
                 max = Math.Max(max, pontos[i]);                  //guardados o valor maximo
             }
-            var y = pontos.Select(v => v == max ? 0.8 : -0.8).ToArray(); //normaliza o array pontos exemplo "[ -3, -3, -3, -3, -3, -3,  -1,   0,  +1 ]" -> "[ -1, -1, -1, -1, -1, -1,  -1,  -1,  +1 ]"
+            var y = pontos.Select(v => v == max ? 1.0 : -1.0).ToArray(); //normaliza o array pontos exemplo "[ -3, -3, -3, -3, -3, -3,  -1,   0,  +1 ]" -> "[ -1, -1, -1, -1, -1, -1,  -1,  -1,  +1 ]"
             dados[chave] = (x, y); //adiciona no dicionario o par board atual(x), e melhor jogada(y)
         }
 

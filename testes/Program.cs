@@ -6,12 +6,12 @@ class Program
     static bool showPesosPendores = false;
     static bool showArt = true; // por default é true para mostrar os graficos
     static int decimalCases = 3; //isto é para a apresentação de percentagens na consola
-    static string trainingErrorsFileName = null;
+    static string trainingErrorsFileName = "erro"; //ficheiro padrão
     //Variaveis dos treinos:
     static double taxaAprendizagem = 0.02; //velocidade do treino
-    static double fatorMomento = 0.02; // fartor de movimento
+    static double fatorMomento = 0.05; // fartor de movimento
     static int epocas = 1000; // Epocas para treinar
-    static double erroMaximo = 0.001; //0,1%
+    static double erroMaximo = 0.05; //0,1%
 
     static Random r = new Random(); //gera um randomizer que podemos chamar para os testes
 
@@ -38,11 +38,13 @@ class Program
                 "Program\n" +
                 "(7) - Completar a linha testes\n" +
                 "(8) - jogar contra a AI (completadora de linhas)\n" +
+                "(9) - treino o algoritmo minimax(bruteforce allgames)\n" +
+                "(10) - Jogar contra a AI (treinada com o algoritmo minimax)\n" +
                 "\n" +
-                "(10) - Show Pesos e Pendores\n" +
-                "(11) - Show Art Barras Verticais\n" +
-                "(12) - Save Training Errors\n" +
-                "(13) - Change Training Parameters\n" +
+                "(20) - Show Pesos e Pendores\n" +
+                "(21) - Show Art Barras Verticais\n" +
+                "(22) - Save Training Errors\n" +
+                "(23) - Change Training Parameters\n" +
                 "(99) - Exit\n"
                 );
             Console.Write("Choice: ");
@@ -74,6 +76,7 @@ class Program
                     ShowParameters();
                     TreinoXorDuplaRede();
                     break;
+                //testes para o jogo do galo
                 case 7:
                     ShowParameters();
                     CompletarLinhas();
@@ -81,20 +84,26 @@ class Program
                 case 8:
                     JogoContraAI(TreinoCompletarLinhas()); //Jogar contra a AI(gera uma nova sempre que jogar denovo)
                     break;
-                //Extras
+                case 9:
+                    testeMinimax();
+                    break;
                 case 10:
+                    JogoContraAI(TreinoMiniMax());
+                    break;
+                //Extras
+                case 20:
                     showPesosPendores = !showPesosPendores;
                     Console.WriteLine("showPesosPendores " + showPesosPendores);
                     break;
-                case 11:
+                case 21:
                     showArt = !showArt;
                     Console.WriteLine("showArt " + showArt);
                     break;
-                case 12: // Save Training Errors
+                case 22: // Save Training Errors
                     Console.Write("FileName:");
                     trainingErrorsFileName = Console.ReadLine();
                     break;
-                case 13: // Change Training Parameters
+                case 23: // Change Training Parameters
                     Console.Write("Taxa Aprendizagem ("+ taxaAprendizagem + "):"); //change training values
                     taxaAprendizagem = Convert.ToDouble(Console.ReadLine());
 
@@ -604,6 +613,51 @@ class Program
         }
     }
 
+    public static RedeNeuronal TreinoMiniMax()
+    {
+        int[] forma = { 9, 64, 32, 16, 9 };
+        var fucaoTanh = new FucaoAtivadoraTanh();
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName,null,null,new FucaoAtivadoraLiniar()); //cria uma rede neuronal
+
+        double[] board = new double[9];
+        var dicionario = new Dictionary<string, (double[] x, double[] y)>(); //gera para todos os boards(x) as melhores escolhas (y) 
+        GerarJogoDoGalo(board, 1, dicionario);
+
+        (double[] x, double[] y)[] trainingdata = dicionario.Values.ToArray();
+        r.Shuffle(trainingdata); //suffle the training data
+        Console.Write("Numero de tabuleiros para treinar (Max 4520)=");
+        var boardNumber = Convert.ToInt32(Console.ReadLine());
+
+        double[][] trainingBoards = trainingdata.Select(v => v.x).Take(boardNumber).ToArray();
+        double[][] trainingSaidasEsperadas = trainingdata.Select(v => v.y).Take(boardNumber).ToArray();
+
+        //Treino
+        var foiUmSuceso = false;
+        while (true) //treina até for um sucesso (simples loop)
+        {
+            Console.WriteLine("Treino AI minimax");
+            foiUmSuceso = rede.Treinar(trainingBoards, trainingSaidasEsperadas, epocas, 0.3, 0.01, 0);
+            Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
+
+            if (foiUmSuceso)
+            {
+                if (showPesosPendores)
+                {
+                    Console.WriteLine("Pesos finais:");
+                    ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+                }
+                return rede;
+            }
+            else
+            {
+                Console.WriteLine("RIP: descartar Rede\n");
+                return rede; //temp para dar trobleShot
+            }
+        }
+
+        return rede;
+    }
+
     //Obj: implementar o jogo do galo com a rede neuronal
     //AI é o "X", o jogador é o "O"
     //Objetivo inicial é uma rede que saiba a jogada vencedora
@@ -741,6 +795,44 @@ class Program
             Console.WriteLine("---------------");
         }
     }
+
+    public static void testeMinimax()
+    {
+        var rede = TreinoMiniMax();
+
+        double[] board = new double[9];
+        var dicionario = new Dictionary<string, (double[] x, double[] y)>(); //gera para todos os boards(x) as melhores escolhas (y) 
+        GerarJogoDoGalo(board, 1, dicionario);
+        (double[] x, double[] y)[] boardData = dicionario.Values.ToArray();
+
+        r.Shuffle(boardData); //suffle the training data
+        Console.Write("Numero de tabuleiros para testar (Max 4520)=");
+        var boardNumber = Convert.ToInt32(Console.ReadLine());
+
+        double[][] boardsTestes = boardData.Select(v => v.x).Take(boardNumber).ToArray();
+        double[][] pontosTestes = boardData.Select(v => v.y).Take(boardNumber).ToArray();
+
+        Console.WriteLine("Teste try play until full");
+        double soma = 0;
+        for (int i = 0; i < boardsTestes.Length; i++)
+        {
+            Console.WriteLine("Original board");
+            ShowQuadriculas(boardsTestes[i], 3);
+            var AIplay = rede.calcRedeNeuronal(boardsTestes[i]);
+            var boardResult = PlayBoard(boardsTestes[i], AIplay);
+            var points = pontosTestes[i][Array.IndexOf(boardResult, boardResult.Max())]; //Captura os pontos da maior escolha da AI
+            Console.WriteLine("Pontos:" + points);
+            ShowQuadriculas(boardResult, 3);
+            Console.WriteLine("---------------");
+
+            soma += points;
+        }
+        double mediaPoints = soma / boardsTestes.Length;
+        Console.WriteLine("Media de pontos:" + mediaPoints);
+
+
+    }
+
     public static void JogoContraAI(RedeNeuronal rede)
     {
         var player = -1;
@@ -783,7 +875,7 @@ class Program
 
             Console.WriteLine("Ai play = ");
             //jogada da AI
-            var AIplay = rede.calcRedeNeuronal(board);
+            var AIplay = rede.calcRedeNeuronal(board.Select(b => (b >= 1 ? 1.0 : (b <= -1 ? -1.0 : 0.0))).ToArray());
             board = PlayBoard(board,AIplay);
 
             ShowQuadriculas(board, 3);
@@ -853,6 +945,60 @@ class Program
         }
 
         return false;
+    }
+
+    // Algoritmo Minimax para dar brute force da melhor jogada possivel
+    // Valor da posição para quem joga (player): +1 ganha, 0 empata, -1 perde
+    static int Minimax(double[] board, int player)
+    {
+        if (CheckVictory(board, -player)) return -1;              // o adversário acabou de ganhar "-1"
+        if (!board.Contains(0)) return 0;                         // se não existir um 0 é um empate "0"
+        int melhor = -2;                                          // valor inicial da jogada "-2" para ser pior que todas as jogadas possiveis (-1,0,1)
+        for (int i = 0; i < 9; i++)                               // basicamente vamos exprimentar todas as jogads possiveis
+        {
+            if (board[i] != 0) continue;                            // caso esta casa não estiver vasia ignora
+            board[i] = player;                                      // Exprimenta jogar aqui
+            melhor = Math.Max(melhor, -Minimax(board, -player));    // Agora calcula se esta jogada faz o adversario perder "-1" ou empatar "0", 
+            board[i] = 0;
+        }
+        return melhor;
+    }
+
+    //gerador de jogos do Galo
+    static void GerarJogoDoGalo(double[] board, int player, Dictionary<string, (double[] x, double[] y)> dados)
+    {
+        if (CheckVictory(board, player) || CheckVictory(board, -player) || !board.Contains(0)) return; //caso alguem tenha ganho return
+
+        var x = board.Select(c => (c * player)).ToArray();   // ponto de vista de quem joga (player "-1" flipa o jogo)(player 1 deixa o jogo igual)
+        string chave = string.Join(",", x);                  // gerar a chave do jogo atual Exemplo: "X,0,0, ,X,0, , , " para ivitar repetições
+
+        if (!dados.ContainsKey(chave)) //se o Dicionario ja tiver a chave não existe necessidade de calcular os dados
+        {
+            var pontos = new int[9]; //Inicializa um array de pontos a [0,0,0 ,0,0,0 ,0,0,0]
+            int max = -2;           //max ser -2 para mais tarde ser substituido por uma pontuação real
+            for (int i = 0; i < 9; i++) //verifica todas as jogads possiveis do board atual
+            {
+                if (board[i] != 0) { pontos[i] = -3; continue; } //caso a casa já estiver ocupada a pontuação é -3 para essa casa
+                board[i] = player;                               //tenta jogar nesta casa
+                pontos[i] = -Minimax(board, -player);            //calcula o contrario do minimax do adversario no board atual (se ele pontuação negativa sgnifica que nesta casa podemos ganhar)
+                board[i] = 0;                                    //reseta a casa para usar no proximo loop
+                max = Math.Max(max, pontos[i]);                  //guardados o valor maximo
+            }
+            var y = pontos.Select(v => v == max ? 0.8 : -0.8).ToArray(); //normaliza o array pontos exemplo "[ -3, -3, -3, -3, -3, -3,  -1,   0,  +1 ]" -> "[ -1, -1, -1, -1, -1, -1,  -1,  -1,  +1 ]"
+            dados[chave] = (x, y); //adiciona no dicionario o par board atual(x), e melhor jogada(y)
+        }
+
+        //aqui vamos fazer recursividade,
+        //tenta jogar numa posição,
+        //e verifica as proximas jogadas no ramo (GerarJogoDoGalo),
+        //depois renicia a posição da jogada para poder verificar outro ramo no proximo loop
+        for (int i = 0; i < 9; i++)
+        {
+            if (board[i] != 0) continue;
+            board[i] = player;
+            GerarJogoDoGalo(board, -player, dados);
+            board[i] = 0;
+        }
     }
 
     //função para traduzir board strings para numeros que a rede neuronal pode ler

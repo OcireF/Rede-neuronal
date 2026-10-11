@@ -14,9 +14,10 @@ namespace Rede_neuronal
         public string traningErrorsFileName; //file onde guarda os valores dos erros
         public bool writeErrors = false; //bool para saber se vamos escrever os erros medios e pendores num .csv
         private bool firstLine = true; //bool para saber se é a primeira linha da escrita
+        private Random r = new Random();
 
         //Construtor para guardar os updates do erros, num ficheiro especificado
-        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, string traningErrorsFileName, double[][][] pesos = null, double[][] pendores = null) : this(forma, f, pesos, pendores)
+        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, string traningErrorsFileName, double[][][] pesos = null, double[][] pendores = null, IFuncoaAtivacao fsaida = null) : this(forma, f, pesos, pendores, fsaida)
         {
             if (traningErrorsFileName != null)
             {
@@ -42,7 +43,7 @@ namespace Rede_neuronal
             }
         }*/
         //contrutor para criar a rede neuronal
-        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, double[][][] pesos = null, double[][] pendores = null)
+        public RedeNeuronal(int[] forma, IFuncoaAtivacao f, double[][][] pesos = null, double[][] pendores = null, IFuncoaAtivacao fsaida = null)
         {
             camadas = new ICamada[forma.Length]; // inicia o Array de todas as camadas
             camadas[0] = new CamadaEntrada();    // inicia a camada de entrada
@@ -60,6 +61,9 @@ namespace Rede_neuronal
                     camadas[i] = new CamadaDensa(forma[i - 1], forma[i], f); //inicia a camada (tamanhoEntrada,TamanhoSaida, funcaoAtivacao)
                 }
             }
+
+            if(fsaida != null) //caso exista uma função ativadora de saida modifica a saida para ela
+                camadas.Last().SetFucaoAtivadoraCamada(fsaida);
         }
 
         //se for preciso trocar os pesos e pendores de uma camada on the fly
@@ -140,22 +144,26 @@ namespace Rede_neuronal
         //treino da rede
         public bool Treinar(double[][] entradas, double[][] saidasEsperadas, int numeroEpocas, double erroMaximo, double taxaAprendizagem, double fatorMomento = 0)  //valor default para o Momento
         {
-            for(int e = 0; e < numeroEpocas; e++) // fazer numeroEpocas treinos
+            int[] ordem = Enumerable.Range(0, entradas.Length).ToArray(); //array com todos os indices das entradas, para poder dar suffle mais tarde
+            for (int e = 0; e < numeroEpocas; e++) // fazer numeroEpocas treinos
             {
                 double erro = 0; //erro começa a 0 até provas do contrario
-                
-                for(int i = 0; i < entradas.Length; i++) // loop até ao final das entradas (nota as saidasEsperadas devem ter o mesmo tamanho)
+                double soma = 0; //para calcular o erroMedio
+                r.Shuffle(ordem); //suffle a ordem
+                foreach (int i in ordem) // loop até ao final das entradas (nota as saidasEsperadas devem ter o mesmo tamanho)
                 {
                     var erroTreino = Adaptar(entradas[i], saidasEsperadas[i], taxaAprendizagem, fatorMomento); //ada+tar a rede e capturar o erro do treino
                     erro = Math.Max(erro, erroTreino); //guarda o erro maior
-                    
-                    if (erro <= erroMaximo) //Caso o erro da epoca for menor que o erroMaximo retorna True, o treino foi um sucesso :)
-                    {
-                        SaveErrorPesosPendoresInFile(erro); //caso finalise escreve o ultimo erros pesos e pendores 
-                        return true;
-                    }
+                    soma += erroTreino; //guarda o erro medio
                 }
-                SaveErrorPesosPendoresInFile(erro); //escreve todos as epocas
+                var erroMedio = soma / entradas.Length;
+
+                SaveErrorPesosPendoresInFile(erro, erroMedio); //escreve o erro todos as epocas
+
+                if (erro <= erroMaximo) //Caso o erro da epoca for menor que o erroMaximo retorna True, o treino foi um sucesso :)
+                {
+                    return true;
+                }
             }
             return false; //Caso acabar todas a epocas e o erro for maior que o "erroMximo" returnamos o treino como um não sucesso :(
         }
@@ -202,7 +210,7 @@ namespace Rede_neuronal
             return pendores;
         }
 
-        public void SaveErrorPesosPendoresInFile(double erro)
+        public void SaveErrorPesosPendoresInFile(double erroMaximo, double erroMedio)
         {
             //Codigo de escrever num ficheiro csv o grafico de erro medio, pesos e pendores
             if (writeErrors)
@@ -213,7 +221,7 @@ namespace Rede_neuronal
 
                 if (firstLine) //se for a primeira linha escrevemos as labels
                 {
-                    string labels = "ErroMedio;";
+                    string labels = "ErroMaximo;ErroMedio;";
                     for (int i = 0; i < pesos.Length; i++)
                         for (int j = 0; j < pesos[i].Length; j++)
                             for (int k = 0; k < pesos[i][j].Length; k++)
@@ -233,7 +241,8 @@ namespace Rede_neuronal
                     }
                 }
                 //escrita dos dados no .csv
-                string linha = erro.ToString(System.Globalization.CultureInfo.CurrentUICulture) + ";"; // erro;
+                string linha = erroMaximo.ToString(System.Globalization.CultureInfo.CurrentUICulture) + ";" 
+                    + erroMedio.ToString(System.Globalization.CultureInfo.CurrentUICulture) + ";"; // erroMaximo;erroMedio
                 for (int i = 0; i < pesos.Length; i++)
                     for (int j = 0; j < pesos[i].Length; j++)
                         for (int k = 0; k < pesos[i][j].Length; k++)

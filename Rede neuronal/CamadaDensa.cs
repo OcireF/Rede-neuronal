@@ -63,6 +63,13 @@ namespace Rede_neuronal
             return saidas;
         }
 
+        public void SetFucaoAtivadoraCamada(IFuncoaAtivacao f)
+        {
+            for (int neuro = 0; neuro < neuronios.Length; neuro++)
+                neuronios[neuro].ativador = f;
+        }
+
+
         //Funções para capturar dados da rede
         public double[] GetSaidas()
         {

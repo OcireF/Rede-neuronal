@@ -12,6 +12,7 @@ namespace Rede_neuronal.Interfaces
         public void SetPesosAndPendores(double[][] pesos, double[] pendore);
         public void AdaptarCamada(double[] errosSaida, double[] entradas, double taxaAprendizagem, double fatorMomento);
         public double[] CalcularSaidas(double[] entradas);
+        public void SetFucaoAtivadoraCamada(IFuncoaAtivacao f);
         public double[] GetSaidas();
         public Neuronio[] GetNeuronios();
         public double[][] GetPesos();

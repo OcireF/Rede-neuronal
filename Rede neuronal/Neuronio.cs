@@ -39,7 +39,7 @@ namespace Rede_neuronal
 
             for (int entrada = 0; entrada < numeroEntradas; entrada++) //inicializar todas as entradas
             {
-                pesos[entrada] = (rand.NextDouble() * 2 - 1)/ Math.Sqrt(numeroEntradas); //random peso (-1 a 1) nota: o -1 é para acertar o (o a 2)
+                pesos[entrada] = (rand.NextDouble() * 2 - 1) / Math.Sqrt(numeroEntradas); //random peso (-1 a 1) nota: o -1 é para acertar o (o a 2) NOTA o "Sqrt(numeroEntradas)" é para diminuir a saturação do gradiente da função tanh
             }
         }
 

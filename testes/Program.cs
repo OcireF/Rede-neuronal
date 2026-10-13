@@ -11,7 +11,7 @@ class Program
     static double taxaAprendizagem = 0.02; //velocidade do treino
     static double fatorMomento = 0.05; // fartor de movimento
     static int epocas = 1000; // Epocas para treinar
-    static double erroMaximo = 0.05; //5%
+    static double erroMaximo = 0.02; //2%
     static Random r = new Random(); //gera um randomizer que podemos chamar para os testes
 
     static void Main(string[] args)
@@ -35,10 +35,13 @@ class Program
                 "(6) - 2 treinamentos com Rede Xor [2,5,1] mas uma com Beta e outra com beta = 0\n" +
                 "\n" +
                 "Programa\n" +
-                "(7) - Treino de completar a linhas\n" +
+                "(7) - Treino de completar as linhas\n" +
                 "(8) - Jogar contra a AI (completadora de linhas)\n" +
-                "(9) - Treino o algoritmo minimax(bruteforce allgames)\n" +
+                "(9) - Treino o algoritmo minimax (bruteforce all possible not completed games) (ajuda da Ai no algoritmo geração de dados para o treino)\n" +
                 "(10) - Jogar contra a AI (treinada com o algoritmo minimax)\n" +
+                "\n" +
+                "Programa 2 a pedido do prof\n" +
+                "(11) - Expetativa de vida a nascença por país\n" +
                 "\n" +
                 "(20) - Show Pesos e Pendores\n" +
                 "(21) - Show Art Barras Verticais\n" +
@@ -88,6 +91,11 @@ class Program
                     break;
                 case 10:
                     JogoContraAI(TreinoMiniMax());
+                    break;
+                //Aplicação expetativas de vida
+                case 11:
+                    ShowParameters();
+                    ExpetativaDeVida();
                     break;
                 //Extras
                 case 20:
@@ -886,6 +894,218 @@ class Program
         return;
     }
 
+    public static void ExpetativaDeVida()
+    {
+        string[] database = File.ReadAllLines("LiveExpectancy.csv"); //dados tirados de "https://gateway.euro.who.int/en/indicators/hfa_44-1011-life-expectancy-at-birth-years-males/#id=18851" and "https://gateway.euro.who.int/en/indicators/hfa_45-1012-life-expectancy-at-birth-years-females/#id=18852"
+
+        string[] paises =
+        {
+            "ALB",
+            "AND",
+            "ARM",
+            "AUT",
+            "AZE",
+            "BEL",
+            "BGR",
+            "BIH",
+            "BLR",
+            "CARINFONET",
+            "CHE",
+            "CIS",
+            "CYP",
+            "CZE",
+            "DEU",
+            "DNK",
+            "ESP",
+            "EST",
+            "EU_AFTER_MAY2004",
+            "EU_BEFORE_FEB2020",
+            "EU_BEFORE_MAY2004",
+            "EU_MEMBERS",
+            "FIN",
+            "FRA", //frança
+            "GBR",
+            "GEO",
+            "GRC",
+            "HRV",
+            "HUN",
+            "IRL",
+            "ISL",
+            "ISR",
+            "ITA",
+            "KAZ",
+            "KGZ",
+            "LTU",
+            "LUX",
+            "LVA",
+            "MDA",
+            "MKD",
+            "MLT",
+            "MNE",
+            "NLD",
+            "NOR",
+            "NORDIC",
+            "POL",
+            "PRT", //portugal
+            "ROU",
+            "RUS",
+            "SEEHN",
+            "SMALL",
+            "SMR",
+            "SRB",
+            "SVK",
+            "SVN",
+            "SWE",
+            "TJK",
+            "TKM",
+            "TUR",
+            "UKR",
+            "UZB",
+            "WESTERN_BALKANS",
+            "WHO_EURO"
+        };
+
+        double[][] input = new double[database.Length][];  // onde vai ser guardado o input
+        double[][] output = new double[database.Length][]; // idade espctada
+
+        Console.WriteLine("Lendo LiveExpectacy.csv");
+        for (int i = 0; i < database.Length; i++) //"COUNTRY","COUNTRY_GRP","SEX","YEAR","VALUE"
+        {
+            input[i] = new double[paises.Length + 2]; //classificação para cada pais (1 se for o pais), sexo e ano de nascimento
+            output[i] = new double[1];
+            string[] data = database[i].Replace("\"","").Split(","); // o replace apaga todos os " e o split divide toda a data da linha
+            //ler o país
+            if (data[0] != "") // tem um "COUNTRY"
+            {
+                int index = Array.IndexOf(paises, data[0]);
+                input[i][index] = 1.0; // set the "Country"
+            } else if(data[1] != "")//não tem "COUNTRY" apenas "COUNTRY_GRP"
+            {
+                int index = Array.IndexOf(paises, data[1]);
+                input[i][index] = 1.0; // set the "Country" as the "COUNTRY_GRP"
+            }
+            else
+            {
+                Console.WriteLine("Contry não lido de:" + database[i]);
+            }
+
+            //sexo MALE/FEMALE
+            if (data[2] == "MALE")
+            {
+                input[i][paises.Length] = 1;
+            }
+            else if(data[2] == "female")
+            {
+                input[i][paises.Length] = -1;
+            }
+
+            //ano de nascimento
+            input[i][paises.Length + 1] = Convert.ToDouble(data[3])/10000; //para fazer o ano ser 0,1987
+
+            //tempo de vida
+            output[i][0] = Convert.ToDouble(data[4].Replace(".", ",")) / 100; //tempo de vida esperado o "1000" é apenas para comportar idades maiores que 100
+        }
+        Console.WriteLine("Acabou de ler o LiveExpectacy.csv");
+
+        var numPaises = paises.Length;
+        int[] forma = { numPaises + 2, 64, numPaises , 1 }; //1 neuronio na camada escondida para cada pais
+        var fucaoTanh = new FucaoAtivadoraTanh();
+        RedeNeuronal rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName, null, null, new FucaoAtivadoraLiniar());
+
+        var foiUmSuceso = false;
+        while (true) //treina até for um sucesso (simples loop)
+        {
+            Console.WriteLine("Treino de expectativa de vida");
+            foiUmSuceso = rede.Treinar(input, output, epocas, erroMaximo, taxaAprendizagem, fatorMomento);
+            Console.WriteLine("O treino foi um Suceso? " + (foiUmSuceso ? "sim" : "não"));
+
+            if (foiUmSuceso)
+            {
+                if (showPesosPendores)
+                {
+                    Console.WriteLine("Pesos finais:");
+                    ShowPesosPendores(rede.GetPesos(), rede.GetPendores());
+                }
+                break;
+            }
+            else //cria uma rede nova
+            {
+                rede = new RedeNeuronal(forma, fucaoTanh, trainingErrorsFileName, null, null, new FucaoAtivadoraLiniar());
+            }
+        }
+
+        //teste pt "PRT","","MALE","1987","70.32"
+        double[] testePT = new double[paises.Length + 2]; //tudo a 0
+        testePT[Array.IndexOf(paises, "PRT")] = 1;
+        testePT[paises.Length] = 1;
+        testePT[paises.Length + 1] = 0.1987;
+
+        var result = rede.calcRedeNeuronal(testePT);
+        Console.WriteLine("teste Portugal,MALE,1987 = 70,32 anos, resultado da rede =" + result[0]);
+
+        testePT[paises.Length] = -1; //troca para female para ver a diferença
+        result = rede.calcRedeNeuronal(testePT);
+        Console.WriteLine("teste Portugal,FEMALE,1987 = 77,25 anos, resultado da rede =" + result[0]);
+
+        double[] testeFr = new double[paises.Length + 2]; //tudo a 0
+        testePT[Array.IndexOf(paises, "FRA")] = 1; //frança
+        testePT[paises.Length] = -1; //female
+        testePT[paises.Length + 1] = 0.1970;
+
+        result = rede.calcRedeNeuronal(testeFr);
+        Console.WriteLine("teste França,FEMALE,1970, = 76,71 anos, resultado da rede =" + result[0]);
+
+        while (true)
+        {
+            Console.Write("\nEscreve (t) para testar Manualmente =");
+            var t = Console.ReadLine();
+            if (t != "t")
+                break; //acabou os textes
+            else
+            {
+                Console.Write("Mostrar todos os codigos dos paises (y/n) = ");
+                var seeCodes = Console.ReadLine();
+                if (seeCodes == "y")
+                {
+                    Console.Write("[");
+                    foreach (string p in paises)
+                    {
+                        Console.Write(", " + p);
+                    }
+                    Console.Write("\n");
+                }
+                double[] testeManual = new double[paises.Length + 2]; //tudo a 0
+                Console.Write("Codigo do Pais = ");
+                var pais = Console.ReadLine();
+                if(Array.IndexOf(paises, pais) == -1)
+                {
+                    Console.Write("Codigo de Pais escolhido não existe");
+                    continue;
+                }
+                testeManual[Array.IndexOf(paises, pais)] = 1;
+
+                Console.Write("Sexo (f/m) = ");
+                var sexo = Console.ReadLine();
+                if(sexo == "m")
+                    testeManual[paises.Length] = 1; //male
+                else if(sexo == "f")
+                    testeManual[paises.Length] = -1; //female
+                else
+                {
+                    Console.Write("Sexo escolhido não existe");
+                    continue;
+                }
+
+                Console.Write("Ano de nascença = ");
+                var ano = Convert.ToInt32(Console.ReadLine());
+                testeManual[paises.Length + 1] = ano / 1000;
+
+                result = rede.calcRedeNeuronal(testeManual);
+                Console.WriteLine("tempo de vida:" + result[0] * 100);
+            }
+        }
+    }
+
     //Recebe o board atual, e as escolhas da AI de onde jogar, e tenta fazer esta jogada
     public static double[] PlayBoard(double[] board, double[] AIplay)
     {
@@ -944,7 +1164,7 @@ class Program
         return false;
     }
 
-    // Algoritmo Minimax para dar brute force da melhor jogada possivel
+    // Algoritmo Minimax para dar brute force da melhor jogada possivel (feito com ajuda de Ai)
     // Valor da posição para quem joga (player): +1 ganha, 0 empata, -1 perde
     static int Minimax(double[] board, int player)
     {
@@ -955,13 +1175,13 @@ class Program
         {
             if (board[i] != 0) continue;                            // caso esta casa não estiver vasia ignora
             board[i] = player;                                      // Exprimenta jogar aqui
-            melhor = Math.Max(melhor, -Minimax(board, -player));    // Agora calcula se esta jogada faz o adversario perder "-1" ou empatar "0", 
+            melhor = Math.Max(melhor, -Minimax(board, -player));    // Agora calcula se esta jogada faz o adversario perder "-1" ou empatar "0" ou ganar "1" faz o inverso dos pondos do adversario e vé se é jogada melhor, 
             board[i] = 0;
         }
         return melhor;
     }
 
-    //gerador de jogos do Galo
+    //gerador de jogos do Galo (feito com ajuda de Ai)
     static void GerarJogoDoGalo(double[] board, int player, Dictionary<string, (double[] x, double[] y)> dados)
     {
         if (CheckVictory(board, player) || CheckVictory(board, -player) || !board.Contains(0)) return; //caso alguem tenha ganho return

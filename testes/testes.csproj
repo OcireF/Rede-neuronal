@@ -9,6 +9,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Rede neuronal\Rede neuronal.csproj" />
+	  
   </ItemGroup>
+	  <ItemGroup>
+    <ProjectReference Include="..\Rede neuronal\Rede neuronal.csproj" />
+  </ItemGroup>
+	  <ItemGroup>
+	    <None Update="LiveExpectancy.csv">
+	      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    </None>
+	  </ItemGroup>
 
 </Project>

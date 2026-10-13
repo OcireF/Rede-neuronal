@@ -1193,7 +1193,7 @@ class Program
         {
             var pontos = new int[9]; //Inicializa um array de pontos a [0,0,0 ,0,0,0 ,0,0,0]
             int max = -2;           //max ser -2 para mais tarde ser substituido por uma pontuação real
-            for (int i = 0; i < 9; i++) //verifica todas as jogads possiveis do board atual
+            for (int i = 0; i < 9; i++) //verifica todas as jogadas possiveis do board atual para ver a pontuação de cada jogada
             {
                 if (board[i] != 0) { pontos[i] = -3; continue; } //caso a casa já estiver ocupada a pontuação é -3 para essa casa
                 board[i] = player;                               //tenta jogar nesta casa

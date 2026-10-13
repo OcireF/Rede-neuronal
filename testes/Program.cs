@@ -1101,7 +1101,7 @@ class Program
                 testeManual[paises.Length + 1] = ano / 1000;
 
                 result = rede.calcRedeNeuronal(testeManual);
-                Console.WriteLine("tempo de vida:" + result[0] * 100);
+                Console.WriteLine("tempo de vida: " + result[0] * 100);
             }
         }
     }

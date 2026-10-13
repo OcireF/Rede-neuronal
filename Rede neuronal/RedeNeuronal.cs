@@ -22,6 +22,7 @@ namespace Rede_neuronal
             if (traningErrorsFileName != null)
             {
                 writeErrors = true;
+                Console.WriteLine("Erros em: " + traningErrorsFileName + ".csv");
                 this.traningErrorsFileName = traningErrorsFileName;
 
                 //apaga o ficheio e o recria vasio

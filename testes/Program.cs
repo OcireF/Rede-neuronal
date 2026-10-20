@@ -41,7 +41,7 @@ class Program
                 "(10) - Jogar contra a AI (treinada com o algoritmo minimax)\n" +
                 "\n" +
                 "Programa 2 a pedido do prof\n" +
-                "(11) - Expetativa de vida a nascença por país\n" +
+                "(11) - Expetativa de vida a nascença\n" +
                 "\n" +
                 "(20) - Show Pesos e Pendores\n" +
                 "(21) - Show Art Barras Verticais\n" +

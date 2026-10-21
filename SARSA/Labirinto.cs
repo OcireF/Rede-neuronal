@@ -27,13 +27,13 @@ namespace SARSA
 
         public Labirinto(int sizeX, int sizeY)
         {
+            //init floor
             mapa = new int[sizeX][];
             for (int i = 0; i < mapa.Length; i++)
             {
                 mapa[i] = new int[sizeY];
-            } //tudo a floor
+            }
             Random r = new Random();
-
             for (int x = 0; x < sizeX; x++)
             {
                 for(int y = 0; y < sizeY; y++)
@@ -41,6 +41,10 @@ namespace SARSA
                     mapa[x][y] = r.Next(-1,2); //basic map
                 }
             }
+            //faz com que a entrada e saida serem "floor"
+            mapa[0][0] = 0; //player position to be floor
+            mapa[sizeX - 1][sizeY - 1] = 0; //exit to be floor
+
             //init exit
             escada = (sizeX -1, sizeY - 1); //last square
         }
@@ -48,6 +52,48 @@ namespace SARSA
         public int getFloorData(int x , int y)
         {
             return mapa[x][y];
+        }
+
+        public (int x, int y) getPlayerPosition()
+        {
+            return player;
+        }
+
+        public (int x, int y) getEscadaPosition()
+        {
+            return escada;
+        }
+
+        public void MovePlayer(int dir)
+        {
+            if (dir == 0) //left
+            {
+                if (player.x - 1 > 0) 
+                {
+                    player.x -= 1;
+                }
+            }
+            else if (dir == 1) //up
+            {
+                if (player.y - 1 > 0) 
+                {
+                    player.y -= 1;
+                }
+            }
+            else if (dir == 2) //right
+            {
+                if (player.x + 1 < mapa.Length)
+                {
+                    player.x += 1;
+                }
+            }
+            else if (dir == 3 ) //down
+            {
+                if (player.y + 1 < mapa[0].Length)
+                {
+                    player.y += 1;
+                }
+            }
         }
 
         public List<int> AcoesPossiveis()

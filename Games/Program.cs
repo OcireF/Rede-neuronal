@@ -54,7 +54,7 @@ class Program
             Rectangle playerDestino = new Rectangle(player.x * blockSize * zoom, player.y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
 
-            labirinto.MovePlayer(r.Next(0, 5));
+            //labirinto.MovePlayer(r.Next(0, 5));
 
 
             Raylib.EndDrawing();

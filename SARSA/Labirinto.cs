@@ -49,6 +49,27 @@ namespace SARSA
             escada = (sizeX -1, sizeY - 1); //last square
         }
 
+        //faz o labirinto possivel
+        public void Flood()
+        {
+            List<(int x, int y)> visitado = new List<(int x, int y)>();
+            FloodRecurcivo((0, 0), visitado);
+        }
+
+        public void FloodRecurcivo((int x, int y) position, List<(int x, int y)> visitado)
+        {
+            visitado.Add(position);
+            var acoes = AcoesPossiveis();
+            foreach(int a in acoes)
+            {
+                (int x, int y) newFloor = GetNextFloor(position, a); //get next position
+                if (!visitado.Contains(newFloor))//) && mapa[newFloor.x][newFloor.y] == 0) //apenas investiga caminhos possiveis
+                {
+                    FloodRecurcivo(newFloor, visitado);
+                }
+            }
+        }
+
         public int getFloorData(int x , int y)
         {
             return mapa[x][y];
@@ -63,37 +84,42 @@ namespace SARSA
         {
             return escada;
         }
+        public void MovePlayerTo((int x, int y) position)
+        {
+            player = position;
+        }
 
-        public void MovePlayer(int dir)
+        public (int x, int y) GetNextFloor((int x, int y) position,int dir)
         {
             if (dir == 0) //left
             {
-                if (player.x - 1 > 0) 
+                if (position.x - 1 > 0) 
                 {
-                    player.x -= 1;
+                    position.x -= 1;
                 }
             }
             else if (dir == 1) //up
             {
-                if (player.y - 1 > 0) 
+                if (position.y - 1 > 0) 
                 {
-                    player.y -= 1;
+                    position.y -= 1;
                 }
             }
             else if (dir == 2) //right
             {
-                if (player.x + 1 < mapa.Length)
+                if (position.x + 1 < mapa.Length)
                 {
-                    player.x += 1;
+                    position.x += 1;
                 }
             }
             else if (dir == 3 ) //down
             {
-                if (player.y + 1 < mapa[0].Length)
+                if (position.y + 1 < mapa[0].Length)
                 {
-                    player.y += 1;
+                    position.y += 1;
                 }
             }
+            return position;
         }
 
         public List<int> AcoesPossiveis()
@@ -130,9 +156,9 @@ namespace SARSA
             return acoesPossiveis;
         }
 
-        public bool IsTerminal()
+        public bool IsTerminal((int x, int y) position)
         {
-            return (player.x == escada.x && player.y == escada.y);
+            return (position.x == escada.x && position.y == escada.y);
         }
     }
 }

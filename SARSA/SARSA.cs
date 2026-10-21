@@ -10,19 +10,23 @@ namespace SARSA
 {
     public class SARSA
     {
-        public Dictionary<(int, int), double> Politica = new Dictionary<(int estado, int acao), double>(); //Q(s,a)
+        public Dictionary<double[], Dictionary<int, double>> Politica = new Dictionary<double[], Dictionary<int, double>>(); //Q(s,a) = recompensa
         public List<int> terminalStates = new List<int>();
-        public double y;
+        public double gamma; //y
         public double alfa;
         public Random r = new Random();
         public double efen = 0.5;
+        private IAmbiente ambiente;
 
-        SARSA()
+        public SARSA(IAmbiente ambiente,double gamma, double alfa, double efen)
         {
-
+            this.ambiente = ambiente;
+            this.gamma = gamma;
+            this.alfa = alfa;
+            this.efen = efen;
         }
 
-        public double Aprender(int s, int a, double r, int sLine, int aLine, bool isFinal) //s, a, r, s’, a’, final
+        public double Aprender(double[] s, int a, double r, double[] sLine, int aLine, bool isFinal) //s, a, r, s’, a’, final
         {
             double j = 0;
             if (isFinal)
@@ -31,72 +35,102 @@ namespace SARSA
             }
             else
             {
-                j = r + (y * Politica[(sLine, aLine)]); // J = r + γQ(s’, a’)
-                Politica[(s, a)] += alfa * (j - Politica[(s, a)]); // Q(s, a) = Q(s, a) + alfa(J – Q(s, a))
+                j = r + (gamma * Politica[sLine][ aLine]); // J = r + γQ(s’, a’)
+                Politica[s][a] += alfa * (j - Politica[s][a]); // Q(s, a) = Q(s, a) + alfa(J – Q(s, a))
             }
             return j;
         }
-
-        public void InicializarPoliticas(int estados, int acoes, List<int> terminalStates)
+        
+        //Chamar esta função para adicioar sempre que tiver novos estados para adicionar na Politica
+        public void CreatePolitica(double[] estado)
         {
-            this.terminalStates = terminalStates; //terminal states
-            for (int s = 0; s < estados; s++)
+            if (Politica.ContainsKey(estado)) // o estado já existe na politica
             {
-                for (int a = 0; a < acoes; a++)
-                {
-                    Politica[(s, a)] = 0;
-                }
+                return;
+            }
+            if (ambiente.IsTerminal(estado)) // não adiciona nenhuma polita (esta no estado final)
+            {
+                return;
+            }
+
+            //cria as acoes do estado
+            var acoes = ambiente.AcoesPossiveis(estado);
+            foreach(int a in acoes)
+            {
+                Politica[estado].Add( a, 0);
             }
         }
 
-        public void treino(int estadoInicial,int numEstados, int numAcoes, int numEpisodios, int numPassos)
+        public void treino(int numEpisodios, int numPassos)
         {
-            var estado = estadoInicial;
-            double recompensa;
-            var estadoLinha = 0;
-            var acaoLinha = 0;
-            InicializarPoliticas(numEstados, numAcoes, new List<int>());
-            for(int ep = 0; ep < numEpisodios; ep++)
+            CreatePolitica(ambiente.GetInicialState()); //Primeira politica
+            //Variables
+            double[] estado;                                //s
+            int acao;                                       //a
+            double recompensa;                              //r
+            double[] estadoLinha;                           //s'
+            int acaoLinha;                                  //a'
+            for (int ep = 0; ep < numEpisodios; ep++)
             {
-                var acao = seleccionar_acao(estado);
-                for(int p = 0; p < numPassos; p++)
+                estado = ambiente.GetInicialState();        //init s
+                acao = seleccionar_acao(estado);            //seleccionar acao (a)
+                for(int p = 0; p < numPassos; p++)          //passos
                 {
                     (recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
-                    acaoLinha = seleccionar_acao(estadoLinha);
+                    CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem
+                    acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
                     recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha,false); //is final should be differnt
-                    estado = estadoLinha;
-                    acao = acaoLinha;
+                    estado = estadoLinha;   //atualizar estado (s <- s')
+                    acao = acaoLinha;       //atualizar acao (a <- a')
                 }
             }
         }
 
-        public int seleccionar_acao(int estado)
+        public int seleccionar_acao(double[] estado)
         {
-            int a = 0;
-            if ( r.Next(0,1) > efen)
+            int acao = 0;
+            if ( r.NextDouble() > efen)
             {
-                a = Acao_sofrega(estado);
+                acao = Acao_sofrega(estado); //Aproveitar conhecimento
             }
             else
             {
-                a = Acao_exploracao(estado);
+                acao = Acao_exploracao(estado); //Explorar
             }
-            return a;
+            return acao;
         }
-        public int Acao_sofrega(int estado)
+        public int Acao_sofrega(double[] estado)
         {
             //suffle acoes
-            return 0; //maxarg
+            int[] acoes = Politica[estado].Keys.ToArray();
+            r.Shuffle(acoes);
+
+            int acao = 0;
+            double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
+
+            foreach(int a in acoes)
+            {
+                if (Politica[estado][a] > maxValue)
+                {
+                    acao = a; //max argument
+                    maxValue = Politica[estado][a];
+                }
+            }
+            return acao; //maxArg
         }
 
-        public int Acao_exploracao(int estado)
+        public int Acao_exploracao(double[] estado)
         {
-            return 0; //random
+            int[] acoes = Politica[estado].Keys.ToArray();
+            r.Shuffle(acoes); //suffle para ter uma acao aleatoria
+            return acoes[0]; //random
         }
 
-        public (int r, int sLinha) executar_acao(int s, int a)
+        public (double recompensa, double[] estadoLinha) executar_acao(double[] estado, int acao)
         {
-            return (0, 0);
+            var estadoLinha = ambiente.ExecutarAcao(estado, acao); // ver o novo estado
+            var recompensa = ambiente.GetRecompensa(estadoLinha); // recompensa do novo estado
+            return (recompensa, estadoLinha);
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SARSA
 {
-    public class Labirinto //: IEstado
+    public class Labirinto : IAmbiente
     {
         //-1 Hole
         //0 is floor
@@ -15,7 +15,7 @@ namespace SARSA
         //2 ice (deslisar até bater numa parede ou acabar o gelo)
         //-2 water (pode usar um barco)
         private int[][] mapa;
-        private (int x, int y) player = (0,0); //start defaut
+        private (int x, int y) start; //start defaut
         private (int x, int y) escada;
         private Random r = new Random();
 
@@ -44,7 +44,7 @@ namespace SARSA
                 }
             }
             //init player e a escada
-            player = (0, 0);
+            start = (0, 0);
             escada = (sizeX -1, sizeY - 1); //last square
 
             //faz com que a entrada e saida serem "floor"
@@ -60,9 +60,9 @@ namespace SARSA
         //(escada.x - player.x) passos horizontais e (escada.y - player.y) passos Verticais
         public void DoubleLineClearPath()
         {                                        //ex: player(0,0) escada(9,9) / player(5,3) escada(7,2)
-            var passosH = (escada.x - player.x); // 9 / 2 passos
-            var passosV = (escada.y - player.y); // 9 / -1
-            var position = player;
+            var passosH = (escada.x - start.x); // 9 / 2 passos
+            var passosV = (escada.y - start.y); // 9 / -1
+            var position = start;
 
             var mode = r.NextDouble(); //apenas para deixar este caminho menos diagonal se fizer 50/50 apenas
             double chanceH;
@@ -142,18 +142,15 @@ namespace SARSA
 
         public (int x, int y) getPlayerPosition()
         {
-            return player;
+            return start;
         }
 
         public (int x, int y) getEscadaPosition()
         {
             return escada;
         }
-        public void MovePlayerTo((int x, int y) position)
-        {
-            player = position;
-        }
 
+        //movendo na direção escolhida qual é a nova posição
         public (int x, int y) GetNextFloor((int x, int y) position,int dir)
         {
             if (dir == 0) //left
@@ -187,33 +184,48 @@ namespace SARSA
             return position;
         }
 
-        public List<int> AcoesPossiveis()
+        public double[] GetInicialState()
         {
+            return new double[] { 0, 0 };
+        }
+
+        public double[] ExecutarAcao(double[] estado, int a)
+        {
+            int x = (int)estado[0];
+            int y = (int)estado[1];
+            var newPosition = GetNextFloor((x,y),a);
+            return new double[] { newPosition.x, newPosition.y };
+        }
+
+        public List<int> AcoesPossiveis(double[] estado)
+        {
+            int x = (int)estado[0];
+            int y = (int)estado[1];
             List<int> acoesPossiveis = new List<int>();
-            if (player.x - 1 > 0) //left
+            if (x - 1 > 0) //left
             {
-                if (mapa[player.x - 1][player.y] != 1)
+                if (mapa[x - 1][y] != 1)
                 {
                     acoesPossiveis.Add((int)Diretions.left);
                 }
             }
-            if (player.y - 1 > 0) //up
+            if (y - 1 > 0) //up
             {
-                if(mapa[player.x][player.y - 1] != 1)
+                if(mapa[x][y - 1] != 1)
                 {
                     acoesPossiveis.Add((int)Diretions.up);
                 }
             }
-            if (player.x + 1 < mapa.Length) //right
+            if (x + 1 < mapa.Length) //right
             {
-                if (mapa[player.x + 1][player.y] != 1)
+                if (mapa[x + 1][y] != 1)
                 {
                     acoesPossiveis.Add((int)Diretions.right);
                 }
             }
-            if (player.y + 1 < mapa[player.x].Length) //down
+            if (y + 1 < mapa[x].Length) //down
             {
-                if (mapa[player.x][player.y + 1] != 1)
+                if (mapa[x][y + 1] != 1)
                 {
                     acoesPossiveis.Add((int)Diretions.down);
                 }
@@ -221,9 +233,29 @@ namespace SARSA
             return acoesPossiveis;
         }
 
-        public bool IsTerminal((int x, int y) position)
+        public double GetRecompensa(double[] estado)
         {
-            return (position.x == escada.x && position.y == escada.y);
+            int x = (int)estado[0];
+            int y = (int)estado[1];
+            if (x == escada.x && y == escada.y) //escada
+            {
+                return 1;
+            }
+            else if (mapa[x][y] == -1) //hole
+            {
+                return -1;
+            }
+            else //floor
+            {
+                return 0;
+            }
+        }
+
+        public bool IsTerminal(double[] estado) //estado [x , y]
+        {
+            int x = (int) estado[0];
+            int y = (int) estado[1];
+            return (x == escada.x && y == escada.y) || mapa[x][y] == -1; //chegou no final ou caiu num buraco
         }
     }
 }

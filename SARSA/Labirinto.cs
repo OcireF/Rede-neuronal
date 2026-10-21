@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SARSA
 {
-    public class Labirinto : IEstado
+    public class Labirinto //: IEstado
     {
         //-1 Hole
         //0 is floor

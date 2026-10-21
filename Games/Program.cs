@@ -30,7 +30,7 @@ class Program
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.Black);
 
-            for (int x = 0; x < size.x; x++)
+            for (int x = 0; x < size.x; x++) //desenha o labirinto
             {
                 for (int y = 0; y < size.y; y++)
                 {
@@ -55,9 +55,12 @@ class Program
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
 
             //labirinto.MovePlayer(r.Next(0, 5));
-
-
             Raylib.EndDrawing();
+
+            if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
+            {
+                labirinto = new Labirinto(size.x, size.y);
+            }
         }
     }
 

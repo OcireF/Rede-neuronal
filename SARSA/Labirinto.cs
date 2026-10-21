@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ namespace SARSA
         private int[][] mapa;
         private (int x, int y) player = (0,0); //start defaut
         private (int x, int y) escada;
+        private Random r = new Random();
 
         private enum Diretions
         {
@@ -41,16 +43,79 @@ namespace SARSA
                     mapa[x][y] = r.Next(-1,2); //basic map
                 }
             }
+            //init player e a escada
+            player = (0, 0);
+            escada = (sizeX -1, sizeY - 1); //last square
+
             //faz com que a entrada e saida serem "floor"
             mapa[0][0] = 0; //player position to be floor
             mapa[sizeX - 1][sizeY - 1] = 0; //exit to be floor
 
-            //init exit
-            escada = (sizeX -1, sizeY - 1); //last square
+            //cria um caminho possivel
+            DoubleLineClearPath();
+        }
+
+        //função para limpar um caminho possivel,
+        //Usando a base que para chegar no final no menor caminho possivel é
+        //(escada.x - player.x) passos horizontais e (escada.y - player.y) passos Verticais
+        public void DoubleLineClearPath()
+        {                                        //ex: player(0,0) escada(9,9) / player(5,3) escada(7,2)
+            var passosH = (escada.x - player.x); // 9 / 2 passos
+            var passosV = (escada.y - player.y); // 9 / -1
+            var position = player;
+
+            var mode = r.NextDouble(); //apenas para deixar este caminho menos diagonal se fizer 50/50 apenas
+            double chanceH;
+            double chanceV;
+            if(mode > 0.66) // 70% Horizontal 30% Vertical
+            {
+                chanceH = 0.7;
+                chanceV = 0.3;
+            } 
+            else if (mode > 0.33) // 30% Horizontal 70% Vertical
+            {
+                chanceH = 0.3;
+                chanceV = 0.7;
+            }
+            else // 50/50 %
+            {
+                chanceH = 0.5;
+                chanceV = 0.5;
+            }
+
+            //Criar caminho
+            while( passosH != 0 || passosV != 0)
+            {
+                var chance = r.NextDouble();
+                if (chance < chanceH) //mover horizontal
+                {
+                    var passo = (passosH > 0) ? -1 : 1; //caso o numero for positivo "-1" caso positivo "+1"
+                    position.x -= passo;  //mover
+                    passosH += passo;
+                    if (passosH == 0) //acabou passos horizontais
+                    {
+                        chanceH = 0; //sem passos horizontais
+                        chanceV = 1; //agora apenas verticais
+                    }
+                }
+                else //mover Vertical
+                {
+                    var passo = (passosV > 0) ? -1 : 1; //caso o numero for positivo "-1" caso positivo "+1"
+                    position.y -= passo;
+                    passosV += passo;
+                    if (passosV == 0) //acabou passos horizontais
+                    {
+                        chanceH = 1; //agora apenas Horizontais
+                        chanceV = 0; //sem passs Verticais
+                    }
+                }
+                mapa[position.x][position.y] = 0; //clear floor
+
+            }
         }
 
         //faz o labirinto possivel
-        public void Flood()
+        /*public void Flood()
         {
             List<(int x, int y)> visitado = new List<(int x, int y)>();
             FloodRecurcivo((0, 0), visitado);
@@ -68,7 +133,7 @@ namespace SARSA
                     FloodRecurcivo(newFloor, visitado);
                 }
             }
-        }
+        }*/
 
         public int getFloorData(int x , int y)
         {

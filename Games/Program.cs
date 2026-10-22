@@ -9,21 +9,26 @@ class Program
         LabirintoBase();
     }
 
-    static (int x, int y) size = (5, 5);
+    static (int x, int y) size = (15, 15);
     static int zoom = 4;
     static int blockSize = 16;
 
-    static int numTreinos = 100;
-    static int numPassos = 40;
+    static int numTreinos = 5000;
+    static int numPassos = 140;
+    static double gamma = 0.99; //gama alto para ver a escada no final
+    static double alfa = 0.3;
+    static double efen = 0.3; //faser decaimento
+    static double valor_omissao = 0.0;
+
     static void LabirintoBase()
     {
         var labirinto = new Labirinto(size.x, size.y);
-        var sarsa = new SARSA_Algoritmo(labirinto, 0.5, 0.8, 0.3, 0.0);
+        var sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
         //temp
         var estados = sarsa.treino(numTreinos, numPassos);
 
         int playerFrame = 0;      //frame do treino
-        float timer = 0.01f; //timer da velociade de atualização do player
+        float timer = 0.05f; //timer da velociade de atualização do player
         float acumulador = 0; //acumulador para contar o tempo passado
 
         Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
@@ -79,7 +84,7 @@ class Program
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
             {
                 labirinto = new Labirinto(size.x, size.y);
-                sarsa = new SARSA_Algoritmo(labirinto, 0.5, 0.8, 0.3, 0.0);
+                sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
                 estados = sarsa.treino(numTreinos, numPassos);
                 playerFrame = 0;
             }

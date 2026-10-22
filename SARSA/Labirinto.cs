@@ -21,6 +21,7 @@ namespace SARSA
         private Random r = new Random();
         private Dictionary<(int x, int y), int> pointshouses = new Dictionary<(int x, int y), int>();
         private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time
+        private List<(int x, int y)> housesPassed = new List<(int x, int y)>();
 
         private enum Diretions
         {
@@ -117,7 +118,7 @@ namespace SARSA
                 if (passosMidle == 0)
                 {
                     mapa[position.x][position.y] = 2; //midle point
-                    pointshouses.Add(position, 5); //give 5 points for this position
+                    pointshouses.Add(position, 50); //give 5 points for this position
                     pointshousesUsed[position] = false; //mark as not used
                 }
                 else
@@ -161,6 +162,7 @@ namespace SARSA
             {
                 pointshousesUsed[key] = false;
             }
+            housesPassed.Clear();
             return start;
         }
 
@@ -172,6 +174,7 @@ namespace SARSA
         //movendo na direção escolhida qual é a nova posição
         public (int x, int y) GetNextFloor((int x, int y) position,int dir)
         {
+            housesPassed.Add(position); //passed floor
             if (dir == 0) //left
             {
                 if (position.x - 1 > 0) 
@@ -256,23 +259,27 @@ namespace SARSA
         {
             int x = (int)estado[0];
             int y = (int)estado[1];
+
             if (x == escada.x && y == escada.y) //escada
             {
-                return 10;
+                return 100;
             }
-            else if (pointshouses.ContainsKey((x, y)) && !pointshousesUsed[(x, y)]) //midle point houses
+            if (mapa[x][y] == -1) //hole
+            {
+                return -10;
+            }
+            if (pointshouses.ContainsKey((x, y)) && !pointshousesUsed[(x, y)]) //middle point houses
             {
                 pointshousesUsed[(x, y)] = true; //mark as used
                 return pointshouses[(x, y)];
             }
-            else if (mapa[x][y] == -1) //hole
+
+            if (housesPassed.Contains(((int)estado[0], (int)estado[1])))
             {
-                return -10;
+                return -0.01; //punir passar por casas repetidas
             }
-            else //floor
-            {
-                return 0;
-            }
+
+            return -1;
         }
 
         public bool IsTerminal(double[] estado) //estado [x , y]

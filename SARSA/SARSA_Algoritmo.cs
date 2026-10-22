@@ -36,8 +36,8 @@ namespace SARSA
             else
             {
                 j = r + (gamma * Politica[sLine][ aLine]); // J = r + γQ(s’, a’)
-                Politica[s][a] += alfa * (j - Politica[s][a]); // Q(s, a) = Q(s, a) + alfa(J – Q(s, a))
             }
+            Politica[s][a] += alfa * (j - Politica[s][a]); // Q(s, a) = Q(s, a) + alfa(J – Q(s, a))
             return j;
         }
         

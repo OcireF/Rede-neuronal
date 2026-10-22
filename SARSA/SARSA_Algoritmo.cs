@@ -8,17 +8,17 @@ using System;
 
 namespace SARSA
 {
-    public class SARSA
+    public class SARSA_Algoritmo
     {
+        public Random r = new Random();
         public Dictionary<double[], Dictionary<int, double>> Politica = new Dictionary<double[], Dictionary<int, double>>(); //Q(s,a) = recompensa
-        public List<int> terminalStates = new List<int>();
+        private IAmbiente ambiente;
         public double gamma; //y
         public double alfa;
-        public Random r = new Random();
-        public double efen = 0.5;
-        private IAmbiente ambiente;
+        public double efen;
+        public double valor_omissao;
 
-        public SARSA(IAmbiente ambiente,double gamma, double alfa, double efen)
+        public SARSA_Algoritmo(IAmbiente ambiente, double gamma, double alfa, double efen, double volor_omissao = 0.0)
         {
             this.ambiente = ambiente;
             this.gamma = gamma;

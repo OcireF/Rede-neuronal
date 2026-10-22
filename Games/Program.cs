@@ -12,10 +12,10 @@ class Program
     static (int x, int y) size = (10, 10);
     static int zoom = 4;
     static int blockSize = 16;
-    static Random r = new Random();
     static void LabirintoBase()
     {
         var labirinto = new Labirinto(size.x, size.y);
+        var sarsa = new SARSA_Algoritmo(labirinto, 0.4, 1, 0.7, 0.0);
 
         Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
         Raylib.SetTargetFPS(30);
@@ -54,12 +54,12 @@ class Program
             Rectangle playerDestino = new Rectangle(player.x * blockSize * zoom, player.y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
 
-            //labirinto.MovePlayer(r.Next(0, 5));
             Raylib.EndDrawing();
 
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
             {
                 labirinto = new Labirinto(size.x, size.y);
+                sarsa = new SARSA_Algoritmo(labirinto, 0.4, 1, 0.7, 0.0);
             }
         }
     }

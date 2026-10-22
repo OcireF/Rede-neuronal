@@ -140,7 +140,7 @@ namespace SARSA
             return mapa[x][y];
         }
 
-        public (int x, int y) getPlayerPosition()
+        public (int x, int y) getStartPosition()
         {
             return start;
         }

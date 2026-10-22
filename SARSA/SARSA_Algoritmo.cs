@@ -11,7 +11,7 @@ namespace SARSA
     public class SARSA_Algoritmo
     {
         public Random r = new Random();
-        public Dictionary<double[], Dictionary<int, double>> Politica = new Dictionary<double[], Dictionary<int, double>>(); //Q(s,a) = recompensa
+        public Dictionary<double[], Dictionary<int, double>> Politica = new Dictionary<double[], Dictionary<int, double>>(new ComparadorEstados()); //Q(s,a) = recompensa
         private IAmbiente ambiente;
         public double gamma; //y
         public double alfa;
@@ -44,25 +44,28 @@ namespace SARSA
         //Chamar esta função para adicioar sempre que tiver novos estados para adicionar na Politica
         public void CreatePolitica(double[] estado)
         {
+
+            if (ambiente.IsTerminal(estado)) // não adiciona nenhuma polita (esta no estado terminal)
+            {
+                return;
+            }
             if (Politica.ContainsKey(estado)) // o estado já existe na politica
             {
                 return;
             }
-            if (ambiente.IsTerminal(estado)) // não adiciona nenhuma polita (esta no estado final)
-            {
-                return;
-            }
 
+            Politica.Add(estado, new Dictionary<int, double>());
             //cria as acoes do estado
             var acoes = ambiente.AcoesPossiveis(estado);
             foreach(int a in acoes)
             {
-                Politica[estado].Add( a, 0);
+                Politica[estado].Add( a, valor_omissao);
             }
         }
 
-        public void treino(int numEpisodios, int numPassos)
+        public List<double[]> treino(int numEpisodios, int numPassos)
         {
+            List<double[]> estadosTreino = new List<double[]>();
             CreatePolitica(ambiente.GetInicialState()); //Primeira politica
             //Variables
             double[] estado;                                //s
@@ -76,14 +79,22 @@ namespace SARSA
                 acao = seleccionar_acao(estado);            //seleccionar acao (a)
                 for(int p = 0; p < numPassos; p++)          //passos
                 {
+                    estadosTreino.Add(estado); //adicona o estado na lista para mais tarde vermos o treino @TEMP
                     (recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
                     CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem
                     acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
-                    recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha,false); //is final should be differnt
+                    recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha,ambiente.IsTerminal(estadoLinha)); //if s' is terminal
                     estado = estadoLinha;   //atualizar estado (s <- s')
                     acao = acaoLinha;       //atualizar acao (a <- a')
+
+                    if (ambiente.IsTerminal(estado))
+                    {  //acaba os passos quando estado (s) for terminal
+                        estadosTreino.Add(estado); //adiciona o estado final
+                        break;
+                    }
                 }
             }
+            return estadosTreino;
         }
 
         public int seleccionar_acao(double[] estado)
@@ -101,6 +112,11 @@ namespace SARSA
         }
         public int Acao_sofrega(double[] estado)
         {
+            if (!Politica.ContainsKey(estado)) //terminal não existe mais acoes
+            {
+                return 0;
+            }
+
             //suffle acoes
             int[] acoes = Politica[estado].Keys.ToArray();
             r.Shuffle(acoes);
@@ -121,6 +137,11 @@ namespace SARSA
 
         public int Acao_exploracao(double[] estado)
         {
+            if (!Politica.ContainsKey(estado)) //terminal não existe mais acoes
+            {
+                return 0; 
+            }
+
             int[] acoes = Politica[estado].Keys.ToArray();
             r.Shuffle(acoes); //suffle para ter uma acao aleatoria
             return acoes[0]; //random

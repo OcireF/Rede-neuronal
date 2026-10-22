@@ -12,13 +12,22 @@ class Program
     static (int x, int y) size = (10, 10);
     static int zoom = 4;
     static int blockSize = 16;
+
+    static int numTreinos = 30;
+    static int numPassos = 40;
     static void LabirintoBase()
     {
         var labirinto = new Labirinto(size.x, size.y);
         var sarsa = new SARSA_Algoritmo(labirinto, 0.4, 1, 0.7, 0.0);
+        //temp
+        var estados = sarsa.treino(numTreinos, numPassos);
+
+        int playerFrame = 0;      //frame do treino
+        float timer = 0.1f; //timer da velociade de atualização do player
+        float acumulador = 0; //acumulador para contar o tempo passado
 
         Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
-        Raylib.SetTargetFPS(30);
+        Raylib.SetTargetFPS(60);
 
         //init tileset
         Texture2D tileset = Raylib.LoadTexture("Assets/Floor_TileSet.png");
@@ -27,6 +36,17 @@ class Program
 
         while (!Raylib.WindowShouldClose())
         {
+            acumulador += Raylib.GetFrameTime();
+
+            if (acumulador >= timer)
+            {
+                acumulador -= timer;
+                if(playerFrame < estados.Count()-1)
+                {
+                    playerFrame++;
+                }
+            }
+
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.Black);
 
@@ -49,9 +69,9 @@ class Program
             Raylib.DrawTexturePro(npcs, escadaSprite, escadaDestino, Vector2.Zero, 0f, Color.White);
 
             //draw Player (sempre em cima)
-            var player = labirinto.getPlayerPosition();
+            var player = estados[playerFrame];//labirinto.getStartPosition();
             Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
-            Rectangle playerDestino = new Rectangle(player.x * blockSize * zoom, player.y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+            Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
 
             Raylib.EndDrawing();
@@ -60,6 +80,7 @@ class Program
             {
                 labirinto = new Labirinto(size.x, size.y);
                 sarsa = new SARSA_Algoritmo(labirinto, 0.4, 1, 0.7, 0.0);
+                estados = sarsa.treino(numTreinos, numPassos);
             }
         }
     }

@@ -9,21 +9,21 @@ class Program
         LabirintoBase();
     }
 
-    static (int x, int y) size = (10, 10);
+    static (int x, int y) size = (5, 5);
     static int zoom = 4;
     static int blockSize = 16;
 
-    static int numTreinos = 30;
+    static int numTreinos = 100;
     static int numPassos = 40;
     static void LabirintoBase()
     {
         var labirinto = new Labirinto(size.x, size.y);
-        var sarsa = new SARSA_Algoritmo(labirinto, 0.4, 1, 0.7, 0.0);
+        var sarsa = new SARSA_Algoritmo(labirinto, 0.5, 0.8, 0.3, 0.0);
         //temp
         var estados = sarsa.treino(numTreinos, numPassos);
 
         int playerFrame = 0;      //frame do treino
-        float timer = 0.1f; //timer da velociade de atualização do player
+        float timer = 0.01f; //timer da velociade de atualização do player
         float acumulador = 0; //acumulador para contar o tempo passado
 
         Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
@@ -69,7 +69,7 @@ class Program
             Raylib.DrawTexturePro(npcs, escadaSprite, escadaDestino, Vector2.Zero, 0f, Color.White);
 
             //draw Player (sempre em cima)
-            var player = estados[playerFrame];//labirinto.getStartPosition();
+            var player = estados[playerFrame];
             Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
             Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
@@ -79,8 +79,15 @@ class Program
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
             {
                 labirinto = new Labirinto(size.x, size.y);
-                sarsa = new SARSA_Algoritmo(labirinto, 0.4, 1, 0.7, 0.0);
+                sarsa = new SARSA_Algoritmo(labirinto, 0.5, 0.8, 0.3, 0.0);
                 estados = sarsa.treino(numTreinos, numPassos);
+                playerFrame = 0;
+            }
+            if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
+            {
+                sarsa.efen = 0.0; //para não explorar mais
+                estados = sarsa.treino(numTreinos, numPassos);
+                playerFrame = 0;
             }
         }
     }

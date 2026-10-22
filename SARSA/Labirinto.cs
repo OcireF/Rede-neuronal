@@ -12,12 +12,15 @@ namespace SARSA
         //-1 Hole
         //0 is floor
         //1 Wall
-        //2 ice (deslisar até bater numa parede ou acabar o gelo)
+        //2 midlle point (para ajudar o treino)
+        //3 ice (deslisar até bater numa parede ou acabar o gelo)
         //-2 water (pode usar um barco)
         private int[][] mapa;
         private (int x, int y) start; //start defaut
         private (int x, int y) escada;
         private Random r = new Random();
+        private Dictionary<(int x, int y), int> pointshouses = new Dictionary<(int x, int y), int>();
+        private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time
 
         private enum Diretions
         {
@@ -62,6 +65,7 @@ namespace SARSA
         {                                        //ex: player(0,0) escada(9,9) / player(5,3) escada(7,2)
             var passosH = (escada.x - start.x); // 9 / 2 passos
             var passosV = (escada.y - start.y); // 9 / -1
+            var passosMidle = (passosH + passosV) / 2; // 9 / 0
             var position = start;
 
             var mode = r.NextDouble(); //apenas para deixar este caminho menos diagonal se fizer 50/50 apenas
@@ -109,7 +113,17 @@ namespace SARSA
                         chanceV = 0; //sem passs Verticais
                     }
                 }
-                mapa[position.x][position.y] = 0; //clear floor
+                passosMidle--;
+                if (passosMidle == 0)
+                {
+                    mapa[position.x][position.y] = 2; //midle point
+                    pointshouses.Add(position, 5); //give 5 points for this position
+                    pointshousesUsed[position] = false; //mark as not used
+                }
+                else
+                {
+                    mapa[position.x][position.y] = 0; //clear floor
+                }
 
             }
         }
@@ -142,6 +156,11 @@ namespace SARSA
 
         public (int x, int y) getStartPosition()
         {
+            //reset pointshousesUsed
+            foreach (var key in pointshousesUsed.Keys.ToList())
+            {
+                pointshousesUsed[key] = false;
+            }
             return start;
         }
 
@@ -239,11 +258,16 @@ namespace SARSA
             int y = (int)estado[1];
             if (x == escada.x && y == escada.y) //escada
             {
-                return 1;
+                return 10;
+            }
+            else if (pointshouses.ContainsKey((x, y)) && !pointshousesUsed[(x, y)]) //midle point houses
+            {
+                pointshousesUsed[(x, y)] = true; //mark as used
+                return pointshouses[(x, y)];
             }
             else if (mapa[x][y] == -1) //hole
             {
-                return -1;
+                return -10;
             }
             else //floor
             {

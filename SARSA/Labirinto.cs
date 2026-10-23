@@ -19,7 +19,7 @@ namespace SARSA
         private (int x, int y) start; //start defaut
         private (int x, int y) escada;
         private Random r = new Random();
-        private Dictionary<(int x, int y), int> pointshouses = new Dictionary<(int x, int y), int>();
+        private List<(int x, int y)> pointshouses = new List<(int x, int y)>();
         private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time
         private List<(int x, int y)> housesPassed = new List<(int x, int y)>();
 
@@ -66,7 +66,8 @@ namespace SARSA
         {                                        //ex: player(0,0) escada(9,9) / player(5,3) escada(7,2)
             var passosH = (escada.x - start.x); // 9 / 2 passos
             var passosV = (escada.y - start.y); // 9 / -1
-            var passosMidle = (passosH + passosV) / 2; // 9 / 0
+            var passosToPointsHouse = 5; //(passosH + passosV) / 2;
+            var passosToNextPointsHouse = passosToPointsHouse;
             var position = start;
 
             var mode = r.NextDouble(); //apenas para deixar este caminho menos diagonal se fizer 50/50 apenas
@@ -114,12 +115,13 @@ namespace SARSA
                         chanceV = 0; //sem passs Verticais
                     }
                 }
-                passosMidle--;
-                if (passosMidle == 0)
+                passosToNextPointsHouse--;
+                if (passosToNextPointsHouse == 0)
                 {
                     mapa[position.x][position.y] = 2; //midle point
-                    pointshouses.Add(position, 50); //give 5 points for this position
+                    pointshouses.Add(position); //give 5 points for this position
                     pointshousesUsed[position] = false; //mark as not used
+                    passosToNextPointsHouse = passosToPointsHouse;
                 }
                 else
                 {
@@ -266,18 +268,18 @@ namespace SARSA
             }
             if (mapa[x][y] == -1) //hole
             {
-                return -10;
+                return -100;
             }
-            if (pointshouses.ContainsKey((x, y)) && !pointshousesUsed[(x, y)]) //middle point houses
+            if (pointshouses.Contains((x, y)) && !pointshousesUsed[(x, y)]) //middle point houses
             {
                 pointshousesUsed[(x, y)] = true; //mark as used
-                return pointshouses[(x, y)];
+                return 8;
             }
 
-            if (housesPassed.Contains(((int)estado[0], (int)estado[1])))
+            /*if (housesPassed.Contains(((int)estado[0], (int)estado[1])))
             {
-                return -0.01; //punir passar por casas repetidas
-            }
+                return -5; //punir passar por casas repetidas
+            }*/
 
             return -1;
         }

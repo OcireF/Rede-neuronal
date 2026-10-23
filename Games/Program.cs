@@ -9,12 +9,12 @@ class Program
         LabirintoBase();
     }
 
-    static (int x, int y) size = (15, 15);
+    static (int x, int y) size = (15, 15); // samll(5,5)(8) meadle(15,15)(4) big (50,50)(1)
     static int zoom = 4;
     static int blockSize = 16;
 
     static int numTreinos = 5000;
-    static int numPassos = 140;
+    static int numPassos = size.x * size.y; //correr o labirinto inteiro
     static double gamma = 0.99; //gama alto para ver a escada no final
     static double alfa = 0.3;
     static double efen = 0.3; //faser decaimento
@@ -27,6 +27,8 @@ class Program
         //temp
         var estados = sarsa.treino(numTreinos, numPassos);
 
+
+
         int playerFrame = 0;      //frame do treino
         float timer = 0.05f; //timer da velociade de atualização do player
         float acumulador = 0; //acumulador para contar o tempo passado
@@ -37,6 +39,7 @@ class Program
         //init tileset
         Texture2D tileset = Raylib.LoadTexture("Assets/Floor_TileSet.png");
         Texture2D npcs = Raylib.LoadTexture("Assets/NPC.png");
+        Texture2D arrows = Raylib.LoadTexture("Assets/Arrows.png");
         Raylib.SetTextureFilter(tileset, TextureFilter.Point); // para a pixel art nao ficar borrada
 
         while (!Raylib.WindowShouldClose())
@@ -73,6 +76,28 @@ class Program
             Rectangle escadaDestino = new Rectangle(escada.x * blockSize * zoom, escada.y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, escadaSprite, escadaDestino, Vector2.Zero, 0f, Color.White);
 
+            //draw Arrows
+
+
+            var politica = sarsa.Politica;
+            foreach (double[] position in politica.Keys)
+            {
+                int acao = 0;
+                double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
+                foreach (int a in politica[position].Keys)
+                {
+                    if (politica[position][a] > maxValue)
+                    {
+                        acao = a; //max argument
+                        maxValue = politica[position][a];
+                    }
+                }
+                //draw a
+                Rectangle arrowSprite = new Rectangle(acao * blockSize, 0, blockSize, blockSize);
+                Rectangle arrowDestino = new Rectangle((int)position[0] * blockSize * zoom, (int)position[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                Raylib.DrawTexturePro(arrows, arrowSprite, arrowDestino, Vector2.Zero, 0f, Color.White);
+            }
+
             //draw Player (sempre em cima)
             var player = estados[playerFrame];
             Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
@@ -91,7 +116,8 @@ class Program
             if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
             {
                 sarsa.efen = 0.0; //para não explorar mais
-                estados = sarsa.treino(numTreinos, numPassos);
+                estados.Clear();
+                estados = sarsa.treino(10, numPassos);
                 playerFrame = 0;
             }
         }

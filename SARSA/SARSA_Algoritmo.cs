@@ -139,7 +139,7 @@ namespace SARSA
         {
             if (!Politica.ContainsKey(estado)) //terminal não existe mais acoes
             {
-                return 0; 
+                return -1; 
             }
 
             int[] acoes = Politica[estado].Keys.ToArray();

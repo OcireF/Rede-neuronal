@@ -19,6 +19,7 @@ class Program
     static double alfa = 0.3;
     static double efen = 0.3; //faser decaimento
     static double valor_omissao = 0.0;
+    static bool showArrows = false; //mostrar as setas da politica
 
     static void LabirintoBase()
     {
@@ -78,24 +79,26 @@ class Program
 
             //draw Arrows
 
-
-            var politica = sarsa.Politica;
-            foreach (double[] position in politica.Keys)
+            if (showArrows)
             {
-                int acao = 0;
-                double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
-                foreach (int a in politica[position].Keys)
+                var politica = sarsa.Politica;
+                foreach (double[] position in politica.Keys)
                 {
-                    if (politica[position][a] > maxValue)
+                    int acao = 0;
+                    double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
+                    foreach (int a in politica[position].Keys)
                     {
-                        acao = a; //max argument
-                        maxValue = politica[position][a];
+                        if (politica[position][a] > maxValue)
+                        {
+                            acao = a; //max argument
+                            maxValue = politica[position][a];
+                        }
                     }
+                    //draw a
+                    Rectangle arrowSprite = new Rectangle(acao * blockSize, 0, blockSize, blockSize);
+                    Rectangle arrowDestino = new Rectangle((int)position[0] * blockSize * zoom, (int)position[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                    Raylib.DrawTexturePro(arrows, arrowSprite, arrowDestino, Vector2.Zero, 0f, Color.White);
                 }
-                //draw a
-                Rectangle arrowSprite = new Rectangle(acao * blockSize, 0, blockSize, blockSize);
-                Rectangle arrowDestino = new Rectangle((int)position[0] * blockSize * zoom, (int)position[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
-                Raylib.DrawTexturePro(arrows, arrowSprite, arrowDestino, Vector2.Zero, 0f, Color.White);
             }
 
             //draw Player (sempre em cima)
@@ -111,13 +114,15 @@ class Program
                 labirinto = new Labirinto(size.x, size.y);
                 sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
                 estados = sarsa.treino(numTreinos, numPassos);
+                showArrows = false;
                 playerFrame = 0;
             }
             if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
             {
                 sarsa.efen = 0.0; //para não explorar mais
                 estados.Clear();
-                estados = sarsa.treino(10, numPassos);
+                estados = sarsa.treino(10, numPassos,true);
+                showArrows = true;
                 playerFrame = 0;
             }
         }

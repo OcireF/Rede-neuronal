@@ -62,8 +62,8 @@ namespace SARSA
                 Politica[estado].Add( a, valor_omissao);
             }
         }
-
-        public List<double[]> treino(int numEpisodios, int numPassos)
+        //treino do algoritmo SARSA, retorna uma lista de estados passados no treino
+        public List<double[]> treino(int numEpisodios, int numPassos,bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
             CreatePolitica(ambiente.GetInicialState()); //Primeira politica
@@ -75,6 +75,10 @@ namespace SARSA
             int acaoLinha;                                  //a'
             for (int ep = 0; ep < numEpisodios; ep++)
             {
+                if(justLastEP)
+                {
+                    estadosTreino.Clear(); //limpa o Treino para guardar apenas o ultimo episodio
+                } 
                 estado = ambiente.GetInicialState();        //init s
                 acao = seleccionar_acao(estado);            //seleccionar acao (a)
                 for(int p = 0; p < numPassos; p++)          //passos

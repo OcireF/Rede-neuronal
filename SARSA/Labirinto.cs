@@ -66,7 +66,7 @@ namespace SARSA
         {                                        //ex: player(0,0) escada(9,9) / player(5,3) escada(7,2)
             var passosH = (escada.x - start.x); // 9 / 2 passos
             var passosV = (escada.y - start.y); // 9 / -1
-            var passosToPointsHouse = 5; //(passosH + passosV) / 2;
+            var passosToPointsHouse = (passosH + passosV) / 2;
             var passosToNextPointsHouse = passosToPointsHouse;
             var position = start;
 

@@ -15,7 +15,13 @@ class Program
                 "Textes Parte 2.1\n" +
                 "(1) - Random small  ( 5x5 ) Labirinto\n" +
                 "(2) - Random Medion (15x15) Labirinto\n" +
-                "(3) - Random Big    (50x50) Labirinto\n"
+                "(3) - Random Big    (50x50) Labirinto\n" +
+                "\nNotes:\n" +
+                "O calculo do algorimo é feito antes do visual, o visual é apenas para visualizar\n" +
+                "No Big Labirinto pode ser necessario correr multiplos treinos para chegar ao final usando 'P'\n" +
+                "\nBotões:\n" +
+                "N - Novo labirinto\n" +
+                "P - Faz um novo treino com efen=0 e mostra a sua ultima volta no labirinto\n"
                 );
             Console.Write("Choice: ");
             test = Convert.ToInt32(Console.ReadLine());
@@ -42,7 +48,7 @@ class Program
     static int blockSize = 16;
     static double gamma = 0.99; //gama alto para ver a escada no final
     static double alfa = 0.3;
-    static double efen = 0.3; //faser decaimento
+    static double efen = 0.3; // 30% de explorar
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
 
@@ -51,11 +57,9 @@ class Program
         var labirinto = new Labirinto(size.x, size.y);
         var sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
         //temp
-        var estados = sarsa.treino(numTreinos, numPassos);
+        var estados = sarsa.treino(numTreinos, numPassos); //calcula o algortimo e retorna todos os estados no treino
 
-
-
-        int playerFrame = 0;      //frame do treino
+        int playerFrame = 0;  //frame do treino
         float timer = 0.05f; //timer da velociade de atualização do player
         float acumulador = 0; //acumulador para contar o tempo passado
 
@@ -72,7 +76,7 @@ class Program
         {
             acumulador += Raylib.GetFrameTime();
 
-            if (acumulador >= timer)
+            if (acumulador >= timer) //para controlar a velocidade de update do player nos estados
             {
                 acumulador -= timer;
                 if(playerFrame < estados.Count()-1)
@@ -96,20 +100,19 @@ class Program
                 }
             }
 
-            //draw Escada
+            //desenha a Escada
             var escada = labirinto.getEscadaPosition();
             Rectangle escadaSprite = new Rectangle(1 * blockSize, 0, blockSize, blockSize);
             Rectangle escadaDestino = new Rectangle(escada.x * blockSize * zoom, escada.y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, escadaSprite, escadaDestino, Vector2.Zero, 0f, Color.White);
 
-            //draw Arrows
-
+            //desenha as setas
             if (showArrows)
             {
                 var politica = sarsa.Politica;
                 foreach (double[] position in politica.Keys)
                 {
-                    int acao = 0;
+                    int acao = 5; //acao erro no visual
                     double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
                     foreach (int a in politica[position].Keys)
                     {
@@ -119,14 +122,14 @@ class Program
                             maxValue = politica[position][a];
                         }
                     }
-                    //draw a
+                    //desenha a seta
                     Rectangle arrowSprite = new Rectangle(acao * blockSize, 0, blockSize, blockSize);
                     Rectangle arrowDestino = new Rectangle((int)position[0] * blockSize * zoom, (int)position[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
                     Raylib.DrawTexturePro(arrows, arrowSprite, arrowDestino, Vector2.Zero, 0f, Color.White);
                 }
             }
 
-            //draw Player (sempre em cima)
+            //draw Player (sempre em cima de tudo o resto)
             var player = estados[playerFrame];
             Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
             Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
@@ -138,6 +141,7 @@ class Program
             {
                 labirinto = new Labirinto(size.x, size.y);
                 sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
+                estados.Clear();
                 estados = sarsa.treino(numTreinos, numPassos);
                 showArrows = false;
                 playerFrame = 0;
@@ -146,7 +150,7 @@ class Program
             {
                 sarsa.efen = 0.0; //para não explorar mais
                 estados.Clear();
-                estados = sarsa.treino(10, numPassos,true);
+                estados = sarsa.treino(numTreinos, numPassos, true);
                 showArrows = true;
                 playerFrame = 0;
             }

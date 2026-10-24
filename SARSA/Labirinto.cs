@@ -13,15 +13,15 @@ namespace SARSA
         //0 is floor
         //1 Wall
         //2 midlle point (para ajudar o treino)
-        //3 ice (deslisar até bater numa parede ou acabar o gelo)
-        //-2 water (pode usar um barco)
-        private int[][] mapa;
+        //3 ice (deslisar até bater numa parede ou acabar o gelo)   @NOT EMPLEMENTED
+        //-2 water (pode usar um barco)                             @NOT EMPLEMENTED
+        private int[][] mapa;          //dados do labirinto
         private (int x, int y) start; //start defaut
-        private (int x, int y) escada;
+        private (int x, int y) escada; //final
         private Random r = new Random();
-        private List<(int x, int y)> pointshouses = new List<(int x, int y)>();
-        private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time
-        //private List<(int x, int y)> housesPassed = new List<(int x, int y)>();
+        private List<(int x, int y)> pointshouses = new List<(int x, int y)>(); //Casas que dao pontos
+        private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time para não viciar em voltas no ponto
+        //private List<(int x, int y)> housesPassed = new List<(int x, int y)>(); //para tirar pontos de passar em casas repetidas
 
         private enum Diretions
         {
@@ -40,14 +40,14 @@ namespace SARSA
                 mapa[i] = new int[sizeY];
             }
             Random r = new Random();
-            for (int x = 0; x < sizeX; x++)
+            for (int x = 0; x < sizeX; x++) //gera um labirinto com obstaculos random
             {
                 for(int y = 0; y < sizeY; y++)
                 {
-                    mapa[x][y] = r.Next(-1,2); //basic map
+                    mapa[x][y] = r.Next(-1,2); //basic map (-1 to 1)
                 }
             }
-            //init player e a escada
+            //init player start e a escada
             start = (0, 0);
             escada = (sizeX -1, sizeY - 1); //last square
 
@@ -130,34 +130,11 @@ namespace SARSA
 
             }
         }
-
-        //faz o labirinto possivel
-        /*public void Flood()
-        {
-            List<(int x, int y)> visitado = new List<(int x, int y)>();
-            FloodRecurcivo((0, 0), visitado);
-        }
-
-        public void FloodRecurcivo((int x, int y) position, List<(int x, int y)> visitado)
-        {
-            visitado.Add(position);
-            var acoes = AcoesPossiveis();
-            foreach(int a in acoes)
-            {
-                (int x, int y) newFloor = GetNextFloor(position, a); //get next position
-                if (!visitado.Contains(newFloor))//) && mapa[newFloor.x][newFloor.y] == 0) //apenas investiga caminhos possiveis
-                {
-                    FloodRecurcivo(newFloor, visitado);
-                }
-            }
-        }*/
-
+        
         public int getFloorData(int x , int y)
         {
             return mapa[x][y];
         }
-
-
 
         public (int x, int y) getEscadaPosition()
         {
@@ -198,7 +175,7 @@ namespace SARSA
             }
             return position;
         }
-
+        //reseta o ambiente e retorna o estado inicial
         public double[] GetInicialState()
         {
             //reset pointshousesUsed
@@ -210,6 +187,7 @@ namespace SARSA
             return new double[] { start.x, start.y };
         }
 
+        //executa a acao e retorna o estado resultante
         public double[] ExecutarAcao(double[] estado, int a)
         {
             int x = (int)estado[0];
@@ -217,7 +195,7 @@ namespace SARSA
             var newPosition = GetNextFloor((x,y),a);
             return new double[] { newPosition.x, newPosition.y };
         }
-
+        //retorna todas as acoes possiveis para um dado estado
         public List<int> AcoesPossiveis(double[] estado)
         {
             int x = (int)estado[0];
@@ -253,7 +231,7 @@ namespace SARSA
             }
             return acoesPossiveis;
         }
-
+        //retorna a recompensa do estado
         public double GetRecompensa(double[] estado)
         {
             int x = (int)estado[0];
@@ -278,9 +256,10 @@ namespace SARSA
                 return -5; //punir passar por casas repetidas
             }*/
 
-            return -1;
+            return -1; // punir andar muito
         }
 
+        //Verifica se o estado é terminal
         public bool IsTerminal(double[] estado) //estado [x , y]
         {
             int x = (int) estado[0];

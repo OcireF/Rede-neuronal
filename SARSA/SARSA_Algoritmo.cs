@@ -12,11 +12,11 @@ namespace SARSA
     {
         public Random r = new Random();
         public Dictionary<double[], Dictionary<int, double>> Politica = new Dictionary<double[], Dictionary<int, double>>(new ComparadorEstados()); //Q(s,a) = recompensa
-        private IAmbiente ambiente;
-        public double gamma; //y
-        public double alfa;
-        public double efen;
-        public double valor_omissao;
+        private IAmbiente ambiente; //Mundo onde o algoritmo vai passar
+        public double gamma; //fator de desconto do futuro
+        public double alfa; //taxa de aprendizagem
+        public double efen; //taxa de exploracao
+        public double valor_omissao; //valor_omissao das politicas (valor inicial para cada uma)
 
         public SARSA_Algoritmo(IAmbiente ambiente, double gamma, double alfa, double efen, double valor_omissao = 0.0)
         {
@@ -26,7 +26,7 @@ namespace SARSA
             this.efen = efen;
             this.valor_omissao = valor_omissao;
         }
-
+        //Algoritmo de propagacao das recompensas
         public double Aprender(double[] s, int a, double r, double[] sLine, int aLine, bool isFinal) //s, a, r, s’, a’, final
         {
             double j = 0;
@@ -63,7 +63,7 @@ namespace SARSA
                 Politica[estado].Add( a, valor_omissao);
             }
         }
-        //treino do algoritmo SARSA, retorna uma lista de estados passados no treino
+        //treino do algoritmo SARSA, retorna uma lista de todos os estados passados no treino ou apenas o ultimo Episodio se o "justLastEP" = true
         public List<double[]> treino(int numEpisodios, int numPassos,bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
@@ -74,9 +74,9 @@ namespace SARSA
             double recompensa;                              //r
             double[] estadoLinha;                           //s'
             int acaoLinha;                                  //a'
-            for (int ep = 0; ep < numEpisodios; ep++)
+            for (int ep = 0; ep < numEpisodios; ep++) //loop todos os Episodios
             {
-                if(justLastEP)
+                if(justLastEP) //caso queremos apenas salvar o ultimo ep para mostrar o treinamento
                 {
                     estadosTreino.Clear(); //limpa o Treino para guardar apenas o ultimo episodio
                 } 
@@ -102,6 +102,7 @@ namespace SARSA
             return estadosTreino;
         }
 
+        //Selecionador de Acoes
         public int seleccionar_acao(double[] estado)
         {
             int acao;
@@ -115,9 +116,11 @@ namespace SARSA
             }
             return acao;
         }
+
+        //aproveita o conhecimento da politica
         public int Acao_sofrega(double[] estado)
         {
-            if (!Politica.ContainsKey(estado)) //terminal não existe mais acoes
+            if (!Politica.ContainsKey(estado)) //isto para casos terminais não existem mais acoes
             {
                 return -1;
             }
@@ -126,7 +129,7 @@ namespace SARSA
             int[] acoes = Politica[estado].Keys.ToArray();
             r.Shuffle(acoes);
 
-            int acao = -1;
+            int acao = -1; //começa a -1 para caso não existem acoes
             double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
 
             foreach(int a in acoes)
@@ -140,18 +143,20 @@ namespace SARSA
             return acao; //maxArg
         }
 
+        //exploracao de novos estados
         public int Acao_exploracao(double[] estado)
         {
-            if (!Politica.ContainsKey(estado)) //terminal não existe mais acoes
+            if (!Politica.ContainsKey(estado)) //isto para casos terminais não existem mais acoes
             {
-                return -1; 
+                return -1; //não existem acoes
             }
 
             int[] acoes = Politica[estado].Keys.ToArray();
             r.Shuffle(acoes); //suffle para ter uma acao aleatoria
-            return acoes != null ? acoes[0] : -1; //random
+            return acoes != null ? acoes[0] : -1; //random or -1 action
         }
 
+        //executar a acao selecionada e retornar a recompensa e o estado resultante
         public (double recompensa, double[] estadoLinha) executar_acao(double[] estado, int acao)
         {
             var estadoLinha = ambiente.ExecutarAcao(estado, acao); // ver o novo estado

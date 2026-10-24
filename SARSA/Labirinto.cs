@@ -21,7 +21,7 @@ namespace SARSA
         private Random r = new Random();
         private List<(int x, int y)> pointshouses = new List<(int x, int y)>();
         private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time
-        private List<(int x, int y)> housesPassed = new List<(int x, int y)>();
+        //private List<(int x, int y)> housesPassed = new List<(int x, int y)>();
 
         private enum Diretions
         {
@@ -157,16 +157,7 @@ namespace SARSA
             return mapa[x][y];
         }
 
-        public (int x, int y) getStartPosition()
-        {
-            //reset pointshousesUsed
-            foreach (var key in pointshousesUsed.Keys.ToList())
-            {
-                pointshousesUsed[key] = false;
-            }
-            housesPassed.Clear();
-            return start;
-        }
+
 
         public (int x, int y) getEscadaPosition()
         {
@@ -176,7 +167,7 @@ namespace SARSA
         //movendo na direção escolhida qual é a nova posição
         public (int x, int y) GetNextFloor((int x, int y) position,int dir)
         {
-            housesPassed.Add(position); //passed floor
+            //housesPassed.Add(position); //passed floor
             if (dir == 0) //left
             {
                 if (position.x - 1 > 0) 
@@ -210,7 +201,13 @@ namespace SARSA
 
         public double[] GetInicialState()
         {
-            return new double[] { 0, 0 };
+            //reset pointshousesUsed
+            foreach (var key in pointshousesUsed.Keys.ToList())
+            {
+                pointshousesUsed[key] = false;
+            }
+            //housesPassed.Clear();
+            return new double[] { start.x, start.y };
         }
 
         public double[] ExecutarAcao(double[] estado, int a)
@@ -226,14 +223,14 @@ namespace SARSA
             int x = (int)estado[0];
             int y = (int)estado[1];
             List<int> acoesPossiveis = new List<int>();
-            if (x - 1 > 0) //left
+            if (x - 1 >= 0) //left
             {
                 if (mapa[x - 1][y] != 1)
                 {
                     acoesPossiveis.Add((int)Diretions.left);
                 }
             }
-            if (y - 1 > 0) //up
+            if (y - 1 >= 0) //up
             {
                 if(mapa[x][y - 1] != 1)
                 {
@@ -273,7 +270,7 @@ namespace SARSA
             if (pointshouses.Contains((x, y)) && !pointshousesUsed[(x, y)]) //middle point houses
             {
                 pointshousesUsed[(x, y)] = true; //mark as used
-                return 8;
+                return 50;
             }
 
             /*if (housesPassed.Contains(((int)estado[0], (int)estado[1])))

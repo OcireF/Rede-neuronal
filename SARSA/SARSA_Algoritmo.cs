@@ -18,12 +18,13 @@ namespace SARSA
         public double efen;
         public double valor_omissao;
 
-        public SARSA_Algoritmo(IAmbiente ambiente, double gamma, double alfa, double efen, double volor_omissao = 0.0)
+        public SARSA_Algoritmo(IAmbiente ambiente, double gamma, double alfa, double efen, double valor_omissao = 0.0)
         {
             this.ambiente = ambiente;
             this.gamma = gamma;
             this.alfa = alfa;
             this.efen = efen;
+            this.valor_omissao = valor_omissao;
         }
 
         public double Aprender(double[] s, int a, double r, double[] sLine, int aLine, bool isFinal) //s, a, r, s’, a’, final
@@ -103,7 +104,7 @@ namespace SARSA
 
         public int seleccionar_acao(double[] estado)
         {
-            int acao = 0;
+            int acao;
             if ( r.NextDouble() > efen)
             {
                 acao = Acao_sofrega(estado); //Aproveitar conhecimento
@@ -118,14 +119,14 @@ namespace SARSA
         {
             if (!Politica.ContainsKey(estado)) //terminal não existe mais acoes
             {
-                return 0;
+                return -1;
             }
 
             //suffle acoes
             int[] acoes = Politica[estado].Keys.ToArray();
             r.Shuffle(acoes);
 
-            int acao = 0;
+            int acao = -1;
             double maxValue = int.MinValue; //minValue para sempre selecionar uma acao
 
             foreach(int a in acoes)
@@ -148,7 +149,7 @@ namespace SARSA
 
             int[] acoes = Politica[estado].Keys.ToArray();
             r.Shuffle(acoes); //suffle para ter uma acao aleatoria
-            return acoes[0]; //random
+            return acoes != null ? acoes[0] : -1; //random
         }
 
         public (double recompensa, double[] estadoLinha) executar_acao(double[] estado, int acao)

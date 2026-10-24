@@ -6,22 +6,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        LabirintoBase();
+        int test = 0;
+        //while (test != 99)
+        {
+            test = 0;
+
+            Console.WriteLine(
+                "Textes Parte 2.1\n" +
+                "(1) - Random small  ( 5x5 ) Labirinto\n" +
+                "(2) - Random Medion (15x15) Labirinto\n" +
+                "(3) - Random Big    (50x50) Labirinto\n"
+                );
+            Console.Write("Choice: ");
+            test = Convert.ToInt32(Console.ReadLine());
+            switch (test)
+            {
+                case 1:
+                    LabirintoBase((5, 5), 8, 300, 25);
+                    break;
+                case 2:
+                    LabirintoBase((15, 15), 4, 5000, 15*15);
+                    break;
+                case 3:
+                    LabirintoBase((50, 50), 1, 5000, 50*50);
+                    break;
+            }
+                    
+        }
     }
 
-    static (int x, int y) size = (15, 15); // samll(5,5)(8) meadle(15,15)(4) big (50,50)(1)
-    static int zoom = 4;
+    //static (int x, int y) size = (50, 50); // samll(5,5)(8) meadle(15,15)(4) big (50,50)(1)
+    //static int zoom = 1;
+    //static int numTreinos = 5000;
+    //static int numPassos = size.x * size.y; //correr o labirinto inteiro
     static int blockSize = 16;
-
-    static int numTreinos = 5000;
-    static int numPassos = size.x * size.y; //correr o labirinto inteiro
     static double gamma = 0.99; //gama alto para ver a escada no final
     static double alfa = 0.3;
     static double efen = 0.3; //faser decaimento
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
 
-    static void LabirintoBase()
+    static void LabirintoBase((int x, int y) size, int zoom, int numTreinos, int numPassos)
     {
         var labirinto = new Labirinto(size.x, size.y);
         var sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);

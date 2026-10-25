@@ -16,7 +16,7 @@ class Program
                 "(1) - Random small  ( 5x5 ) Labirinto\n" +
                 "(2) - Random Medion (15x15) Labirinto\n" +
                 "(3) - Random Big    (50x50) Labirinto\n" +
-                "(4) - Load mapa e politicas guardadas e faz um novo treino com efen = 0\n" +
+                "(4) - Load mapa e politicas guardadas e faz um novo treino\n" +
                 "\nNotes:\n" +
                 "O calculo do algorimo é feito antes do visual, o visual é apenas para visualização\n" +
                 "\nBotões:\n" +

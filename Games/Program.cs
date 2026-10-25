@@ -16,30 +16,35 @@ class Program
                 "(1) - Random small  ( 5x5 ) Labirinto\n" +
                 "(2) - Random Medion (15x15) Labirinto\n" +
                 "(3) - Random Big    (50x50) Labirinto\n" +
+                "(4) - Load mapa e politicas guardadas e faz um novo treino com efen = 0\n" +
                 "\nNotes:\n" +
-                "O calculo do algorimo é feito antes do visual, o visual é apenas para visualizar\n" +
-                "No Big Labirinto pode ser necessario correr multiplos treinos para chegar ao final usando 'P'\n" +
+                "O calculo do algorimo é feito antes do visual, o visual é apenas para visualização\n" +
                 "\nBotões:\n" +
                 "N - Novo labirinto\n" +
-                "P - Faz um novo treino com efen=0 e mostra a sua ultima volta no labirinto\n"
+                "P - Faz um novo treino com efen=0 e mostra a sua ultima volta no labirinto\n" +
+                "S - Salva o labirinto e a politica atual\n"
                 );
             Console.Write("Choice: ");
             test = Convert.ToInt32(Console.ReadLine());
             switch (test)
             {
                 case 1:
-                    LabirintoBase((5, 5), 8, 300, 25);
+                    LabirintoBase((5, 5), 300);
                     break;
                 case 2:
-                    LabirintoBase((15, 15), 4, 5000, 15*15);
+                    LabirintoBase((15, 15), 5000);
                     break;
                 case 3:
-                    LabirintoBase((50, 50), 1, 5000, 50*50);
+                    LabirintoBase((50, 50), 5000);
+                    break;
+                case 4:
+                    LabirintoBase((0,0), 100, "Labirinto"); //não defene o size porque vai ser lido do ficheiro
                     break;
             }
-                    
         }
     }
+
+
 
     //static (int x, int y) size = (50, 50); // samll(5,5)(8) meadle(15,15)(4) big (50,50)(1)
     //static int zoom = 1;
@@ -52,19 +57,56 @@ class Program
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
 
-    static void LabirintoBase((int x, int y) size, int zoom, int numTreinos, int numPassos)
+    static void LabirintoBase((int x, int y) size, int numTreinos, string file = null)
     {
-        var labirinto = new Labirinto(size.x, size.y);
-        var sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
-        //temp
-        var estados = sarsa.treino(numTreinos, numPassos); //calcula o algortimo e retorna todos os estados no treino
+        Labirinto labirinto;
+        SARSA_Algoritmo sarsa;
+
+        if (file == null)
+        {
+            labirinto = new Labirinto(size.x, size.y);
+            sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
+        }
+        else //ler labirinto e politicas de ficheiros
+        {
+            labirinto = Labirinto.LoadAmbienteFromFile(file + ".ambiente");
+            size = labirinto.GetSize(); //set size do labirinto
+            sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao, file + ".sarsa");
+        }
+
+        int numPassos = size.x * size.y; //set o numero de passos para o treino
+        var estados = sarsa.treino(numTreinos, numPassos); //pré calcula o algortimo e retorna todos os estados no treino
 
         int playerFrame = 0;  //frame do treino
         float timer = 0.05f; //timer da velociade de atualização do player
         float acumulador = 0; //acumulador para contar o tempo passado
 
-        Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
+        Raylib.SetConfigFlags(ConfigFlags.HiddenWindow); //inddenWindow, enquanto faz setup do zoom
+        Raylib.InitWindow(800, 600, "Labirinto"); // tamanho temporario
+        //Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
         Raylib.SetTargetFPS(60);
+
+        //set Max Zoom
+        int monitor = Raylib.GetCurrentMonitor();
+        int maxW = (int)(Raylib.GetMonitorWidth(monitor) * 0.9); //margem para as bordas laterais
+        int maxH = (int)(Raylib.GetMonitorHeight(monitor) * 0.85); //margem para o titulo e borda 
+
+        int zoom = Math.Max(1, Math.Min( //captura o zoom maximo
+            maxW / (size.x * blockSize), //max zoom vertical
+            maxH / (size.y * blockSize))); //max zoom horizontal
+
+        //resize para o maior zoom
+        int monitorW = size.x * blockSize * zoom;
+        int monitorH = size.y * blockSize * zoom;
+        Raylib.SetWindowSize(monitorW, monitorH);
+
+        //centrar a janela do labirinto
+        Raylib.SetWindowPosition(           
+            (Raylib.GetMonitorWidth(monitor) - monitorW) / 2,
+            (Raylib.GetMonitorHeight(monitor) - monitorH) / 2);
+        Console.WriteLine("w"+ monitorW + "h" + monitorH);
+
+        Raylib.ClearWindowState(ConfigFlags.HiddenWindow);
 
         //init tileset
         Texture2D tileset = Raylib.LoadTexture("Assets/Floor_TileSet.png");
@@ -153,6 +195,11 @@ class Program
                 estados = sarsa.treino(numTreinos, numPassos, true);
                 showArrows = true;
                 playerFrame = 0;
+            }
+            if (Raylib.IsKeyPressed(KeyboardKey.S)) //Aproveitar o treino
+            {
+                sarsa.SavePoliticaOnFile("Labirinto");
+                Console.WriteLine("Save Done do Labirinto e Politica");
             }
         }
     }

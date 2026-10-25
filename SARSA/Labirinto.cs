@@ -19,8 +19,7 @@ namespace SARSA
         private (int x, int y) start; //start defaut
         private (int x, int y) escada; //final
         private Random r = new Random();
-        private List<(int x, int y)> pointshouses = new List<(int x, int y)>(); //Casas que dao pontos
-        private Dictionary<(int x, int y), bool> pointshousesUsed = new Dictionary<(int x, int y), bool>(); //to make the pointshouses dynamic, only give points the first time para não viciar em voltas no ponto
+        private List<string> pointshousesUsed = new List<string>(); //to make the pointshouses dynamic, only give points the first time para não viciar em voltas no ponto
         //private List<(int x, int y)> housesPassed = new List<(int x, int y)>(); //para tirar pontos de passar em casas repetidas
 
         private enum Diretions
@@ -33,20 +32,8 @@ namespace SARSA
 
         public Labirinto(int sizeX, int sizeY)
         {
-            //init floor
-            mapa = new int[sizeX][];
-            for (int i = 0; i < mapa.Length; i++)
-            {
-                mapa[i] = new int[sizeY];
-            }
-            Random r = new Random();
-            for (int x = 0; x < sizeX; x++) //gera um labirinto com obstaculos random
-            {
-                for(int y = 0; y < sizeY; y++)
-                {
-                    mapa[x][y] = r.Next(-1,2); //basic map (-1 to 1)
-                }
-            }
+            //gerar labirinto
+            RandomLabirinto(sizeX, sizeY);
             //init player start e a escada
             start = (0, 0);
             escada = (sizeX -1, sizeY - 1); //last square
@@ -57,6 +44,37 @@ namespace SARSA
 
             //cria um caminho possivel
             DoubleLineClearPath();
+        }
+
+        //lambirinto pré Feito
+        public Labirinto(int[][] mapa, (int x, int y) start, (int x, int y) escada)
+        {
+            this.mapa = mapa;
+            this.start = start;
+            this.escada = escada;
+        }
+
+        //Init a variavel mapa
+        public void InitFloor(int sizeX, int sizeY)
+        {
+            mapa = new int[sizeX][];
+            for (int i = 0; i < mapa.Length; i++)
+            {
+                mapa[i] = new int[sizeY];
+            }
+        }
+
+        public void RandomLabirinto(int sizeX, int sizeY)
+        {
+            InitFloor(sizeX, sizeY);
+            Random r = new Random();
+            for (int x = 0; x < sizeX; x++) //gera um labirinto com obstaculos random
+            {
+                for (int y = 0; y < sizeY; y++)
+                {
+                    mapa[x][y] = r.Next(-1, 2); //basic map (-1 to 1)
+                }
+            }
         }
 
         //função para limpar um caminho possivel,
@@ -119,8 +137,7 @@ namespace SARSA
                 if (passosToNextPointsHouse == 0)
                 {
                     mapa[position.x][position.y] = 2; //midle point
-                    pointshouses.Add(position); //give 5 points for this position
-                    pointshousesUsed[position] = false; //mark as not used
+                    //pointshouses.Add(position); //give 5 points for this position
                     passosToNextPointsHouse = passosToPointsHouse;
                 }
                 else
@@ -175,14 +192,20 @@ namespace SARSA
             }
             return position;
         }
+        public (int x, int y) GetSize()
+        {
+            return (mapa.Length, mapa[0].Length);
+        }
+
         //reseta o ambiente e retorna o estado inicial
         public double[] GetInicialState()
         {
             //reset pointshousesUsed
-            foreach (var key in pointshousesUsed.Keys.ToList())
+            /*foreach (var key in pointshousesUsed.Keys.ToList())
             {
                 pointshousesUsed[key] = false;
-            }
+            }*/
+            pointshousesUsed.Clear();
             //housesPassed.Clear();
             return new double[] { start.x, start.y };
         }
@@ -245,10 +268,10 @@ namespace SARSA
             {
                 return -100;
             }
-            if (pointshouses.Contains((x, y)) && !pointshousesUsed[(x, y)]) //middle point houses
+            if (mapa[x][y] == 2 && !pointshousesUsed.Contains("(" + x + "," + y + ")")) //middle point houses
             {
-                pointshousesUsed[(x, y)] = true; //mark as used
-                return 50;
+                pointshousesUsed.Add("(" + x + "," + y + ")"); //mark as used
+                return 10;
             }
 
             /*if (housesPassed.Contains(((int)estado[0], (int)estado[1])))
@@ -259,12 +282,91 @@ namespace SARSA
             return -1; // punir andar muito
         }
 
+
         //Verifica se o estado é terminal
         public bool IsTerminal(double[] estado) //estado [x , y]
         {
             int x = (int) estado[0];
             int y = (int) estado[1];
             return (x == escada.x && y == escada.y) || mapa[x][y] == -1; //chegou no final ou caiu num buraco
+        }
+
+        //guarda dados do lambirinto num ficheiro
+        public void SaveAmbienteInStream(StreamWriter fileStream)
+        {
+            fileStream.Write("tamanho:(" + mapa.Length + "," + mapa[0].Length + ")\n"); //tamanho
+            fileStream.Write("start:(" + start.x + "," + start.y + ")\n"); //start
+            fileStream.Write("escada:(" + escada.x + "," + escada.y + ")\n"); //end
+
+            fileStream.Write("labirinto:\n");
+            for(int y = 0; y < mapa[0].Length; y++)
+            {
+                var linha = Enumerable.Range(0, mapa.Length).Select(x => mapa[x][y]); //os dados na classe sao colunas, mas no ficheiro dá mais geito guardar por linhas, por isto esta tranformacao
+                fileStream.WriteLine("[" + string.Join(",", linha) + "]");
+            }
+
+        }
+
+        //Ler o Ambiente guardado num file
+        public static Labirinto LoadAmbienteFromFile(string fileName)
+        {
+            string caminho = Path.Combine(
+                AppContext.BaseDirectory,
+                    fileName
+                );
+
+            int[][] mapa = {};
+            (int x, int y) start = (0, 0), escada = (0, 0);
+            int yAtual = 0;
+
+            foreach (string linha in File.ReadLines(caminho))
+            {
+                string l = linha.Trim();
+                if (l.Length == 0 || l.StartsWith("labirinto:")) continue; //salta linhas vasias e "labirinto:"
+
+                if (l.StartsWith("tamanho:")) //load mapa
+                {
+                    var (largura, altura) = ParseCoordenada(l); //lé a largura e altura
+                    mapa = new int[largura][];                  //init mapa
+                    for (int x = 0; x < largura; x++)
+                        mapa[x] = new int[altura];
+                }
+                else if (l.StartsWith("[")) //linha a adicionar no mapa 
+                {
+                    int[] valores = l.Trim('[', ']') //remove os "[]"
+                        .Split(',')
+                        .Select(v => int.Parse(v.Trim())) //tranforma a string em inteiros
+                        .ToArray();
+
+                    for (int x = 0; x < valores.Length; x++) //escreve a linha
+                        mapa[x][yAtual] = valores[x];
+
+                    yAtual++;
+                }
+                else if (l.StartsWith("start:")) start = ParseCoordenada(l); //lé o start
+                else if (l.StartsWith("escada:")) escada = ParseCoordenada(l); //lé a escada
+            }
+
+            return new Labirinto(mapa,start,escada);
+        }
+
+        //função apenas para ler cordenadas em "LoadAmbienteFromFile"
+        private static (int x, int y) ParseCoordenada(string l)
+        {
+            // "start:(1,2)" -> (1,2)
+            int ini = l.IndexOf('(') + 1;
+            int fim = l.IndexOf(')');
+            int[] p = l.Substring(ini, fim - ini)   //remove tudo antes e depois de "(" ")"
+                       .Split(',')                  //divide os 2 numeros
+                       .Select(v => int.Parse(v.Trim()))
+                       .ToArray();                  //tranforma num array
+            return (p[0], p[1]);
+        }
+
+        //se quizer apenas pegar pelo ambiente
+        static IAmbiente IAmbiente.LoadAmbienteFromFile(string fileName)
+        {
+            return LoadAmbienteFromFile(fileName);
         }
     }
 }

@@ -18,14 +18,20 @@ namespace SARSA
         public double efen; //taxa de exploracao
         public double valor_omissao; //valor_omissao das politicas (valor inicial para cada uma)
 
-        public SARSA_Algoritmo(IAmbiente ambiente, double gamma, double alfa, double efen, double valor_omissao = 0.0)
+        public SARSA_Algoritmo(IAmbiente ambiente, double gamma, double alfa, double efen, double valor_omissao = 0.0, string fileToLoadPoliticas = null)
         {
             this.ambiente = ambiente;
             this.gamma = gamma;
             this.alfa = alfa;
             this.efen = efen;
             this.valor_omissao = valor_omissao;
+
+            if (fileToLoadPoliticas != null)
+            {
+                LoadPolitica(fileToLoadPoliticas);
+            }
         }
+
         //Algoritmo de propagacao das recompensas
         public double Aprender(double[] s, int a, double r, double[] sLine, int aLine, bool isFinal) //s, a, r, s’, a’, final
         {
@@ -63,6 +69,44 @@ namespace SARSA
                 Politica[estado].Add( a, valor_omissao);
             }
         }
+
+        //Chamar esta função para load das politicas
+        public void LoadPolitica(string fileToLoadPoliticas)
+        {
+            string caminhoPolitica = Path.Combine(
+                AppContext.BaseDirectory,
+                    fileToLoadPoliticas
+                );
+            var pt = new CultureInfo("pt-PT"); //para usar a Cultura Pt
+            double[] estadoAtual = {}; //não é suposto adicinar uma politica para "[]"
+
+            foreach (string linha in File.ReadLines(caminhoPolitica))
+            {
+                string l = linha.Trim(); //remove separadores
+                if (l.Length == 0) continue; //saltar linhas sem conteudo
+
+                if (l.StartsWith("s:")) //Um novo estado a adicionar
+                {
+                    //s:[1,3]->
+                    string dados = l.Substring(3, l.IndexOf(']') -3); //remove os "s:" e os "[]"
+                    estadoAtual = dados
+                        .Split(";")                             //divide os dados do estado
+                        .Select(x => double.Parse(x.Trim(), pt)) //tranforma em doubles
+                        .ToArray();
+
+                    Politica.Add(estadoAtual, new Dictionary<int, double>()); //adiciona o estado na politica
+                }
+                else if (l.StartsWith("a:")) //uma nova acao a adicionar
+                {
+                    //a:0;r:76,83431692147609;
+                    string[] partes = l.Split(';', StringSplitOptions.RemoveEmptyEntries); // o "StringSplitOptions.RemoveEmptyEntries" é para remover a string vasia que o "split" vai fazer no final
+                    int acao = int.Parse(partes[0].Substring(2));                   // remove "a:"
+                    double valor = double.Parse(partes[1].Substring(2), pt);        // remove "r:"
+                    Politica[estadoAtual].Add(acao, valor);                         //adiciona a acao na politica
+                }
+            }
+        }
+
         //treino do algoritmo SARSA, retorna uma lista de todos os estados passados no treino ou apenas o ultimo Episodio se o "justLastEP" = true
         public List<double[]> treino(int numEpisodios, int numPassos,bool justLastEP = false)
         {
@@ -162,6 +206,38 @@ namespace SARSA
             var estadoLinha = ambiente.ExecutarAcao(estado, acao); // ver o novo estado
             var recompensa = ambiente.GetRecompensa(estadoLinha); // recompensa do novo estado
             return (recompensa, estadoLinha);
+        }
+
+        //guarda a politica e o ambiente associado em 2 ficheiros com nome "filename" e extensoes .sarsa e .ambiente
+        public void SavePoliticaOnFile(string filename) {
+            string caminhoPolitica = Path.Combine(
+                AppContext.BaseDirectory,
+                    filename + ".sarsa"
+                );
+            File.WriteAllText(caminhoPolitica, ""); //delete old text
+            var stream = File.AppendText(caminhoPolitica); //stream Onde vamos escrever
+
+            var estados = Politica.Keys;
+            foreach (double[] estado in estados)
+            {
+                stream.Write("s:[" + string.Join(";", estado) + "]\n"); // string join, adiciona todos os dados do estado separados por virgulas
+                foreach (var acao in Politica[estado])
+                {
+                    stream.Write("a:" + acao.Key + ";r:" + acao.Value + ";\n"); //acao e reward associados
+                }
+                stream.Write("\n");
+            }
+            stream.Close();
+
+            //salva o ambiente em outro ficheiro
+            string caminhoAmbiente = Path.Combine(
+                AppContext.BaseDirectory,
+                    filename + ".ambiente"
+                );
+            File.WriteAllText(caminhoAmbiente, ""); //clear text first
+            var streamAmbiente = File.AppendText(caminhoAmbiente); //stream Onde vamos escrever
+            ambiente.SaveAmbienteInStream(streamAmbiente);
+            streamAmbiente.Close();
         }
     }
 }

@@ -17,6 +17,9 @@ class Program
                 "(2) - Random Medion (15x15) Labirinto\n" +
                 "(3) - Random Big    (50x50) Labirinto\n" +
                 "(4) - Load mapa e politicas guardadas e faz um novo treino\n" +
+                "Textes Parte 2.2\n" +
+                "(5) - Random Medion (15x15) Labirinto usando Q-Learning\n" +
+                "(6) - Criar graficos de treino Sarsa vs Q-Learning\n" +
                 "\nNotes:\n" +
                 "O calculo do algorimo é feito antes do visual, o visual é apenas para visualização\n" +
                 "\nBotões:\n" +
@@ -40,6 +43,9 @@ class Program
                 case 4:
                     LabirintoBase((0,0), 100, "Labirinto"); //não defene o size porque vai ser lido do ficheiro
                     break;
+                case 5:
+
+                    break;
             }
         }
     }
@@ -57,25 +63,29 @@ class Program
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
 
-    static void LabirintoBase((int x, int y) size, int numTreinos, string file = null)
+    static void LabirintoBase((int x, int y) size, int numTreinos, string file = null) //, SARSA_Algoritmo algoritmo
     {
         Labirinto labirinto;
         SARSA_Algoritmo sarsa;
+        Q_Learning q_Learning;
 
         if (file == null)
         {
             labirinto = new Labirinto(size.x, size.y);
             sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
+            q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao);
         }
         else //ler labirinto e politicas de ficheiros
         {
             labirinto = Labirinto.LoadAmbienteFromFile(file + ".ambiente");
             size = labirinto.GetSize(); //set size do labirinto
             sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao, file + ".sarsa");
+            q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao);
         }
 
         int numPassos = size.x * size.y; //set o numero de passos para o treino
         var estados = sarsa.treino(numTreinos, numPassos); //pré calcula o algortimo e retorna todos os estados no treino
+        var estadosQlerning = q_Learning.treino(numTreinos, numPassos);
 
         int playerFrame = 0;  //frame do treino
         float timer = 0.05f; //timer da velociade de atualização do player
@@ -171,11 +181,18 @@ class Program
                 }
             }
 
-            //draw Player (sempre em cima de tudo o resto)
+            //draw Player (sempre em cima de tudo o resto) SARSA
             var player = estados[playerFrame];
             Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
             Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
+
+            //draw Player (sempre em cima de tudo o resto) Q-lerning
+            var player2 = estadosQlerning[playerFrame];
+            Rectangle playerSprite2 = new Rectangle(0, 16, blockSize, blockSize);
+            Rectangle playerDestino2 = new Rectangle((int)player2[0] * blockSize * zoom, (int)player2[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+            Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);
+
 
             Raylib.EndDrawing();
 

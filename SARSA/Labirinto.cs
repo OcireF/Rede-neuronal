@@ -19,7 +19,7 @@ namespace SARSA
         private (int x, int y) start; //start defaut
         private (int x, int y) escada; //final
         private Random r = new Random();
-        private List<string> pointshousesUsed = new List<string>(); //to make the pointshouses dynamic, only give points the first time para não viciar em voltas no ponto
+        //private List<string> pointshousesUsed = new List<string>(); //to make the pointshouses dynamic, only give points the first time para não viciar em voltas no ponto
         //private List<(int x, int y)> housesPassed = new List<(int x, int y)>(); //para tirar pontos de passar em casas repetidas
 
         private enum Diretions
@@ -84,8 +84,8 @@ namespace SARSA
         {                                        //ex: player(0,0) escada(9,9) / player(5,3) escada(7,2)
             var passosH = (escada.x - start.x); // 9 / 2 passos
             var passosV = (escada.y - start.y); // 9 / -1
-            var passosToPointsHouse = (passosH + passosV) / 2;
-            var passosToNextPointsHouse = passosToPointsHouse;
+            //var passosToPointsHouse = (passosH + passosV) / 2;
+            //var passosToNextPointsHouse = passosToPointsHouse;
             var position = start;
 
             var mode = r.NextDouble(); //apenas para deixar este caminho menos diagonal se fizer 50/50 apenas
@@ -133,18 +133,15 @@ namespace SARSA
                         chanceV = 0; //sem passs Verticais
                     }
                 }
-                passosToNextPointsHouse--;
+                mapa[position.x][position.y] = 0; //clear floor
+
+                /*passosToNextPointsHouse--;
                 if (passosToNextPointsHouse == 0)
                 {
-                    mapa[position.x][position.y] = 2; //midle point
+                    //mapa[position.x][position.y] = 2; //midle point
                     //pointshouses.Add(position); //give 5 points for this position
                     passosToNextPointsHouse = passosToPointsHouse;
-                }
-                else
-                {
-                    mapa[position.x][position.y] = 0; //clear floor
-                }
-
+                }*/
             }
         }
         
@@ -205,7 +202,7 @@ namespace SARSA
             {
                 pointshousesUsed[key] = false;
             }*/
-            pointshousesUsed.Clear();
+            //pointshousesUsed.Clear();
             //housesPassed.Clear();
             return new double[] { start.x, start.y };
         }
@@ -268,11 +265,11 @@ namespace SARSA
             {
                 return -100;
             }
-            if (mapa[x][y] == 2 && !pointshousesUsed.Contains("(" + x + "," + y + ")")) //middle point houses
+            /*if (mapa[x][y] == 2 && !pointshousesUsed.Contains("(" + x + "," + y + ")")) //middle point houses
             {
                 pointshousesUsed.Add("(" + x + "," + y + ")"); //mark as used
                 return 10;
-            }
+            }*/
 
             /*if (housesPassed.Contains(((int)estado[0], (int)estado[1])))
             {

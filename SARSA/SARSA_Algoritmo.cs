@@ -8,11 +8,11 @@ using System;
 
 namespace SARSA
 {
-    public class SARSA_Algoritmo
+    public class SARSA_Algoritmo : IAlgoritmo
     {
         public Random r = new Random();
         public Dictionary<double[], Dictionary<int, double>> Politica = new Dictionary<double[], Dictionary<int, double>>(new ComparadorEstados()); //Q(s,a) = recompensa
-        private IAmbiente ambiente; //Mundo onde o algoritmo vai passar
+        public IAmbiente ambiente; //Mundo onde o algoritmo vai passar
         public double gamma; //fator de desconto do futuro
         public double alfa; //taxa de aprendizagem
         public double efen; //taxa de exploracao

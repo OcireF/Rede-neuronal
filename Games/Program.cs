@@ -12,14 +12,13 @@ class Program
             test = 0;
 
             Console.WriteLine(
-                "Textes Parte 2.1\n" +
+                "Textes Parte 2.1/2.2\n" +
                 "(1) - Random small  ( 5x5 ) Labirinto\n" +
                 "(2) - Random Medion (15x15) Labirinto\n" +
                 "(3) - Random Big    (50x50) Labirinto\n" +
                 "(4) - Load mapa e politicas guardadas e faz um novo treino\n" +
                 "Textes Parte 2.2\n" +
-                "(5) - Random Medion (15x15) Labirinto usando Q-Learning\n" +
-                "(6) - Criar graficos de treino Sarsa vs Q-Learning\n" +
+                "(5) - Criar graficos de treino Sarsa vs Q-Learning\n" +
                 "\nNotes:\n" +
                 "O calculo do algorimo é feito antes do visual, o visual é apenas para visualização\n" +
                 "\nBotões:\n" +

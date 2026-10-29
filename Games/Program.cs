@@ -60,13 +60,15 @@ class Program
     static double alfa = 0.3;
     static double efen = 0.3; // 30% de explorar
     static double valor_omissao = 0.0;
-    static bool showArrows = false; //mostrar as setas da politica
+    static bool showArrows = true; //mostrar as setas da politica
 
     static void LabirintoBase((int x, int y) size, int numTreinos, string file = null) //, SARSA_Algoritmo algoritmo
     {
         Labirinto labirinto;
         SARSA_Algoritmo sarsa;
         Q_Learning q_Learning;
+        Agente agenteSarsa; //sarsa
+        //double[] estadoSarsa;
 
         if (file == null)
         {
@@ -83,10 +85,13 @@ class Program
         }
 
         int numPassos = size.x * size.y; //set o numero de passos para o treino
-        var estados = sarsa.treino(numTreinos, numPassos); //pré calcula o algortimo e retorna todos os estados no treino
-        var estadosQlerning = q_Learning.treino(numTreinos, numPassos);
+        agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos); //cria o agente para o treino
+        //estadoSarsa = agenteSarsa.estado;
+        //var estados = sarsa.treino(numTreinos, numPassos); //pré calcula o algortimo e retorna todos os estados no treino
 
-        int playerFrame = 0;  //frame do treino
+        //var estadosQlerning = q_Learning.treino(numTreinos, numPassos);
+
+        //int playerFrame = 0;  //frame do treino
         float timer = 0.05f; //timer da velociade de atualização do player
         float acumulador = 0; //acumulador para contar o tempo passado
 
@@ -130,9 +135,11 @@ class Program
             if (acumulador >= timer) //para controlar a velocidade de update do player nos estados
             {
                 acumulador -= timer;
-                if(playerFrame < estados.Count()-1)
+                agenteSarsa.RunPasso();//faz 1 passo
+                //estadoSarsa = agenteSarsa.RunPasso(); //faz 1 passo
+                //if(playerFrame < estados.Count()-1)
                 {
-                    playerFrame++;
+                    //playerFrame++;
                 }
             }
 
@@ -181,16 +188,16 @@ class Program
             }
 
             //draw Player (sempre em cima de tudo o resto) SARSA
-            var player = estados[playerFrame];
+            var player = agenteSarsa.GetCurretEstado();//estadoSarsa;//estados[playerFrame];
             Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
             Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
 
             //draw Player (sempre em cima de tudo o resto) Q-lerning
-            var player2 = estadosQlerning[playerFrame];
+            /*var player2 = estadosQlerning[playerFrame];
             Rectangle playerSprite2 = new Rectangle(0, 16, blockSize, blockSize);
             Rectangle playerDestino2 = new Rectangle((int)player2[0] * blockSize * zoom, (int)player2[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
-            Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);
+            Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);*/
 
 
             Raylib.EndDrawing();
@@ -199,19 +206,27 @@ class Program
             {
                 labirinto = new Labirinto(size.x, size.y);
                 sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
-                estados.Clear();
-                estados = sarsa.treino(numTreinos, numPassos);
-                showArrows = false;
-                playerFrame = 0;
+                agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos);
+                //estadoSarsa = agenteSarsa.estado;
+                //estados.Clear();
+                //estados = sarsa.treino(numTreinos, numPassos);
+                //showArrows = false;
+                //playerFrame = 0;
             }
             if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
             {
                 sarsa.efen = 0.0; //para não explorar mais
-                estados.Clear();
-                estados = sarsa.treino(numTreinos, numPassos, true);
-                showArrows = true;
-                playerFrame = 0;
+                agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos);
+                //estadoSarsa = agenteSarsa.estado;
+                //estados.Clear();
+                //estados = sarsa.treino(numTreinos, numPassos, true);
+                //showArrows = true;
+                //playerFrame = 0;
             }
+            /*if (Raylib.IsKeyPressed(KeyboardKey.Right))
+            {
+                estadoSarsa = agenteSarsa.RunPasso(); //faz 1 passo
+            }*/
             if (Raylib.IsKeyPressed(KeyboardKey.S)) //Aproveitar o treino
             {
                 sarsa.SavePoliticaOnFile("Labirinto");

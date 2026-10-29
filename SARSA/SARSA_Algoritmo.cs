@@ -148,7 +148,7 @@ namespace SARSA
 
         public Agente CreateAgente(int numEpisodios, int numPassos)
         {
-            return null;
+            return new Agente(this, ambiente, numEpisodios, numPassos);
         }
 
         //Selecionador de Acoes

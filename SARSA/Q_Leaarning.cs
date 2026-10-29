@@ -26,7 +26,7 @@ namespace SARSA
         public List<double[]> treino(int numEpisodios, int numPassos, bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
-            CreatePolitica(ambiente.GetInicialState()); //Primeira politica
+            //CreatePolitica(ambiente.GetInicialState()); //Primeira politica
             //Variables
             double[] estado;                                //s
             int acao;                                       //a
@@ -45,7 +45,7 @@ namespace SARSA
                 {
                     estadosTreino.Add(estado); //adicona o estado na lista para mais tarde vermos o treino @TEMP
                     (recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
-                    CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem
+                    //CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem
                     acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
                     recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen
                     estado = estadoLinha;   //atualizar estado (s <- s')

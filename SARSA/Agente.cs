@@ -22,7 +22,7 @@ namespace SARSA
         private int passo = 0;
         private int numPassos;
 
-        public Agente(IAlgoritmo algoritmo, IAmbiente ambiente, int numEpisodios, int numPassos)
+        public Agente(IAlgoritmo algoritmo, IAmbiente ambiente, int numEpisodios, int numPassos)//sarsa
         {
             this.algoritmo = algoritmo;
             this.ambiente = ambiente;
@@ -46,6 +46,7 @@ namespace SARSA
 
                 episodio = 0;
                 passo = 0;
+                return estado;
             }
 
             (recompensa, estadoLinha) = algoritmo.executar_acao(estado, acao); //Executar ação "a"
@@ -56,6 +57,11 @@ namespace SARSA
 
             return estado;
         }
+        public double[] GetCurretEstado()
+        {
+            return estado;
+        }
+
 
     }
 }

@@ -62,12 +62,18 @@ class Program
     static double valor_omissao = 0.0;
     static bool showArrows = true; //mostrar as setas da politica
 
+    static void LabirintoAgentes((int x, int y) size, int numTreinos, string file = null)
+    {
+
+    }
+
     static void LabirintoBase((int x, int y) size, int numTreinos, string file = null) //, SARSA_Algoritmo algoritmo
     {
         Labirinto labirinto;
         SARSA_Algoritmo sarsa;
         Q_Learning q_Learning;
         Agente agenteSarsa; //sarsa
+        Agente[] agentes = new Agente[20]; //Q_Learning
         //double[] estadoSarsa;
 
         if (file == null)
@@ -86,6 +92,11 @@ class Program
 
         int numPassos = size.x * size.y; //set o numero de passos para o treino
         agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos); //cria o agente para o treino
+
+        for(int i = 0; i< agentes.Length; i++) //setup agentes
+        {
+            agentes[i] = q_Learning.CreateAgente(numTreinos, numPassos);
+        }
         //estadoSarsa = agenteSarsa.estado;
         //var estados = sarsa.treino(numTreinos, numPassos); //pré calcula o algortimo e retorna todos os estados no treino
 
@@ -135,7 +146,12 @@ class Program
             if (acumulador >= timer) //para controlar a velocidade de update do player nos estados
             {
                 acumulador -= timer;
-                agenteSarsa.RunPasso();//faz 1 passo
+                //agenteSarsa.RunPasso();//faz 1 passo
+                foreach (Agente a in agentes)
+                {
+                    a.RunPasso();
+                }
+
                 //estadoSarsa = agenteSarsa.RunPasso(); //faz 1 passo
                 //if(playerFrame < estados.Count()-1)
                 {
@@ -193,11 +209,15 @@ class Program
             Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
             Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
 
-            //draw Player (sempre em cima de tudo o resto) Q-lerning
-            /*var player2 = estadosQlerning[playerFrame];
-            Rectangle playerSprite2 = new Rectangle(0, 16, blockSize, blockSize);
-            Rectangle playerDestino2 = new Rectangle((int)player2[0] * blockSize * zoom, (int)player2[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
-            Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);*/
+            for(int i = 0; i < agentes.Length; i++) //draw agentes
+            {
+                //draw Player (sempre em cima de tudo o resto) Q-lerning
+                var player2 = agentes[i].GetCurretEstado();
+                Rectangle playerSprite2 = new Rectangle(0, 16, blockSize, blockSize);
+                Rectangle playerDestino2 = new Rectangle((int)player2[0] * blockSize * zoom, (int)player2[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);
+            }
+
 
 
             Raylib.EndDrawing();
@@ -216,7 +236,8 @@ class Program
             if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
             {
                 sarsa.efen = 0.0; //para não explorar mais
-                agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos);
+                q_Learning.efen = 0.0;
+                //agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos);
                 //estadoSarsa = agenteSarsa.estado;
                 //estados.Clear();
                 //estados = sarsa.treino(numTreinos, numPassos, true);

@@ -23,7 +23,7 @@ namespace SARSA
         }
 
         //overwrite Treino para dar no modo Q-learning
-        public List<double[]> treino(int numEpisodios, int numPassos, bool justLastEP = false)
+        /*public List<double[]> treino(int numEpisodios, int numPassos, bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
             //CreatePolitica(ambiente.GetInicialState()); //Primeira politica
@@ -59,6 +59,15 @@ namespace SARSA
                 }
             }
             return estadosTreino;
+        }*/
+
+        public (double[] estado, int acao) FazerPasso(double[] estado, int acao)
+        {
+            (double recompensa, double[] estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
+            int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
+            recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen
+
+            return (estadoLinha, acaoLinha);
         }
 
     }

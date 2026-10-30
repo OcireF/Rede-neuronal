@@ -129,12 +129,14 @@ namespace SARSA
                 for(int p = 0; p < numPassos; p++)          //passos
                 {
                     estadosTreino.Add(estado); //adicona o estado na lista para mais tarde vermos o treino @TEMP
-                    (recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
+                    (estado, acao) = FazerPasso(estado, acao);
+                    
+                    /*(recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
                     //CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem
                     acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
                     recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha,ambiente.IsTerminal(estadoLinha)); //if s' is terminal
                     estado = estadoLinha;   //atualizar estado (s <- s')
-                    acao = acaoLinha;       //atualizar acao (a <- a')
+                    acao = acaoLinha;       //atualizar acao (a <- a')*/
 
                     if (ambiente.IsTerminal(estado))
                     {  //acaba os passos quando estado (s) for terminal
@@ -144,6 +146,15 @@ namespace SARSA
                 }
             }
             return estadosTreino;
+        }
+
+        public (double[] estado,int acao) FazerPasso(double[] estado,int acao)
+        {
+            (double recompensa, double[] estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
+            int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
+            recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha, ambiente.IsTerminal(estadoLinha)); //if s' is terminal
+
+            return (estadoLinha, acaoLinha);
         }
 
         public Agente CreateAgente(int numEpisodios, int numPassos)

@@ -13,9 +13,9 @@ namespace SARSA
         //dados 
         private double[] estado;                                //s
         private int acao;                                       //a
-        private double recompensa;                              //r
+        /*private double recompensa;                              //r
         private double[] estadoLinha;                           //s'
-        private int acaoLinha;                                  //a'
+        private int acaoLinha;                                  //a'*/
         //dados do loop
         private int episodio = 0;
         private int numEpisodios;
@@ -28,9 +28,9 @@ namespace SARSA
             this.ambiente = ambiente;
             this.numEpisodios = numEpisodios;
             this.numPassos = numPassos;
+            //estado inicial e acao escolhida
             estado = ambiente.GetInicialState();
             acao = algoritmo.seleccionar_acao(estado);
-            (recompensa, estadoLinha) = algoritmo.executar_acao(estado, acao);
         }
 
         public double[] RunPasso()
@@ -44,16 +44,16 @@ namespace SARSA
                 estado = ambiente.GetInicialState();
                 acao = algoritmo.seleccionar_acao(estado);
 
-                episodio = 0;
-                passo = 0;
+                episodio += 1; //proximo episodio
+                passo = 0; //reseta os passos
                 return estado;
             }
-
-            (recompensa, estadoLinha) = algoritmo.executar_acao(estado, acao); //Executar ação "a"
+            (estado, acao) = algoritmo.FazerPasso(estado, acao);
+            /*(recompensa, estadoLinha) = algoritmo.executar_acao(estado, acao); //Executar ação "a"
             acaoLinha = algoritmo.seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
             recompensa = algoritmo.Aprender(estado, acao, recompensa, estadoLinha, acaoLinha, ambiente.IsTerminal(estadoLinha)); //if s' is terminal
             estado = estadoLinha;   //atualizar estado (s <- s')
-            acao = acaoLinha;       //atualizar acao (a <- a')
+            acao = acaoLinha;       //atualizar acao (a <- a')*/
 
             return estado;
         }

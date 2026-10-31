@@ -161,14 +161,14 @@ namespace SARSA
             //housesPassed.Add(position); //passed floor
             if (dir == 0) //left
             {
-                if (position.x - 1 > 0) 
+                if (position.x - 1 >= 0) 
                 {
                     position.x -= 1;
                 }
             }
             else if (dir == 1) //up
             {
-                if (position.y - 1 > 0) 
+                if (position.y - 1 >= 0) 
                 {
                     position.y -= 1;
                 }

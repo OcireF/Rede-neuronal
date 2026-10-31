@@ -23,7 +23,7 @@ class Program
                 "\nBotões:\n" +
                 "N - Novo labirinto Usando Agentes (Sarsa)\n" +
                 "P - Modifica o efen para 0 (apenas para o Algorimo Primario)\n" +
-                "A - Apresenta as Setas do algorimo (apenas para o Algorimo Primario)" +
+                "A - Apresenta as Setas do algorimo (apenas para o Algorimo Primario)\n" +
                 "S - Salva o labirinto e a politica atual (apenas para o Algorimo Primario)\n"
                 );
             Console.Write("Choice: ");

@@ -3,6 +3,27 @@ using SARSA;
 using System.Numerics;
 class Program
 {
+    //static (int x, int y) size = (50, 50); // samll(5,5)(8) meadle(15,15)(4) big (50,50)(1)
+    //static int numTreinos = 5000;
+    //static int numPassos = size.x * size.y; //correr o labirinto inteiro
+
+    static double gamma = 0.99; //gama alto para ver a escada no final
+    static double alfa = 0.3;
+    static double efen = 0.1; // 10% de explorar
+    static double valor_omissao = 0.0;
+    static bool showArrows = false; //mostrar as setas da politica
+    static float[] timer = { 0.001f, 0.05f, 0.1f, 0.5f }; //timer da velociade de atualização do player
+    static int timerIndex = 1; //default speed "0.05f"
+    static float acumulador = 0; //acumulador para contar o tempo passado
+
+    //window stuff
+    static int blockSize = 16;
+    static int zoom = 1;
+    //texturas
+    static Texture2D tileset;// = Raylib.LoadTexture("Assets/Floor_TileSet.png");
+    static Texture2D npcs;// = Raylib.LoadTexture("Assets/NPC.png");
+    static Texture2D arrows; //= Raylib.LoadTexture("Assets/Arrows.png");
+
     static void Main(string[] args)
     {
         int test = 0;
@@ -17,7 +38,8 @@ class Program
                 "(3) - Random Big    (50x50) Labirinto (Sarsa)\n" +
                 "Textes Parte 2.2\n" +
                 "(4) - Load mapa e politicas guardadas e faz um novo treino (Sarsa e Q-Learning)\n" +
-                "(5) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
+                "(5) - Random Medium (15x15) Labirinto (Q-Learning)\n" +
+                "(6) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
                 "\n Notes:\n" +
                 "Algoritmo Primario - algorimo do primeiro agente" +
                 "\nBotões:\n" +
@@ -44,26 +66,14 @@ class Program
                     LabirintoAgentesLoadMapa("Labirinto"); //não define o size porque vai ser lido do ficheiro
                     break;
                 case 5:
+                    LabirintoAgentesQ_learning((15, 15), 5000); //não define o size porque vai ser lido do ficheiro
+                    break;
+                case 6:
                     LabirintoSarsaVsQ_lerning((10, 10), 500);
                     break;
             }
         }
     }
-
-
-
-    //static (int x, int y) size = (50, 50); // samll(5,5)(8) meadle(15,15)(4) big (50,50)(1)
-    //static int zoom = 1;
-    //static int numTreinos = 5000;
-    //static int numPassos = size.x * size.y; //correr o labirinto inteiro
-    static int blockSize = 16;
-    static double gamma = 0.99; //gama alto para ver a escada no final
-    static double alfa = 0.3;
-    static double efen = 0.1; // 10% de explorar
-    static double valor_omissao = 0.0;
-    static bool showArrows = false; //mostrar as setas da politica
-    static float[] timer = { 0.001f, 0.05f , 0.1f, 0.5f }; //timer da velociade de atualização do player
-    static int timerIndex = 1; //default "0.05"
 
     static void LabirintoAgentesSarsa((int x, int y) size, int numTreinos, int numAgentes = 0)
     {
@@ -108,6 +118,30 @@ class Program
 
         ResizeWindow(size);
         LabirintoBase(sarsa, labirinto, agentes, 4);
+    }
+
+    static void LabirintoAgentesQ_learning((int x, int y) size, int numTreinos, int numAgentes = 0)
+    {
+        if (numAgentes == 0)
+        {
+            Console.Write("Numero de agentes: ");
+            numAgentes = Convert.ToInt32(Console.ReadLine());
+        }
+
+        Agente[] agentes = new Agente[numAgentes]; // Q_Learning agentes
+
+        Labirinto labirinto = new Labirinto(size.x, size.y);
+        Q_Learning q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao);
+
+        int numPassos = size.x * size.y; //set o numero de passos para o treino
+
+        for (int i = 0; i < agentes.Length; i++)
+        {
+            agentes[i] = q_Learning.CreateAgente(numTreinos, numPassos);
+        }
+
+        ResizeWindow(size);
+        LabirintoBase(q_Learning, labirinto, agentes, 2);
     }
 
     static void LabirintoSarsaVsQ_lerning((int x, int y) size, int numTreinos)
@@ -157,11 +191,7 @@ class Program
         }
      */
 
-    static int zoom = 1;
-    //texturas
-    static Texture2D tileset;// = Raylib.LoadTexture("Assets/Floor_TileSet.png");
-    static Texture2D npcs;// = Raylib.LoadTexture("Assets/NPC.png");
-    static Texture2D arrows; //= Raylib.LoadTexture("Assets/Arrows.png");
+
 
     static void SetupWindow()
     {
@@ -205,10 +235,6 @@ class Program
     {
         (int x, int y) size = labirinto.GetSize();
 
-        float acumulador = 0;//acumulador para contar o tempo passado
-
-        
-
         while (!Raylib.WindowShouldClose())
         {
             acumulador += Raylib.GetFrameTime();
@@ -216,7 +242,6 @@ class Program
             if (acumulador >= timer[timerIndex]) //para controlar a velocidade de update do player nos estados
             {
                 acumulador -= timer[timerIndex];
-                //agenteSarsa.RunPasso();//faz 1 passo
                 foreach (Agente a in agentes)
                 {
                     a.RunPasso();
@@ -317,18 +342,20 @@ class Program
                 }
                 else
                 {
-                    timerIndex += -1;
+                    acumulador = 0;//reset acumulador
+                    timerIndex += -1; //aumenta
                 }
             }
             else //diminuir
             {
-                if (timerIndex == timer.Length-1) //velociade maxima
+                if (timerIndex == timer.Length-1) //velociade minima
                 {
                     return;
                 }
                 else
                 {
-                    timerIndex += 1;
+                    acumulador = 0; //reset acumulador
+                    timerIndex += 1; //diminui
                 }
             }
         }

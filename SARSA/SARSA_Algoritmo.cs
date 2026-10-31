@@ -108,7 +108,7 @@ namespace SARSA
         }
 
         //treino do algoritmo SARSA, retorna uma lista de todos os estados passados no treino ou apenas o ultimo Episodio se o "justLastEP" = true
-        public List<double[]> treino(int numEpisodios, int numPassos,bool justLastEP = false)
+        public virtual List<double[]> treino(int numEpisodios, int numPassos,bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
             //CreatePolitica(ambiente.GetInicialState()); //Primeira politica
@@ -148,7 +148,7 @@ namespace SARSA
             return estadosTreino;
         }
 
-        public (double[] estado,int acao) FazerPasso(double[] estado,int acao)
+        public virtual (double[] estado,int acao) FazerPasso(double[] estado,int acao)
         {
             (double recompensa, double[] estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
             int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
@@ -259,6 +259,22 @@ namespace SARSA
             var streamAmbiente = File.AppendText(caminhoAmbiente); //stream Onde vamos escrever
             ambiente.SaveAmbienteInStream(streamAmbiente);
             streamAmbiente.Close();
+        }
+
+        public Dictionary<double[], Dictionary<int, double>> GetPolitica()
+        {
+            return Politica;
+        }
+
+        public double GetEfen()
+        {
+            return efen;
+        }
+
+        public void ChangeEfen(double change)
+        {
+            efen += change;
+            return;
         }
     }
 }

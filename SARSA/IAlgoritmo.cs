@@ -15,5 +15,9 @@ namespace SARSA
         public int seleccionar_acao(double[] estado);
         public (double recompensa, double[] estadoLinha) executar_acao(double[] estado, int acao);
         public void SavePoliticaOnFile(string filename);
+
+        public Dictionary<double[], Dictionary<int, double>> GetPolitica();
+        public double GetEfen();
+        public void ChangeEfen(double change); //para modificar o Efen Manualmente
     }
 }

@@ -13,7 +13,7 @@ namespace SARSA
         //dados 
         private double[] estado;                                //s
         private int acao;                                       //a
-        /*private double recompensa;                              //r
+        /*private double recompensa;                            //r
         private double[] estadoLinha;                           //s'
         private int acaoLinha;                                  //a'*/
         //dados do loop
@@ -22,7 +22,7 @@ namespace SARSA
         private int passo = 0;
         private int numPassos;
 
-        public Agente(IAlgoritmo algoritmo, IAmbiente ambiente, int numEpisodios, int numPassos)//sarsa
+        public Agente(IAlgoritmo algoritmo, IAmbiente ambiente, int numEpisodios, int numPassos)
         {
             this.algoritmo = algoritmo;
             this.ambiente = ambiente;
@@ -41,21 +41,16 @@ namespace SARSA
             }
             if(passo > numPassos || ambiente.IsTerminal(estado)) //reiniciar para um novo episodio
             {
-                estado = ambiente.GetInicialState();
+                estado = ambiente.GetInicialState(); //estado inicial
                 acao = algoritmo.seleccionar_acao(estado);
 
                 episodio += 1; //proximo episodio
                 passo = 0; //reseta os passos
-                return estado;
+                return estado; //estado incial
             }
-            (estado, acao) = algoritmo.FazerPasso(estado, acao);
-            /*(recompensa, estadoLinha) = algoritmo.executar_acao(estado, acao); //Executar ação "a"
-            acaoLinha = algoritmo.seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
-            recompensa = algoritmo.Aprender(estado, acao, recompensa, estadoLinha, acaoLinha, ambiente.IsTerminal(estadoLinha)); //if s' is terminal
-            estado = estadoLinha;   //atualizar estado (s <- s')
-            acao = acaoLinha;       //atualizar acao (a <- a')*/
+            (estado, acao) = algoritmo.FazerPasso(estado, acao); //passo feito de acordo com o algorimo, assim este agente pode funcionar para varios tipos
 
-            return estado;
+            return estado; //o novo estado depois do passo
         }
         public double[] GetCurretEstado()
         {

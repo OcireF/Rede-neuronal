@@ -16,14 +16,14 @@ namespace SARSA
 
         //public double Aprender(double[] s, int a, double r, double[] sLine, int aLine, bool isFinal)
 
-        public double Aprender(double[] s, int a, double r, double[] sLine, bool isFinal)
+        public double Aprender(double[] s, int a, double r, double[] sLine, bool isFinal) //Aprender do Q_learning
         {
-            var aline = Acao_sofrega(sLine);
+            var aline = Acao_sofrega(sLine); //Melhor escolha no estado "sLine"
             return Aprender(s, a, r, sLine, aline, isFinal);
         }
 
         //overwrite Treino para dar no modo Q-learning
-        /*public List<double[]> treino(int numEpisodios, int numPassos, bool justLastEP = false)
+        public override List<double[]> treino(int numEpisodios, int numPassos, bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
             //CreatePolitica(ambiente.GetInicialState()); //Primeira politica
@@ -44,12 +44,14 @@ namespace SARSA
                 for (int p = 0; p < numPassos; p++)          //passos
                 {
                     estadosTreino.Add(estado); //adicona o estado na lista para mais tarde vermos o treino @TEMP
-                    (recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
+                    (estado, acao) = FazerPasso(estado, acao);
+
+                    /*(recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
                     //CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem
                     acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
                     recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen
                     estado = estadoLinha;   //atualizar estado (s <- s')
-                    acao = acaoLinha;       //atualizar acao (a <- a')
+                    acao = acaoLinha;       //atualizar acao (a <- a')*/
 
                     if (ambiente.IsTerminal(estado))
                     {  //acaba os passos quando estado (s) for terminal
@@ -59,13 +61,13 @@ namespace SARSA
                 }
             }
             return estadosTreino;
-        }*/
+        }
 
-        public (double[] estado, int acao) FazerPasso(double[] estado, int acao)
+        public override(double[] estado, int acao) FazerPasso(double[] estado, int acao) //a unica modificacao do Sarsa é feita no passo
         {
             (double recompensa, double[] estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
             int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
-            recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen
+            recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen (THIS ONE)
 
             return (estadoLinha, acaoLinha);
         }

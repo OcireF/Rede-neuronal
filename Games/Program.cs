@@ -1,7 +1,6 @@
 ﻿using Raylib_cs;
 using SARSA;
 using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
 class Program
 {
     static void Main(string[] args)
@@ -13,37 +12,39 @@ class Program
 
             Console.WriteLine(
                 "Textes Parte 2.1/2.2\n" +
-                "(1) - Random small  ( 5x5 ) Labirinto\n" +
-                "(2) - Random Medion (15x15) Labirinto\n" +
-                "(3) - Random Big    (50x50) Labirinto\n" +
-                "(4) - Load mapa e politicas guardadas e faz um novo treino\n" +
+                "(1) - Random small  ( 5x5 ) Labirinto (Sarsa)\n" +
+                "(2) - Random Medium (15x15) Labirinto (Sarsa)\n" +
+                "(3) - Random Big    (50x50) Labirinto (Sarsa)\n" +
                 "Textes Parte 2.2\n" +
-                "(5) - Criar graficos de treino Sarsa vs Q-Learning\n" +
-                "\nNotes:\n" +
-                "O calculo do algorimo é feito antes do visual, o visual é apenas para visualização\n" +
+                "(4) - Load mapa e politicas guardadas e faz um novo treino (Sarsa e Q-Learning)\n" +
+                "(5) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
+                "\n Notes:\n" +
+                "Algoritmo Primario - algorimo do primeiro agente" +
                 "\nBotões:\n" +
-                "N - Novo labirinto\n" +
-                "P - Faz um novo treino com efen=0 e mostra a sua ultima volta no labirinto\n" +
-                "S - Salva o labirinto e a politica atual\n"
+                "N - Novo labirinto Usando Agentes (Sarsa)\n" +
+                "P - Modifica o efen para 0 (apenas para o Algorimo Primario)\n" +
+                "A - Apresenta as Setas do algorimo (apenas para o Algorimo Primario)" +
+                "S - Salva o labirinto e a politica atual (apenas para o Algorimo Primario)\n"
                 );
             Console.Write("Choice: ");
             test = Convert.ToInt32(Console.ReadLine());
+            SetupWindow();
             switch (test)
             {
                 case 1:
-                    LabirintoBase((5, 5), 300);
+                    LabirintoAgentesSarsa((5, 5), 300);
                     break;
                 case 2:
-                    LabirintoBase((15, 15), 5000);
+                    LabirintoAgentesSarsa((15, 15), 5000);
                     break;
                 case 3:
-                    LabirintoBase((50, 50), 5000);
+                    LabirintoAgentesSarsa((50, 50), 5000);
                     break;
                 case 4:
-                    LabirintoBase((0,0), 100, "Labirinto"); //não defene o size porque vai ser lido do ficheiro
+                    LabirintoAgentesLoadMapa("Labirinto"); //não define o size porque vai ser lido do ficheiro
                     break;
                 case 5:
-
+                    LabirintoSarsaVsQ_lerning((10, 10), 500);
                     break;
             }
         }
@@ -58,18 +59,75 @@ class Program
     static int blockSize = 16;
     static double gamma = 0.99; //gama alto para ver a escada no final
     static double alfa = 0.3;
-    static double efen = 0.3; // 30% de explorar
+    static double efen = 0.1; // 10% de explorar
     static double valor_omissao = 0.0;
-    static bool showArrows = true; //mostrar as setas da politica
+    static bool showArrows = false; //mostrar as setas da politica
+    static float[] timer = { 0.001f, 0.05f , 0.1f, 0.5f }; //timer da velociade de atualização do player
+    static int timerIndex = 1; //default "0.05"
 
-    static void LabirintoAgentes((int x, int y) size, int numTreinos, string file = null)
+    static void LabirintoAgentesSarsa((int x, int y) size, int numTreinos, int numAgentes = 0)
     {
+        if (numAgentes == 0) {
+            Console.Write("Numero de agentes: ");
+            numAgentes = Convert.ToInt32(Console.ReadLine());
+        }
 
+        Labirinto labirinto = new Labirinto(size.x, size.y);
+        SARSA_Algoritmo sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
+        
+        int numPassos = size.x * size.y; //set o numero de passos para o treino
+
+        Agente[] agentes = new Agente[numAgentes]; //setup agentes
+        for (int i = 0; i < agentes.Length; i++) 
+        {
+            agentes[i] = sarsa.CreateAgente(numTreinos, numPassos);
+        }
+        ResizeWindow(size);
+        LabirintoBase(sarsa, labirinto, agentes, 4);
     }
 
-    static void LabirintoBase((int x, int y) size, int numTreinos, string file = null) //, SARSA_Algoritmo algoritmo
+    static void LabirintoAgentesLoadMapa(string file) //cria o mapa a partir do ficheiro salvado anteriormente
     {
-        Labirinto labirinto;
+        if (!File.Exists(file + ".ambiente"))
+        {
+            Console.WriteLine("Labirinto não encontrado");
+            return;
+        }
+
+        Agente[] agentes = new Agente[2]; //Sarsa
+
+        Labirinto labirinto = Labirinto.LoadAmbienteFromFile(file + ".ambiente");
+        (int x, int y) size = labirinto.GetSize(); //set size do labirinto
+        SARSA_Algoritmo sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao, file + ".sarsa");
+        Q_Learning q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao, file + ".sarsa");
+
+        int numPassos = size.x * size.y; //set o numero de passos para o treino
+
+        agentes[0] = sarsa.CreateAgente(100, numPassos);         //Sarsa
+        agentes[1] = q_Learning.CreateAgente(100, numPassos);    //Q_Learning
+
+        ResizeWindow(size);
+        LabirintoBase(sarsa, labirinto, agentes, 4);
+    }
+
+    static void LabirintoSarsaVsQ_lerning((int x, int y) size, int numTreinos)
+    {
+        Agente[] agentes = new Agente[2]; //Sarsa vs Q_Learning
+
+        Labirinto labirinto = new Labirinto(size.x, size.y);
+        SARSA_Algoritmo sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
+        Q_Learning q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao);
+
+        int numPassos = size.x * size.y; //set o numero de passos para o treino
+
+        agentes[0] = sarsa.CreateAgente(numTreinos, numPassos);         //Sarsa
+        agentes[1] = q_Learning.CreateAgente(numTreinos, numPassos);    //Q_Learning
+
+        ResizeWindow(size);
+        LabirintoBase(sarsa, labirinto, agentes, 2);
+    }
+    //LabirintoBase((int x, int y) size, int numTreinos, string file = null)
+    /*        Labirinto labirinto;
         SARSA_Algoritmo sarsa;
         Q_Learning q_Learning;
         Agente agenteSarsa; //sarsa
@@ -97,26 +155,36 @@ class Program
         {
             agentes[i] = q_Learning.CreateAgente(numTreinos, numPassos);
         }
-        //estadoSarsa = agenteSarsa.estado;
-        //var estados = sarsa.treino(numTreinos, numPassos); //pré calcula o algortimo e retorna todos os estados no treino
+     */
 
-        //var estadosQlerning = q_Learning.treino(numTreinos, numPassos);
+    static int zoom = 1;
+    //texturas
+    static Texture2D tileset;// = Raylib.LoadTexture("Assets/Floor_TileSet.png");
+    static Texture2D npcs;// = Raylib.LoadTexture("Assets/NPC.png");
+    static Texture2D arrows; //= Raylib.LoadTexture("Assets/Arrows.png");
 
-        //int playerFrame = 0;  //frame do treino
-        float timer = 0.05f; //timer da velociade de atualização do player
-        float acumulador = 0; //acumulador para contar o tempo passado
-
+    static void SetupWindow()
+    {
         Raylib.SetConfigFlags(ConfigFlags.HiddenWindow); //inddenWindow, enquanto faz setup do zoom
         Raylib.InitWindow(800, 600, "Labirinto"); // tamanho temporario
         //Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
         Raylib.SetTargetFPS(60);
 
+        //init tileset
+        tileset = Raylib.LoadTexture("Assets/Floor_TileSet.png");
+        npcs = Raylib.LoadTexture("Assets/NPC.png");
+        arrows = Raylib.LoadTexture("Assets/Arrows.png");
+        Raylib.SetTextureFilter(tileset, TextureFilter.Point); // para a pixel art nao ficar borrada
+    }
+
+    static void ResizeWindow((int x, int y) size)
+    {
         //set Max Zoom
         int monitor = Raylib.GetCurrentMonitor();
         int maxW = (int)(Raylib.GetMonitorWidth(monitor) * 0.9); //margem para as bordas laterais
         int maxH = (int)(Raylib.GetMonitorHeight(monitor) * 0.85); //margem para o titulo e borda 
 
-        int zoom = Math.Max(1, Math.Min( //captura o zoom maximo
+        zoom = Math.Max(1, Math.Min( //captura o zoom maximo
             maxW / (size.x * blockSize), //max zoom vertical
             maxH / (size.y * blockSize))); //max zoom horizontal
 
@@ -126,36 +194,32 @@ class Program
         Raylib.SetWindowSize(monitorW, monitorH);
 
         //centrar a janela do labirinto
-        Raylib.SetWindowPosition(           
+        Raylib.SetWindowPosition(
             (Raylib.GetMonitorWidth(monitor) - monitorW) / 2,
             (Raylib.GetMonitorHeight(monitor) - monitorH) / 2);
-        Console.WriteLine("w"+ monitorW + "h" + monitorH);
 
         Raylib.ClearWindowState(ConfigFlags.HiddenWindow);
+    }
 
-        //init tileset
-        Texture2D tileset = Raylib.LoadTexture("Assets/Floor_TileSet.png");
-        Texture2D npcs = Raylib.LoadTexture("Assets/NPC.png");
-        Texture2D arrows = Raylib.LoadTexture("Assets/Arrows.png");
-        Raylib.SetTextureFilter(tileset, TextureFilter.Point); // para a pixel art nao ficar borrada
+    static void LabirintoBase(IAlgoritmo algoritmo, Labirinto labirinto, Agente[] agentes, int numColors = 1) //colors para diferenciar quando usamos mais de um algoritmo
+    {
+        (int x, int y) size = labirinto.GetSize();
+
+        float acumulador = 0;//acumulador para contar o tempo passado
+
+        
 
         while (!Raylib.WindowShouldClose())
         {
             acumulador += Raylib.GetFrameTime();
 
-            if (acumulador >= timer) //para controlar a velocidade de update do player nos estados
+            if (acumulador >= timer[timerIndex]) //para controlar a velocidade de update do player nos estados
             {
-                acumulador -= timer;
+                acumulador -= timer[timerIndex];
                 //agenteSarsa.RunPasso();//faz 1 passo
                 foreach (Agente a in agentes)
                 {
                     a.RunPasso();
-                }
-
-                //estadoSarsa = agenteSarsa.RunPasso(); //faz 1 passo
-                //if(playerFrame < estados.Count()-1)
-                {
-                    //playerFrame++;
                 }
             }
 
@@ -183,7 +247,7 @@ class Program
             //desenha as setas
             if (showArrows)
             {
-                var politica = sarsa.Politica;
+                var politica = algoritmo.GetPolitica();
                 foreach (double[] position in politica.Keys)
                 {
                     int acao = 5; //acao erro no visual
@@ -203,17 +267,12 @@ class Program
                 }
             }
 
-            //draw Player (sempre em cima de tudo o resto) SARSA
-            var player = agenteSarsa.GetCurretEstado();//estadoSarsa;//estados[playerFrame];
-            Rectangle playerSprite = new Rectangle(0, 0, blockSize, blockSize);
-            Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
-            Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
-
+            //draw Player (sempre em cima de tudo o resto)
             for(int i = 0; i < agentes.Length; i++) //draw agentes
             {
                 //draw Player (sempre em cima de tudo o resto) Q-lerning
                 var player2 = agentes[i].GetCurretEstado();
-                Rectangle playerSprite2 = new Rectangle(0, 16, blockSize, blockSize);
+                Rectangle playerSprite2 = new Rectangle(0, ((i % numColors)) * 16, blockSize, blockSize);
                 Rectangle playerDestino2 = new Rectangle((int)player2[0] * blockSize * zoom, (int)player2[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
                 Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);
             }
@@ -224,34 +283,53 @@ class Program
 
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
             {
-                labirinto = new Labirinto(size.x, size.y);
-                sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
-                agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos);
-                //estadoSarsa = agenteSarsa.estado;
-                //estados.Clear();
-                //estados = sarsa.treino(numTreinos, numPassos);
-                //showArrows = false;
-                //playerFrame = 0;
+                LabirintoAgentesSarsa(size, 5000, agentes.Length); //cria um novo labirinto com o mesmo mumero de agentes Sarsa
             }
             if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
             {
-                sarsa.efen = 0.0; //para não explorar mais
-                q_Learning.efen = 0.0;
-                //agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos);
-                //estadoSarsa = agenteSarsa.estado;
-                //estados.Clear();
-                //estados = sarsa.treino(numTreinos, numPassos, true);
-                //showArrows = true;
-                //playerFrame = 0;
+                algoritmo.ChangeEfen(-algoritmo.GetEfen()); //defene o efen a 0
             }
-            /*if (Raylib.IsKeyPressed(KeyboardKey.Right))
+            if (Raylib.IsKeyPressed(KeyboardKey.A)) //Aproveitar o treino
             {
-                estadoSarsa = agenteSarsa.RunPasso(); //faz 1 passo
-            }*/
+                showArrows = !showArrows;
+            }
             if (Raylib.IsKeyPressed(KeyboardKey.S)) //Aproveitar o treino
             {
-                sarsa.SavePoliticaOnFile("Labirinto");
+                algoritmo.SavePoliticaOnFile("Labirinto");
                 Console.WriteLine("Save Done do Labirinto e Politica");
+            }
+            if (Raylib.IsKeyPressed(KeyboardKey.Up))
+            {
+                updateSpeed(1);
+            }
+            if (Raylib.IsKeyPressed(KeyboardKey.Down))
+            {
+                updateSpeed(-1);
+            }
+        }
+        static void updateSpeed(int update)
+        {
+            if(update >= 1) //aumentar velocidade
+            {
+                if(timerIndex == 0) //velociade maxima
+                {
+                    return;
+                }
+                else
+                {
+                    timerIndex += -1;
+                }
+            }
+            else //diminuir
+            {
+                if (timerIndex == timer.Length-1) //velociade maxima
+                {
+                    return;
+                }
+                else
+                {
+                    timerIndex += 1;
+                }
             }
         }
     }

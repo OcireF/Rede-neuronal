@@ -98,7 +98,7 @@ class Program
 
     static void LabirintoAgentesLoadMapa(string file) //cria o mapa a partir do ficheiro salvado anteriormente
     {
-        if (!File.Exists(file + ".ambiente"))
+        if (!File.Exists(AppContext.BaseDirectory + file + ".ambiente"))
         {
             Console.WriteLine("Labirinto não encontrado");
             return;
@@ -201,9 +201,9 @@ class Program
         Raylib.SetTargetFPS(60);
 
         //init tileset
-        tileset = Raylib.LoadTexture("Assets/Floor_TileSet.png");
-        npcs = Raylib.LoadTexture("Assets/NPC.png");
-        arrows = Raylib.LoadTexture("Assets/Arrows.png");
+        tileset = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/Floor_TileSet.png");
+        npcs = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/NPC.png");
+        arrows = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/Arrows.png");
         Raylib.SetTextureFilter(tileset, TextureFilter.Point); // para a pixel art nao ficar borrada
     }
 

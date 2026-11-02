@@ -40,6 +40,8 @@ class Program
                 "(4) - Load mapa e politicas guardadas e faz um novo treino (Sarsa e Q-Learning)\n" +
                 "(5) - Random Medium (15x15) Labirinto (Q-Learning)\n" +
                 "(6) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
+                "Programa 2.3\n" +
+                "(7) - Pista de corrida\n" +
                 "\n Notes:\n" +
                 "Algoritmo Primario - algorimo do primeiro agente" +
                 "\nBotões:\n" +
@@ -70,6 +72,9 @@ class Program
                     break;
                 case 6:
                     LabirintoSarsaVsQ_lerning((10, 10), 500);
+                    break;
+                case 7:
+                    PistaCorrida((15, 15));
                     break;
             }
         }
@@ -160,38 +165,38 @@ class Program
         ResizeWindow(size);
         LabirintoBase(sarsa, labirinto, agentes, 2);
     }
-    //LabirintoBase((int x, int y) size, int numTreinos, string file = null)
-    /*        Labirinto labirinto;
-        SARSA_Algoritmo sarsa;
-        Q_Learning q_Learning;
-        Agente agenteSarsa; //sarsa
-        Agente[] agentes = new Agente[20]; //Q_Learning
-        //double[] estadoSarsa;
 
-        if (file == null)
+    static void PistaCorrida((int x, int y) size)
+    {
+        PistaCorrida pista = new PistaCorrida(size);
+
+        DrawPista(null, pista);
+
+    }
+    static void DrawPista(IAlgoritmo algoritmo, PistaCorrida pista)
+    {
+        (int x, int y) size = pista.GetSize();
+        ResizeWindow(size);
+
+        while (!Raylib.WindowShouldClose())
         {
-            labirinto = new Labirinto(size.x, size.y);
-            sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao);
-            q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao);
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Black);
+
+            for (int x = 0; x < size.x; x++) //desenha o labirinto
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    //draw tile
+                    var tileIndex = pista.getFloorData(x, y); //O indice começa no -1 (buraco,flor,wall)
+                    Rectangle tile = new Rectangle(tileIndex * blockSize, 16, blockSize, blockSize);
+                    Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                    Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, Color.White);
+                }
+            }
+            Raylib.EndDrawing();
         }
-        else //ler labirinto e politicas de ficheiros
-        {
-            labirinto = Labirinto.LoadAmbienteFromFile(file + ".ambiente");
-            size = labirinto.GetSize(); //set size do labirinto
-            sarsa = new SARSA_Algoritmo(labirinto, gamma, alfa, efen, valor_omissao, file + ".sarsa");
-            q_Learning = new Q_Learning(labirinto, gamma, alfa, efen, valor_omissao);
-        }
-
-        int numPassos = size.x * size.y; //set o numero de passos para o treino
-        agenteSarsa = sarsa.CreateAgente(numTreinos, numPassos); //cria o agente para o treino
-
-        for(int i = 0; i< agentes.Length; i++) //setup agentes
-        {
-            agentes[i] = q_Learning.CreateAgente(numTreinos, numPassos);
-        }
-     */
-
-
+    }
 
     static void SetupWindow()
     {
@@ -257,7 +262,7 @@ class Program
                 {
                     //draw tile
                     var tileIndex = labirinto.getFloorData(x, y) + 1; //O indice começa no -1 (buraco,flor,wall)
-                    Rectangle tile = new Rectangle(tileIndex * blockSize, tileIndex * blockSize, blockSize, blockSize);
+                    Rectangle tile = new Rectangle(tileIndex * blockSize, 0, blockSize, blockSize);
                     Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
                     Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, Color.White);
                 }
@@ -302,8 +307,6 @@ class Program
                 Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);
             }
 
-
-
             Raylib.EndDrawing();
 
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
@@ -332,6 +335,7 @@ class Program
                 updateSpeed(-1);
             }
         }
+
         static void updateSpeed(int update)
         {
             if(update >= 1) //aumentar velocidade

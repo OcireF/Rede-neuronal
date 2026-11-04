@@ -17,8 +17,8 @@ namespace SARSA
         public PistaCorrida((int x,int y) size) 
         {
             InitFloor(size.x, size.y);
+            start = (2, 2);
             SquareRoad(size);
-            start = (2,2);
         }
 
         public void InitFloor(int sizeX, int sizeY) //init all at 0
@@ -85,12 +85,16 @@ namespace SARSA
 
         public List<int> AcoesPossiveis(double[] estado)
         {
-            throw new NotImplementedException();
+            return new List<int> { -1, 0, 1 }; // -1 esquerda, 0 frente, 1 direita
         }
 
         public double[] ExecutarAcao(double[] estado, int a)
         {
-            throw new NotImplementedException();
+            (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
+            int direcao = (int)estado[2];
+
+            return new double[] { posicao.x, posicao.y, (direcao + a) % 4 };
+
         }
 
         public (int x, int y) GetSize()
@@ -104,7 +108,7 @@ namespace SARSA
 
         public double[] GetInicialState()
         {
-            return new double[] { start.x, start.y };
+            return new double[] { start.x, start.y , 3}; //position x, position y, direcao
         }
 
         public double GetRecompensa(double[] estado)

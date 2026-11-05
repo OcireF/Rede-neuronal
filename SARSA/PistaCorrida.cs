@@ -85,16 +85,60 @@ namespace SARSA
 
         public List<int> AcoesPossiveis(double[] estado)
         {
-            return new List<int> { -1, 0, 1 }; // -1 esquerda, 0 frente, 1 direita
+            return new List<int> { 0, 1, 2 , 3, 4}; // 0 esquerda, 1 frente, 2 direita, 3 acelerar, 4 desacelerar
         }
 
         public double[] ExecutarAcao(double[] estado, int a)
         {
             (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
             int direcao = (int)estado[2];
+            int aceleracao = (int)estado[3];
 
-            return new double[] { posicao.x, posicao.y, (direcao + a) % 4 };
+            (int x, int y) NovaPosicao = posicao;
+            switch (direcao)
+            {
+                case 0: //esquerda
+                    NovaPosicao.x -= aceleracao;
+                    break;
+                case 1: //cima
+                    NovaPosicao.y -= aceleracao;
+                    break;
+                case 2: //direita
+                    NovaPosicao.x += aceleracao;
+                    break;
+                case 3: //baixo
+                    NovaPosicao.y += aceleracao;
+                    break;
+            }
+            NovaPosicao = CheckObstaculos(posicao,NovaPosicao);
 
+            //faz a mudança de direção
+            if (a < 3) //direita, frente, esquerda
+            {
+                direcao = (direcao + a) % 4;
+            }
+
+            return new double[] { NovaPosicao.x, NovaPosicao.y, direcao };
+
+        }
+        public (int x, int y) CheckObstaculos((int x, int y) posicao, (int x, int y) novaPosicao)
+        {
+            int moveX = novaPosicao.x - posicao.x;
+            int dx = moveX != 0 ? (moveX > 0 ? 1 : -1) : 0; //direcao do movimento X
+            int moveY = novaPosicao.y - posicao.y;
+            int dy = moveY != 0 ? (moveY > 0 ? 1 : -1) : 0; //direcao do movimento Y
+
+            for (int x = posicao.x; x != novaPosicao.x; x = x + dx)
+            {
+                for (int y = posicao.y; y != novaPosicao.y; y = y + dy)
+                {
+                    if (mapa[x][y] == 2)
+                    {
+                        return (x,y); //colidiu com parede, retorna a posiçao da batida
+                    }
+                }
+            }
+            return novaPosicao; //não colidiu, retorna a nova posição
         }
 
         public (int x, int y) GetSize()
@@ -108,7 +152,7 @@ namespace SARSA
 
         public double[] GetInicialState()
         {
-            return new double[] { start.x, start.y , 3}; //position x, position y, direcao
+            return new double[] { start.x, start.y , 3, 0}; //position x, position y, direcao, velocidade
         }
 
         public double GetRecompensa(double[] estado)

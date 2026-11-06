@@ -157,6 +157,8 @@ namespace SARSA
 
         public double GetRecompensa(double[] estado)
         {
+
+
             throw new NotImplementedException();
         }
 

@@ -201,7 +201,7 @@ class Program
     static void SetupWindow()
     {
         Raylib.SetConfigFlags(ConfigFlags.HiddenWindow); //inddenWindow, enquanto faz setup do zoom
-        Raylib.InitWindow(800, 600, "Labirinto"); // tamanho temporario
+        Raylib.InitWindow(800, 600, "App"); // tamanho temporario
         //Raylib.InitWindow(size.x * blockSize * zoom, size.y * blockSize * zoom, "Labirinto");
         Raylib.SetTargetFPS(60);
 
@@ -308,29 +308,29 @@ class Program
             }
 
             Raylib.EndDrawing();
-
+            //@temp Implemetar switch case
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
             {
                 LabirintoAgentesSarsa(size, 5000, agentes.Length); //cria um novo labirinto com o mesmo mumero de agentes Sarsa
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
+            else if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
             {
                 algoritmo.ChangeEfen(-algoritmo.GetEfen()); //defene o efen a 0
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.A)) //Aproveitar o treino
+            else if(Raylib.IsKeyPressed(KeyboardKey.A)) //Aproveitar o treino
             {
                 showArrows = !showArrows;
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.S)) //Aproveitar o treino
+            else if(Raylib.IsKeyPressed(KeyboardKey.S)) //Aproveitar o treino
             {
                 algoritmo.SavePoliticaOnFile("Labirinto");
                 Console.WriteLine("Save Done do Labirinto e Politica");
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.Up))
+            else if(Raylib.IsKeyPressed(KeyboardKey.Up))
             {
                 updateSpeed(1);
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.Down))
+            else if(Raylib.IsKeyPressed(KeyboardKey.Down))
             {
                 updateSpeed(-1);
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,14 +11,19 @@ namespace SARSA
     {
         public int[][] mapa;
         private (int x, int y) start; //start defaut
+        private (int x, int y) end; //start defaut
+        private int minSpeed = -1;
+        private int maxSpeed = 3;
         //0 grass
         //1 pista
         //2 parede
+        private Dictionary<int, Rectangle> checkPoints = new Dictionary<int, Rectangle>();
 
         public PistaCorrida((int x,int y) size) 
         {
             InitFloor(size.x, size.y);
-            start = (2, 2);
+            start = (size.x - 4, size.y/2);
+            end = (2, size.y / 2);
             SquareRoad(size);
         }
 
@@ -62,20 +68,26 @@ namespace SARSA
             }
 
             //midle blocks
-            (int x, int y) midle = (size.x/2, size.y/2);
+            (int x, int y) midle = (size.x / 2, size.y / 2);
 
-            for (int x = midle.x - 2; x <= midle.x + 2; x++) 
+            for (int x = midle.x - 2; x <= midle.x + 2; x++)
             {
                 mapa[x][midle.y + 2] = 2;
                 mapa[x][midle.y - 2] = 2;
             }
 
-            for (int y = midle.y - 2; y <= midle.y + 2; y++) 
+            for (int y = midle.y - 2; y <= midle.y + 2; y++)
             {
-                mapa[midle.x + 2][y] = 2;  
+                mapa[midle.x + 2][y] = 2;
                 mapa[midle.x - 2][y] = 2;
             }
+            checkPoints.Add(0, new Rectangle(size.x / 2, size.y / 2, 1, size.y / 2));//meio do meio
+            checkPoints.Add(1, new Rectangle(0, size.y / 2, size.x / 2, 1));//meio esquerda
+            checkPoints.Add(2, new Rectangle(size.x / 2, 0, 1, size.y / 2));
+            checkPoints.Add(3, new Rectangle(size.x - 1, size.y / 2, size.x / 2, 1));//meio da direita (meta)
 
+            //meta temp
+            mapa[2][size.y / 2] = 3;
         }
 
         public static IAmbiente LoadAmbienteFromFile(string fileName)
@@ -85,7 +97,7 @@ namespace SARSA
 
         public List<int> AcoesPossiveis(double[] estado)
         {
-            return new List<int> { 0, 1, 2 , 3, 4}; // 0 esquerda, 1 frente, 2 direita, 3 acelerar, 4 desacelerar
+            return new List<int> { 0, 1, 2 }; // 0 esquerda, 1 frente, 2 direita, 3 desacelerar, 4 acelerar
         }
 
         public double[] ExecutarAcao(double[] estado, int a)
@@ -93,7 +105,19 @@ namespace SARSA
             (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
             int direcao = (int)estado[2];
             int aceleracao = (int)estado[3];
+            int checkPoints = (int)estado[4];
 
+            //troca de mudanças
+            if (a == 3)
+            {
+                aceleracao = ChangeSpeed(aceleracao, -1); 
+            }
+            else if(a == 4)
+            {
+                aceleracao = ChangeSpeed(aceleracao, 1);
+            }
+
+            //movimento
             (int x, int y) NovaPosicao = posicao;
             switch (direcao)
             {
@@ -110,35 +134,56 @@ namespace SARSA
                     NovaPosicao.y += aceleracao;
                     break;
             }
+
+            //fazer checks
             NovaPosicao = CheckObstaculos(posicao,NovaPosicao);
 
             //faz a mudança de direção
             if (a < 3) //direita, frente, esquerda
             {
-                direcao = (direcao + a) % 4;
+                direcao = ((direcao + (a - 1)) % 4 + 4) % 4;
             }
 
-            return new double[] { NovaPosicao.x, NovaPosicao.y, direcao };
+            return new double[] { NovaPosicao.x, NovaPosicao.y, direcao, aceleracao, checkPoints};
 
         }
         public (int x, int y) CheckObstaculos((int x, int y) posicao, (int x, int y) novaPosicao)
         {
             int moveX = novaPosicao.x - posicao.x;
-            int dx = moveX != 0 ? (moveX > 0 ? 1 : -1) : 0; //direcao do movimento X
             int moveY = novaPosicao.y - posicao.y;
+            int dx = moveX != 0 ? (moveX > 0 ? 1 : -1) : 0; //direcao do movimento X
             int dy = moveY != 0 ? (moveY > 0 ? 1 : -1) : 0; //direcao do movimento Y
+            (int x, int y) passo = (dx, dy);
 
-            for (int x = posicao.x; x != novaPosicao.x; x = x + dx)
+            for ((int x, int y) p = posicao; 
+                p.x != novaPosicao.x || p.y != novaPosicao.y;
+                p.x += passo.x, p.y += passo.y)
             {
-                for (int y = posicao.y; y != novaPosicao.y; y = y + dy)
+                if (mapa[p.x][p.y] == 2)
                 {
-                    if (mapa[x][y] == 2)
-                    {
-                        return (x,y); //colidiu com parede, retorna a posiçao da batida
-                    }
+                    return p; //colidiu com parede, retorna a posiçao da batida
                 }
             }
             return novaPosicao; //não colidiu, retorna a nova posição
+        }
+        public int CheckCheckPoint(int CheckPointAtual)
+        {
+            return CheckPointAtual;
+        }
+        public int ChangeSpeed(int old,int update)
+        {
+            return 1;
+            var newSpeed = old + update;
+            if (newSpeed < minSpeed)
+            {
+                return minSpeed;
+            }
+            else if (newSpeed > maxSpeed)
+            {
+                return maxSpeed;
+            }
+
+            return newSpeed;
         }
 
         public (int x, int y) GetSize()
@@ -152,19 +197,44 @@ namespace SARSA
 
         public double[] GetInicialState()
         {
-            return new double[] { start.x, start.y , 3, 0}; //position x, position y, direcao, velocidade
+            return new double[] { start.x, start.y , 3, 1, 0}; //position x, position y, direcao, velocidade, checkPoint
         }
 
         public double GetRecompensa(double[] estado)
         {
+            (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
+            var info = mapa[posicao.x][posicao.x];
+            if (info == 2) //Parede
+            {
+                return -100;
+            }
+            else if (info == 0) //relva
+            {
+                return -1;
+            }
+            else if (info == 3)//meta
+            {
+                return 100;
+            }
+            /*else
+            {
+                return 10 - Math.Sqrt( (end.x - posicao.x) * (end.x - posicao.x) + (end.y - posicao.y) * (end.y - posicao.y));
+            }*/
 
-
-            throw new NotImplementedException();
+            return 0;
         }
 
         public bool IsTerminal(double[] estado)
         {
-            throw new NotImplementedException();
+            (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
+            var info = mapa[posicao.x][posicao.y];
+
+            if (info == 2 || info == 3) //bateu na parede
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public void SaveAmbienteInStream(StreamWriter fileStream)

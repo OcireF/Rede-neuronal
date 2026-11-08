@@ -9,11 +9,11 @@ class Program
 
     static double gamma = 0.99; //gama alto para ver a escada no final
     static double alfa = 0.3;
-    static double efen = 0.1; // 10% de explorar
+    static double efen = 0.3; // 10% de explorar
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
     static float[] timer = { 0.001f, 0.05f, 0.1f, 0.5f }; //timer da velociade de atualização do player
-    static int timerIndex = 1; //default speed "0.05f"
+    static int timerIndex = 0; //default speed "0.05f"
     static float acumulador = 0; //acumulador para contar o tempo passado
 
     //window stuff
@@ -23,6 +23,7 @@ class Program
     static Texture2D tileset;// = Raylib.LoadTexture("Assets/Floor_TileSet.png");
     static Texture2D npcs;// = Raylib.LoadTexture("Assets/NPC.png");
     static Texture2D arrows; //= Raylib.LoadTexture("Assets/Arrows.png");
+    static Texture2D car;
 
     static void Main(string[] args)
     {
@@ -169,33 +170,17 @@ class Program
     static void PistaCorrida((int x, int y) size)
     {
         PistaCorrida pista = new PistaCorrida(size);
+        //SARSA_Algoritmo sarsa = new SARSA_Algoritmo(pista, gamma, alfa, efen, valor_omissao);
+        Q_Learning q_Learning = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
+        //preTreino
+        q_Learning.treino(5000, 500);
+        Agente[] agentes = new Agente[1]; //Agente
+        q_Learning.efen = 0;
+        agentes[0] = q_Learning.CreateAgente(5000, size.x * size.y);
+        //agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
 
-        DrawPista(null, pista);
+        DrawPista(q_Learning, pista, agentes);
 
-    }
-    static void DrawPista(IAlgoritmo algoritmo, PistaCorrida pista)
-    {
-        (int x, int y) size = pista.GetSize();
-        ResizeWindow(size);
-
-        while (!Raylib.WindowShouldClose())
-        {
-            Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.Black);
-
-            for (int x = 0; x < size.x; x++) //desenha o labirinto
-            {
-                for (int y = 0; y < size.y; y++)
-                {
-                    //draw tile
-                    var tileIndex = pista.getFloorData(x, y); //O indice começa no -1 (buraco,flor,wall)
-                    Rectangle tile = new Rectangle(tileIndex * blockSize, 16, blockSize, blockSize);
-                    Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
-                    Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, Color.White);
-                }
-            }
-            Raylib.EndDrawing();
-        }
     }
 
     static void SetupWindow()
@@ -209,6 +194,7 @@ class Program
         tileset = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/Floor_TileSet.png");
         npcs = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/NPC.png");
         arrows = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/Arrows.png");
+        car = Raylib.LoadTexture(AppContext.BaseDirectory + "Assets/Car.png");
         Raylib.SetTextureFilter(tileset, TextureFilter.Point); // para a pixel art nao ficar borrada
     }
 
@@ -234,6 +220,55 @@ class Program
             (Raylib.GetMonitorHeight(monitor) - monitorH) / 2);
 
         Raylib.ClearWindowState(ConfigFlags.HiddenWindow);
+    }
+
+    static void DrawPista(IAlgoritmo algoritmo, PistaCorrida pista, Agente[] agentes)
+    {
+        (int x, int y) size = pista.GetSize();
+        ResizeWindow(size);
+
+        while (!Raylib.WindowShouldClose())
+        {
+            acumulador += Raylib.GetFrameTime();
+
+            if (acumulador >= timer[timerIndex]) //para controlar a velocidade de update do player nos estados
+            {
+                acumulador -= timer[timerIndex];
+                foreach (Agente a in agentes)
+                {
+                    a.RunPasso();
+                }
+            }
+
+
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Black);
+
+            for (int x = 0; x < size.x; x++) //desenha o labirinto
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    //draw tile
+                    var tileIndex = pista.getFloorData(x, y); //O indice começa no -1 (buraco,flor,wall)
+                    Rectangle tile = new Rectangle(tileIndex * blockSize, 16, blockSize, blockSize);
+                    Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                    Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, Color.White);
+                }
+            }
+
+            //draw Player (sempre em cima de tudo o resto)
+            for (int i = 0; i < agentes.Length; i++) //draw agentes
+            {
+                //draw Player (sempre em cima de tudo o resto) Q-lerning
+                var player = agentes[i].GetCurretEstado();
+                Rectangle playerSprite = new Rectangle((int)player[2] * blockSize * 2, 0, blockSize * 2, blockSize * 2);
+                Rectangle playerDestino = new Rectangle(((int)player[0] * blockSize - 8) * zoom, ((int)player[1] * blockSize - 8) * zoom, blockSize * 2 * zoom, blockSize * 2 * zoom);
+                Raylib.DrawTexturePro(car, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
+            }
+
+
+            Raylib.EndDrawing();
+        }
     }
 
     static void LabirintoBase(IAlgoritmo algoritmo, Labirinto labirinto, Agente[] agentes, int numColors = 1) //colors para diferenciar quando usamos mais de um algoritmo
@@ -308,6 +343,7 @@ class Program
             }
 
             Raylib.EndDrawing();
+
             //@temp Implemetar switch case
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //Novo labirinto
             {

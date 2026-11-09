@@ -13,7 +13,7 @@ class Program
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
     static float[] timer = { 0.001f, 0.05f, 0.1f, 0.5f }; //timer da velociade de atualização do player
-    static int timerIndex = 0; //default speed "0.05f"
+    static int timerIndex = 2; //default speed "0.05f"
     static float acumulador = 0; //acumulador para contar o tempo passado
 
     //window stuff

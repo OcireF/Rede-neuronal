@@ -83,7 +83,7 @@ namespace SARSA
             }
             checkPoints.Add(0, new Rectangle(size.x / 2, size.y / 2, 1, size.y / 2));//meio do meio
             checkPoints.Add(1, new Rectangle(0, size.y / 2, size.x / 2, 1));//meio esquerda
-            checkPoints.Add(2, new Rectangle(size.x / 2, 0, 1, size.y / 2));
+            checkPoints.Add(2, new Rectangle(size.x / 2, 0, 1, size.y / 2));//meio cima
             checkPoints.Add(3, new Rectangle(size.x - 1, size.y / 2, size.x / 2, 1));//meio da direita (meta)
 
             //meta temp
@@ -97,7 +97,7 @@ namespace SARSA
 
         public List<int> AcoesPossiveis(double[] estado)
         {
-            return new List<int> { 0, 1, 2 }; // 0 esquerda, 1 frente, 2 direita, 3 desacelerar, 4 acelerar
+            return new List<int> { 0, 1, 2 , 3, 4}; // 0 esquerda, 1 frente, 2 direita, 3 desacelerar, 4 acelerar
         }
 
         public double[] ExecutarAcao(double[] estado, int a)
@@ -172,7 +172,7 @@ namespace SARSA
         }
         public int ChangeSpeed(int old,int update)
         {
-            return 1;
+            //return 1;
             var newSpeed = old + update;
             if (newSpeed < minSpeed)
             {
@@ -197,13 +197,13 @@ namespace SARSA
 
         public double[] GetInicialState()
         {
-            return new double[] { start.x, start.y , 3, 1, 0}; //position x, position y, direcao, velocidade, checkPoint
+            return new double[] { start.x, start.y , 3, 0, 0}; //position x, position y, direcao, velocidade, checkPoint
         }
 
         public double GetRecompensa(double[] estado)
         {
             (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
-            var info = mapa[posicao.x][posicao.x];
+            var info = mapa[posicao.x][posicao.y];
             if (info == 2) //Parede
             {
                 return -100;

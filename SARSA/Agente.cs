@@ -21,6 +21,7 @@ namespace SARSA
         private int numEpisodios;
         private int passo = 0;
         private int numPassos;
+        private int AgenteID = 0;
 
         public Agente(IAlgoritmo algoritmo, IAmbiente ambiente, int numEpisodios, int numPassos)
         {
@@ -29,7 +30,8 @@ namespace SARSA
             this.numEpisodios = numEpisodios;
             this.numPassos = numPassos;
             //estado inicial e acao escolhida
-            estado = ambiente.GetInicialState();
+            AgenteID = ambiente.RegistarAgente();
+            estado = ambiente.GetInicialState(AgenteID);
             acao = algoritmo.seleccionar_acao(estado);
         }
 
@@ -41,7 +43,7 @@ namespace SARSA
             }
             if(passo > numPassos || ambiente.IsTerminal(estado)) //reiniciar para um novo episodio
             {
-                estado = ambiente.GetInicialState(); //estado inicial
+                estado = ambiente.GetInicialState(AgenteID); //estado inicial
                 acao = algoritmo.seleccionar_acao(estado);
 
                 episodio += 1; //proximo episodio

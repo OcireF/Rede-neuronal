@@ -148,9 +148,9 @@ namespace SARSA
             return estadosTreino;
         }
 
-        public virtual (double[] estado,int acao) FazerPasso(double[] estado,int acao)
+        public virtual (double[] estado,int acao) FazerPasso(double[] estado,int acao, int agenteID = 0)
         {
-            (double recompensa, double[] estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
+            (double recompensa, double[] estadoLinha) = executar_acao(estado, acao, agenteID);//Executar ação "a"
             int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
             recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha, ambiente.IsTerminal(estadoLinha)); //if s' is terminal
 
@@ -222,10 +222,10 @@ namespace SARSA
         }
 
         //executar a acao selecionada e retornar a recompensa e o estado resultante
-        public (double recompensa, double[] estadoLinha) executar_acao(double[] estado, int acao)
+        public (double recompensa, double[] estadoLinha) executar_acao(double[] estado, int acao, int agenteID)
         {
-            var estadoLinha = ambiente.ExecutarAcao(estado, acao); // ver o novo estado
-            var recompensa = ambiente.GetRecompensa(estadoLinha); // recompensa do novo estado
+            var estadoLinha = ambiente.ExecutarAcao(estado, acao, agenteID); // ver o novo estado
+            var recompensa = ambiente.GetRecompensa(estadoLinha, agenteID); // recompensa do novo estado
             return (recompensa, estadoLinha);
         }
 

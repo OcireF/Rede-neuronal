@@ -13,7 +13,7 @@ class Program
     static double valor_omissao = 0.0;
     static bool showArrows = false; //mostrar as setas da politica
     static float[] timer = { 0.001f, 0.05f, 0.1f, 0.5f }; //timer da velociade de atualização do player
-    static int timerIndex = 2; //default speed "0.05f"
+    static int timerIndex = 1; //default speed "0.05f"
     static float acumulador = 0; //acumulador para contar o tempo passado
 
     //window stuff
@@ -172,13 +172,22 @@ class Program
         PistaCorrida pista = new PistaCorrida(size);
         //SARSA_Algoritmo sarsa = new SARSA_Algoritmo(pista, gamma, alfa, efen, valor_omissao);
         Q_Learning q_Learning = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
+        Q_Learning q_Learning2 = new Q_Learning(pista, gamma, alfa, efen, valor_omissao); 
+        Q_Learning q_Learning3 = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
+
         //preTreino
-        //q_Learning.treino(5000, size.x * size.y);
-        Agente[] agentes = new Agente[3]; //Agente
+        q_Learning.treino(5000, size.x * size.y);
         q_Learning.efen = 0;
+        q_Learning2.treino(5000, size.x * size.y);
+        q_Learning2.efen = 0;
+        q_Learning3.treino(5000, size.x * size.y);
+        q_Learning3.efen = 0;
+
+        //3 carros com resultados diferentes
+        Agente[] agentes = new Agente[3]; //Agente
         agentes[0] = q_Learning.CreateAgente(5000, size.x * size.y);
-        agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
-        agentes[2] = q_Learning.CreateAgente(5000, size.x * size.y);
+        agentes[1] = q_Learning2.CreateAgente(5000, size.x * size.y);
+        agentes[2] = q_Learning3.CreateAgente(5000, size.x * size.y);
         //agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
 
         DrawPista(q_Learning, pista, agentes);
@@ -251,7 +260,7 @@ class Program
                 for (int y = 0; y < size.y; y++)
                 {
                     //draw tile
-                    var tileIndex = pista.getFloorData(x, y); //O indice começa no -1 (buraco,flor,wall)
+                    var tileIndex = pista.getFloorData(x, y);
                     Rectangle tile = new Rectangle(tileIndex * blockSize, 16, blockSize, blockSize);
                     Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
                     Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, Color.White);
@@ -263,10 +272,26 @@ class Program
             {
                 //draw Player (sempre em cima de tudo o resto) Q-lerning
                 var player = agentes[i].GetCurretEstado();
-                Rectangle playerSprite = new Rectangle((int)player[2] * blockSize * 2, 0, blockSize * 2, blockSize * 2);
+                Rectangle playerSprite = new Rectangle((int)player[2] * blockSize * 2, ((i % 3)) * 32, blockSize * 2, blockSize * 2);
                 Rectangle playerDestino = new Rectangle(((int)player[0] * blockSize - 8) * zoom, ((int)player[1] * blockSize - 8) * zoom, blockSize * 2 * zoom, blockSize * 2 * zoom);
                 Raylib.DrawTexturePro(car, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
             }
+
+            //draw the checkPoits para visualizar ele a passar por eles
+            var checkpoints = pista.GetCheckPoints();
+
+            for (int i = 0; i < checkpoints.Count ;i++)
+            {
+                Rectangle checkpoint = new Rectangle(
+                    checkpoints[i].X * blockSize * zoom, 
+                    checkpoints[i].Y * blockSize * zoom, 
+                    checkpoints[i].Width * blockSize * zoom, 
+                    checkpoints[i].Height * blockSize * zoom);
+                Color corSemiTransparente = new Color(0, 0, 255, 100);
+
+                Raylib.DrawRectangleRec(checkpoint, corSemiTransparente);
+            }
+
 
 
             Raylib.EndDrawing();
@@ -338,10 +363,10 @@ class Program
             for(int i = 0; i < agentes.Length; i++) //draw agentes
             {
                 //draw Player (sempre em cima de tudo o resto) Q-lerning
-                var player2 = agentes[i].GetCurretEstado();
-                Rectangle playerSprite2 = new Rectangle(0, ((i % numColors)) * 16, blockSize, blockSize);
-                Rectangle playerDestino2 = new Rectangle((int)player2[0] * blockSize * zoom, (int)player2[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
-                Raylib.DrawTexturePro(npcs, playerSprite2, playerDestino2, Vector2.Zero, 0f, Color.White);
+                var player = agentes[i].GetCurretEstado();
+                Rectangle playerSprite = new Rectangle(0, ((i % numColors)) * 16, blockSize, blockSize);
+                Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
             }
 
             Raylib.EndDrawing();

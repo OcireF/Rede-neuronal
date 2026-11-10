@@ -63,9 +63,9 @@ namespace SARSA
             return estadosTreino;
         }
 
-        public override(double[] estado, int acao) FazerPasso(double[] estado, int acao) //a unica modificacao do Sarsa é feita no passo
+        public override(double[] estado, int acao) FazerPasso(double[] estado, int acao, int agenteID=0 ) //a unica modificacao do Sarsa é feita no passo
         {
-            (double recompensa, double[] estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
+            (double recompensa, double[] estadoLinha) = executar_acao(estado, acao, agenteID);//Executar ação "a"
             int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
             recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen (THIS ONE)
 

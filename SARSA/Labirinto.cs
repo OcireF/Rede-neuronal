@@ -195,7 +195,7 @@ namespace SARSA
         }
 
         //reseta o ambiente e retorna o estado inicial
-        public double[] GetInicialState()
+        public double[] GetInicialState(int agenteid = 0)
         {
             //reset pointshousesUsed
             /*foreach (var key in pointshousesUsed.Keys.ToList())
@@ -208,7 +208,7 @@ namespace SARSA
         }
 
         //executa a acao e retorna o estado resultante
-        public double[] ExecutarAcao(double[] estado, int a)
+        public double[] ExecutarAcao(double[] estado, int a, int agenteid)
         {
             int x = (int)estado[0];
             int y = (int)estado[1];
@@ -252,7 +252,7 @@ namespace SARSA
             return acoesPossiveis;
         }
         //retorna a recompensa do estado
-        public double GetRecompensa(double[] estado)
+        public double GetRecompensa(double[] estado, int agenteid)
         {
             int x = (int)estado[0];
             int y = (int)estado[1];
@@ -364,6 +364,11 @@ namespace SARSA
         static IAmbiente IAmbiente.LoadAmbienteFromFile(string fileName)
         {
             return LoadAmbienteFromFile(fileName);
+        }
+
+        public int RegistarAgente()
+        {
+            return 0;
         }
     }
 }

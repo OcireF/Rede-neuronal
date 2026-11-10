@@ -42,7 +42,8 @@ class Program
                 "(5) - Random Medium (15x15) Labirinto (Q-Learning)\n" +
                 "(6) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
                 "Programa 2.3\n" +
-                "(7) - Pista de corrida\n" +
+                "(7) - Pista de corrida (treino)" +
+                "(8) - Corrida com 3 carros (Com Pre Treino)\n" +
                 "\n Notes:\n" +
                 "Algoritmo Primario - algorimo do primeiro agente" +
                 "\nBotões:\n" +
@@ -75,7 +76,13 @@ class Program
                     LabirintoSarsaVsQ_lerning((10, 10), 500);
                     break;
                 case 7:
-                    PistaCorrida((30, 15));
+                    PistaCorrida((15, 15));
+                    break;
+                case 8:
+                    PistaCorridaPreTreino((30, 15));
+                    break;
+                case 9: //TEMP
+                    PistaCorridaPreTreino((50, 50));
                     break;
             }
         }
@@ -168,6 +175,21 @@ class Program
     }
 
     static void PistaCorrida((int x, int y) size)
+    {
+        PistaCorrida pista = new PistaCorrida(size);
+        //SARSA_Algoritmo sarsa = new SARSA_Algoritmo(pista, gamma, alfa, efen, valor_omissao);
+        Q_Learning q_Learning = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
+
+        //3 carros com resultados diferentes
+        Agente[] agentes = new Agente[1]; //Agente
+        agentes[0] = q_Learning.CreateAgente(5000, size.x * size.y);
+        //agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
+
+        DrawPista(q_Learning, pista, agentes);
+
+    }
+
+    static void PistaCorridaPreTreino((int x, int y) size)
     {
         PistaCorrida pista = new PistaCorrida(size);
         //SARSA_Algoritmo sarsa = new SARSA_Algoritmo(pista, gamma, alfa, efen, valor_omissao);
@@ -293,8 +315,22 @@ class Program
             }
 
 
-
             Raylib.EndDrawing();
+            
+            //butões 
+
+            if (Raylib.IsKeyPressed(KeyboardKey.P)) //Aproveitar o treino
+            {
+                algoritmo.ChangeEfen(-algoritmo.GetEfen()); //defene o efen a 0
+            }
+            else if (Raylib.IsKeyPressed(KeyboardKey.Up)) //spped
+            {
+                updateSpeed(1);
+            }
+            else if (Raylib.IsKeyPressed(KeyboardKey.Down))
+            {
+                updateSpeed(-1);
+            }
         }
     }
 
@@ -384,7 +420,7 @@ class Program
             {
                 showArrows = !showArrows;
             }
-            else if(Raylib.IsKeyPressed(KeyboardKey.S)) //Aproveitar o treino
+            else if(Raylib.IsKeyPressed(KeyboardKey.S)) //salvar o treino
             {
                 algoritmo.SavePoliticaOnFile("Labirinto");
                 Console.WriteLine("Save Done do Labirinto e Politica");
@@ -399,31 +435,32 @@ class Program
             }
         }
 
-        static void updateSpeed(int update)
+        
+    }
+    static void updateSpeed(int update)
+    {
+        if (update >= 1) //aumentar velocidade
         {
-            if(update >= 1) //aumentar velocidade
+            if (timerIndex == 0) //velociade maxima
             {
-                if(timerIndex == 0) //velociade maxima
-                {
-                    return;
-                }
-                else
-                {
-                    acumulador = 0;//reset acumulador
-                    timerIndex += -1; //aumenta
-                }
+                return;
             }
-            else //diminuir
+            else
             {
-                if (timerIndex == timer.Length-1) //velociade minima
-                {
-                    return;
-                }
-                else
-                {
-                    acumulador = 0; //reset acumulador
-                    timerIndex += 1; //diminui
-                }
+                acumulador = 0;//reset acumulador
+                timerIndex += -1; //aumenta
+            }
+        }
+        else //diminuir
+        {
+            if (timerIndex == timer.Length - 1) //velociade minima
+            {
+                return;
+            }
+            else
+            {
+                acumulador = 0; //reset acumulador
+                timerIndex += 1; //diminui
             }
         }
     }

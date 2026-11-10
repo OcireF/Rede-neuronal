@@ -36,9 +36,6 @@ namespace SARSA
             start = (size.x - 4, size.y/2);
             //end = (2, size.y / 2);
             SquareRoad(size);
-
-            //init metadata
-            sessoes.Add(new SessaoAgente());
         }
 
         public void InitFloor(int sizeX, int sizeY) //init all at 0
@@ -216,7 +213,7 @@ namespace SARSA
         public double[] GetInicialState(int id = 0)
         {
             //reset metadata
-            sessoes[id] = new SessaoAgente();
+            sessoes[id].CurrentCheckPoint = 0;
 
             return new double[] { start.x, start.y , 3, 0, 0}; //position x, position y, direcao, velocidade, checkPoint
         }
@@ -240,15 +237,6 @@ namespace SARSA
             {
                 return -1;
             }
-
-            /*else if (info == 3)//meta
-            {
-                return 100;
-            }*/
-            /*else
-            {
-                return 10 - Math.Sqrt( (end.x - posicao.x) * (end.x - posicao.x) + (end.y - posicao.y) * (end.y - posicao.y));
-            }*/
 
             return 0;
         }
@@ -279,7 +267,7 @@ namespace SARSA
         public int RegistarAgente()
         {
             sessoes.Add(new SessaoAgente());
-            return sessoes.Count - 2;
+            return sessoes.Count - 1;
         }
     }
 }

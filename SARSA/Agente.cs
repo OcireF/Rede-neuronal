@@ -50,7 +50,7 @@ namespace SARSA
                 passo = 0; //reseta os passos
                 return estado; //estado incial
             }
-            (estado, acao) = algoritmo.FazerPasso(estado, acao); //passo feito de acordo com o algorimo, assim este agente pode funcionar para varios tipos
+            (estado, acao) = algoritmo.FazerPasso(estado, acao, AgenteID); //passo feito de acordo com o algorimo, assim este agente pode funcionar para varios tipos
 
             return estado; //o novo estado depois do passo
         }

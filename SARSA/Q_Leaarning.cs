@@ -26,6 +26,7 @@ namespace SARSA
         public override List<double[]> treino(int numEpisodios, int numPassos, bool justLastEP = false)
         {
             List<double[]> estadosTreino = new List<double[]>();
+            int ambienteID = ambiente.RegistarAgente();
             //CreatePolitica(ambiente.GetInicialState()); //Primeira politica
             //Variables
             double[] estado;                                //s
@@ -39,12 +40,12 @@ namespace SARSA
                 {
                     estadosTreino.Clear(); //limpa o Treino para guardar apenas o ultimo episodio
                 }
-                estado = ambiente.GetInicialState();        //init s
+                estado = ambiente.GetInicialState(ambienteID);        //init s
                 acao = seleccionar_acao(estado);            //seleccionar acao (a)
                 for (int p = 0; p < numPassos; p++)          //passos
                 {
                     estadosTreino.Add(estado); //adicona o estado na lista para mais tarde vermos o treino @TEMP
-                    (estado, acao) = FazerPasso(estado, acao);
+                    (estado, acao) = FazerPasso(estado, acao, ambienteID);
 
                     /*(recompensa, estadoLinha) = executar_acao(estado, acao);//Executar ação "a"
                     //CreatePolitica(estadoLinha);                                    //cria novas politicas para o novo estado caso nao existirem

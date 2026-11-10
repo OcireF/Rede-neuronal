@@ -12,7 +12,7 @@ namespace SARSA
         public int[][] mapa;
         private (int x, int y) start; //start defaut
         private (int x, int y) end; //start defaut
-        private int minSpeed = -1;
+        private int minSpeed = 1;
         private int maxSpeed = 3;
         //0 grass
         //1 pista
@@ -159,7 +159,7 @@ namespace SARSA
                 p.x != novaPosicao.x || p.y != novaPosicao.y;
                 p.x += passo.x, p.y += passo.y)
             {
-                if (mapa[p.x][p.y] == 2)
+                if (mapa[p.x][p.y] == 2 || mapa[p.x][p.y] == 3)
                 {
                     return p; //colidiu com parede, retorna a posiçao da batida
                 }

@@ -75,7 +75,7 @@ class Program
                     LabirintoSarsaVsQ_lerning((10, 10), 500);
                     break;
                 case 7:
-                    PistaCorrida((15, 15));
+                    PistaCorrida((30, 15));
                     break;
             }
         }
@@ -173,10 +173,12 @@ class Program
         //SARSA_Algoritmo sarsa = new SARSA_Algoritmo(pista, gamma, alfa, efen, valor_omissao);
         Q_Learning q_Learning = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
         //preTreino
-        q_Learning.treino(5000, 500);
-        Agente[] agentes = new Agente[1]; //Agente
+        //q_Learning.treino(5000, size.x * size.y);
+        Agente[] agentes = new Agente[3]; //Agente
         q_Learning.efen = 0;
         agentes[0] = q_Learning.CreateAgente(5000, size.x * size.y);
+        agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
+        agentes[2] = q_Learning.CreateAgente(5000, size.x * size.y);
         //agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
 
         DrawPista(q_Learning, pista, agentes);

@@ -54,7 +54,7 @@ namespace SARSA
                     estado = estadoLinha;   //atualizar estado (s <- s')
                     acao = acaoLinha;       //atualizar acao (a <- a')*/
 
-                    if (ambiente.IsTerminal(estado))
+                    if (ambiente.IsTerminal(estado, ambienteID))
                     {  //acaba os passos quando estado (s) for terminal
                         estadosTreino.Add(estado); //adiciona o estado final
                         break;
@@ -68,7 +68,7 @@ namespace SARSA
         {
             (double recompensa, double[] estadoLinha) = executar_acao(estado, acao, agenteID);//Executar ação "a"
             int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
-            recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen (THIS ONE)
+            recompensa = Aprender(estado, acao, recompensa, estadoLinha, ambiente.IsTerminal(estadoLinha, agenteID)); //no Q-lerning o s' é calculado o maxArg e mão o escolhido com efen (THIS ONE)
 
             return (estadoLinha, acaoLinha);
         }

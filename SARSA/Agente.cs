@@ -41,7 +41,7 @@ namespace SARSA
             {
                 return estado; //retorna o ultimo estado
             }
-            if(passo > numPassos || ambiente.IsTerminal(estado)) //reiniciar para um novo episodio
+            if(passo > numPassos || ambiente.IsTerminal(estado, AgenteID)) //reiniciar para um novo episodio
             {
                 estado = ambiente.GetInicialState(AgenteID); //estado inicial
                 acao = algoritmo.seleccionar_acao(estado);

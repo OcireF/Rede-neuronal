@@ -52,9 +52,9 @@ namespace SARSA
         public void CreatePolitica(double[] estado)
         {
 
-            if (ambiente.IsTerminal(estado)) // não adiciona nenhuma polita (esta no estado terminal)
+            //if (ambiente.IsTerminal(estado)) // não adiciona nenhuma polita (esta no estado terminal)
             {
-                return;
+                //return;
             }
             if (Politica.ContainsKey(estado)) // o estado já existe na politica
             {
@@ -139,7 +139,7 @@ namespace SARSA
                     estado = estadoLinha;   //atualizar estado (s <- s')
                     acao = acaoLinha;       //atualizar acao (a <- a')*/
 
-                    if (ambiente.IsTerminal(estado))
+                    if (ambiente.IsTerminal(estado, ambienteID))
                     {  //acaba os passos quando estado (s) for terminal
                         estadosTreino.Add(estado); //adiciona o estado final
                         break;
@@ -153,7 +153,7 @@ namespace SARSA
         {
             (double recompensa, double[] estadoLinha) = executar_acao(estado, acao, agenteID);//Executar ação "a"
             int acaoLinha = seleccionar_acao(estadoLinha);                      //seleccionar acao Linha (a') para um estado linha (s')
-            recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha, ambiente.IsTerminal(estadoLinha)); //if s' is terminal
+            recompensa = Aprender(estado, acao, recompensa, estadoLinha, acaoLinha, ambiente.IsTerminal(estadoLinha, agenteID)); //if s' is terminal
 
             return (estadoLinha, acaoLinha);
         }

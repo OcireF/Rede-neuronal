@@ -281,7 +281,7 @@ namespace SARSA
 
 
         //Verifica se o estado é terminal
-        public bool IsTerminal(double[] estado) //estado [x , y]
+        public bool IsTerminal(double[] estado, int id) //estado [x , y]
         {
             int x = (int) estado[0];
             int y = (int) estado[1];

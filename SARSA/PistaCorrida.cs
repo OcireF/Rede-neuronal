@@ -12,6 +12,7 @@ namespace SARSA
         public class SessaoAgente //metadados do agente
         {
             public int CurrentCheckPoint = 0; //this is the ones in metadata, o estado tem um diferente, a diferença indentifica a travessia para as reconpensas
+            public int Voltas = 0;
             //public bool PassedCheckpoint = false;
             //public int Voltas = 0;
         }
@@ -180,6 +181,10 @@ namespace SARSA
                 else if (checkPoints[currentCheckPoint].Contains(new Point(p.x, p.y))) //caso passou um checkpoint atualisa o checkPoint
                 {
                     currentCheckPoint = (currentCheckPoint + 1) % checkPoints.Count;
+                    if(currentCheckPoint == 0)//volta completa
+                    {
+                        sessoes[agenteID].Voltas++;
+                    }
                 }
             }
             return (novaPosicao,currentCheckPoint); //não colidiu, retorna a nova posição
@@ -214,6 +219,7 @@ namespace SARSA
         {
             //reset metadata
             sessoes[id].CurrentCheckPoint = 0;
+            sessoes[id].Voltas = 0;
 
             return new double[] { start.x, start.y , 3, 0, 0}; //position x, position y, direcao, velocidade, checkPoint
         }
@@ -241,7 +247,7 @@ namespace SARSA
             return 0;
         }
 
-        public bool IsTerminal(double[] estado)
+        public bool IsTerminal(double[] estado, int id)
         {
             (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
             var info = mapa[posicao.x][posicao.y];
@@ -250,7 +256,10 @@ namespace SARSA
             {
                 return true;
             }
-
+            else if (sessoes[id].Voltas >= 3)
+            {
+                return true;
+            }
             return false;
         }
 

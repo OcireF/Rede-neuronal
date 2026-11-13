@@ -42,7 +42,7 @@ class Program
                 "(5) - Random Medium (15x15) Labirinto (Q-Learning)\n" +
                 "(6) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
                 "Programa 2.3\n" +
-                "(7) - Pista de corrida (treino)" +
+                "(7) - Pista de corrida (treino)\n" +
                 "(8) - Corrida com 3 carros (Com Pre Treino)\n" +
                 "\n Notes:\n" +
                 "Algoritmo Primario - algorimo do primeiro agente" +
@@ -292,9 +292,17 @@ class Program
             //draw Player (sempre em cima de tudo o resto)
             for (int i = 0; i < agentes.Length; i++) //draw agentes
             {
-                //draw Player (sempre em cima de tudo o resto) Q-lerning
                 var player = agentes[i].GetCurretEstado();
-                Rectangle playerSprite = new Rectangle((int)player[2] * blockSize * 2, ((i % 3)) * 32, blockSize * 2, blockSize * 2);
+
+                Rectangle playerSprite;
+                if (pista.getFloorData((int)player[0], (int)player[1]) == 2)
+                {
+                    playerSprite = new Rectangle(4 * blockSize * 2, ((i % 3)) * 32, blockSize * 2, blockSize * 2);
+                }
+                else
+                {
+                    playerSprite = new Rectangle((int)player[2] * blockSize * 2, ((i % 3)) * 32, blockSize * 2, blockSize * 2); //size 32x32 para o carro
+                }
                 Rectangle playerDestino = new Rectangle(((int)player[0] * blockSize - 8) * zoom, ((int)player[1] * blockSize - 8) * zoom, blockSize * 2 * zoom, blockSize * 2 * zoom);
                 Raylib.DrawTexturePro(car, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
             }

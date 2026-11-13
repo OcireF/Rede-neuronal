@@ -18,7 +18,7 @@ namespace SARSA
         }
 
 
-        public int[][] mapa;
+        private int[][] mapa;
         private (int x, int y) start; //start defaut
         //private (int x, int y) end; //start defaut
         private int minSpeed = -1;
@@ -31,12 +31,18 @@ namespace SARSA
 
         private Dictionary<int, Rectangle> checkPoints = new Dictionary<int, Rectangle>();
 
-        public PistaCorrida((int x,int y) size)
+        public PistaCorrida((int x,int y) size)//min size (15x15)
         {
             InitFloor(size.x, size.y);
             start = (size.x - 4, size.y/2);
             //end = (2, size.y / 2);
             SquareRoad(size);
+        }
+
+        public PistaCorrida(int[][] mapa, (int x, int y) start)//min size (15x15)
+        {
+            this.mapa = mapa;
+            this.start = start;
         }
 
         public void InitFloor(int sizeX, int sizeY) //init all at 0
@@ -105,10 +111,7 @@ namespace SARSA
             //mapa[2][size.y / 2] = 3;
         }
 
-        public static IAmbiente LoadAmbienteFromFile(string fileName)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public List<int> AcoesPossiveis(double[] estado)
         {
@@ -265,7 +268,69 @@ namespace SARSA
 
         public void SaveAmbienteInStream(StreamWriter fileStream)
         {
-            throw new NotImplementedException();
+            fileStream.Write("tamanho:(" + mapa.Length + "," + mapa[0].Length + ")\n"); //tamanho
+            fileStream.Write("start:(" + start.x + "," + start.y + ")\n"); //start
+
+            fileStream.Write("labirinto:\n");
+            for (int y = 0; y < mapa[0].Length; y++)
+            {
+                var linha = Enumerable.Range(0, mapa.Length).Select(x => mapa[x][y]); //os dados na classe sao colunas, mas no ficheiro dá mais geito guardar por linhas, por isto esta tranformacao
+                fileStream.WriteLine("[" + string.Join(",", linha) + "]");
+            }
+        }
+
+        public static IAmbiente LoadAmbienteFromFile(string fileName)
+        {
+            string caminho = Path.Combine(
+                AppContext.BaseDirectory,
+                    fileName
+                );
+
+            int[][] mapa = { };
+            (int x, int y) start = (0, 0);
+            int yAtual = 0;
+
+            foreach (string linha in File.ReadLines(caminho))
+            {
+                string l = linha.Trim();
+                if (l.Length == 0 || l.StartsWith("labirinto:")) continue; //salta linhas vasias e "labirinto:"
+
+                if (l.StartsWith("tamanho:")) //load mapa
+                {
+                    var (largura, altura) = ParseCoordenada(l); //lé a largura e altura
+                    mapa = new int[largura][];                  //init mapa
+                    for (int x = 0; x < largura; x++)
+                        mapa[x] = new int[altura];
+                }
+                else if (l.StartsWith("[")) //linha a adicionar no mapa 
+                {
+                    int[] valores = l.Trim('[', ']') //remove os "[]"
+                        .Split(',')
+                        .Select(v => int.Parse(v.Trim())) //tranforma a string em inteiros
+                        .ToArray();
+
+                    for (int x = 0; x < valores.Length; x++) //escreve a linha
+                        mapa[x][yAtual] = valores[x];
+
+                    yAtual++;
+                }
+                else if (l.StartsWith("start:")) start = ParseCoordenada(l); //lé o start
+            }
+
+            return new PistaCorrida(mapa, start);
+        }
+
+        //função apenas para ler cordenadas em "LoadAmbienteFromFile" com ajuda de AI
+        private static (int x, int y) ParseCoordenada(string l)
+        {
+            // "start:(1,2)" -> (1,2)
+            int ini = l.IndexOf('(') + 1;
+            int fim = l.IndexOf(')');
+            int[] p = l.Substring(ini, fim - ini)   //remove tudo antes e depois de "(" ")"
+                       .Split(',')                  //divide os 2 numeros
+                       .Select(v => int.Parse(v.Trim()))
+                       .ToArray();                  //tranforma num array
+            return (p[0], p[1]);
         }
 
         public Dictionary<int, Rectangle> GetCheckPoints()

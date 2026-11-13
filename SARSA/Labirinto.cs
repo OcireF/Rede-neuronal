@@ -301,7 +301,6 @@ namespace SARSA
                 var linha = Enumerable.Range(0, mapa.Length).Select(x => mapa[x][y]); //os dados na classe sao colunas, mas no ficheiro dá mais geito guardar por linhas, por isto esta tranformacao
                 fileStream.WriteLine("[" + string.Join(",", linha) + "]");
             }
-
         }
 
         //Ler o Ambiente guardado num file
@@ -347,7 +346,7 @@ namespace SARSA
             return new Labirinto(mapa,start,escada);
         }
 
-        //função apenas para ler cordenadas em "LoadAmbienteFromFile"
+        //função apenas para ler cordenadas em "LoadAmbienteFromFile" com ajuda de AI
         private static (int x, int y) ParseCoordenada(string l)
         {
             // "start:(1,2)" -> (1,2)

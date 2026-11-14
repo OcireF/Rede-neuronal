@@ -20,7 +20,7 @@
     </ItemGroup>
 	
     <ItemGroup>
-      <None Update="Pista_Custom_1.ambiente">
+      <None Update="Pista_Custom_1_old.ambiente">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Pista_Custom_2.ambiente">

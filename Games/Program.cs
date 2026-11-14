@@ -44,6 +44,7 @@ class Program
                 "Programa 2.3\n" +
                 "(7) - Pista de corrida (treino)\n" +
                 "(8) - Corrida com 3 carros (Com Pre Treino)\n" +
+                "(9) - Pista Custumisada (Pre Treino)\n" +
                 "\n Notes:\n" +
                 "Algoritmo Primario - algorimo do primeiro agente" +
                 "\nBotões:\n" +
@@ -76,13 +77,13 @@ class Program
                     LabirintoSarsaVsQ_lerning((10, 10), 500);
                     break;
                 case 7:
-                    PistaCorrida((15, 15));
+                    PistaCorridaTreino((15, 15));
                     break;
                 case 8:
                     PistaCorridaPreTreino((30, 15));
                     break;
-                case 9: //TEMP
-                    PistaCorridaPreTreino((50, 50));
+                case 9: 
+                    PistaCorridaCustom("Pista_Custom_2");
                     break;
             }
         }
@@ -174,7 +175,7 @@ class Program
         LabirintoBase(sarsa, labirinto, agentes, 2);
     }
 
-    static void PistaCorrida((int x, int y) size)
+    static void PistaCorridaTreino((int x, int y) size)
     {
         PistaCorrida pista = new PistaCorrida(size);
         //SARSA_Algoritmo sarsa = new SARSA_Algoritmo(pista, gamma, alfa, efen, valor_omissao);
@@ -186,7 +187,6 @@ class Program
         //agentes[1] = q_Learning.CreateAgente(5000, size.x * size.y);
 
         DrawPista(q_Learning, pista, agentes);
-
     }
 
     static void PistaCorridaPreTreino((int x, int y) size)
@@ -214,6 +214,29 @@ class Program
 
         DrawPista(q_Learning, pista, agentes);
 
+    }
+
+    static void PistaCorridaCustom(string filename)
+    {
+        if (!File.Exists(AppContext.BaseDirectory + filename + ".ambiente"))
+        {
+            Console.WriteLine("Pista não encontrada");
+            return;
+        }
+
+        PistaCorrida pista = (PistaCorrida) PistaCorrida.LoadAmbienteFromFile(AppContext.BaseDirectory + filename + ".ambiente");
+        (int x, int y) size = pista.GetSize(); //get pista size
+        Q_Learning q_Learning = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
+
+        //pre treino
+        q_Learning.treino(500000, size.x * size.y);
+        q_Learning.efen = 0;
+
+        //agente
+        Agente[] agentes = new Agente[1]; //Agente
+        agentes[0] = q_Learning.CreateAgente(5000, size.x * size.y);
+
+        DrawPista(q_Learning, pista, agentes);
     }
 
     static void SetupWindow()
@@ -338,6 +361,11 @@ class Program
             else if (Raylib.IsKeyPressed(KeyboardKey.Down))
             {
                 updateSpeed(-1);
+            }
+            else if (Raylib.IsKeyPressed(KeyboardKey.S)) //salvar o treino
+            {
+                algoritmo.SavePoliticaOnFile("Pista");
+                Console.WriteLine("Save Done do pista e Politica");
             }
         }
     }

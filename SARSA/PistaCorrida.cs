@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SARSA
@@ -39,10 +40,11 @@ namespace SARSA
             SquareRoad(size);
         }
 
-        public PistaCorrida(int[][] mapa, (int x, int y) start)//min size (15x15)
+        public PistaCorrida(int[][] mapa, (int x, int y) start, Dictionary<int, Rectangle> checkPoints)
         {
             this.mapa = mapa;
             this.start = start;
+            this.checkPoints = checkPoints;
         }
 
         public void InitFloor(int sizeX, int sizeY) //init all at 0
@@ -108,7 +110,6 @@ namespace SARSA
             // (size.x - 4, size.y/2)
             mapa[size.x - 4][size.y / 2] = 3;
             mapa[size.x - 3][size.y / 2] = 3;
-            //mapa[2][size.y / 2] = 3;
         }
 
 
@@ -230,27 +231,29 @@ namespace SARSA
         public double GetRecompensa(double[] estado, int id)
         {
             (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
-            var info = mapa[posicao.x][posicao.y];
-            var checkpointState = estado[4];
+            int info = mapa[posicao.x][posicao.y];
+            int velocidade = (int)estado[3];
+            int checkpointState = (int)estado[4];
 
             if (info == 2) //Parede
             {
-                return -100;
+                return -50;
             }
             else if (sessoes[id].CurrentCheckPoint != checkpointState)
             {
                 sessoes[id].CurrentCheckPoint = (sessoes[id].CurrentCheckPoint + 1) % checkPoints.Count; //isto é feito para casso o estado passe multiplos checkpoins num estado
-                return 1 * (sessoes[id].CurrentCheckPoint + 1); // o +1 é caso o checkpoint atual for index 0
-            }
-            else if (info == 0) //relva
-            {
-                return -1;
+                bool voltaCompleta = sessoes[id].CurrentCheckPoint == 0; //verifica se deu 1 volta
+                return voltaCompleta ? 100 : 20; //100 pontos para 1 volta e 20 por checkpoint
             }
 
-            return 0;
+            //Recompensas por velocidade
+            double r = -0.1;               //custo base
+            if (velocidade <= 0) r -= 0.5; //parado ou marcha-atrás
+            if (info == 0) r -= 1;         //relva
+            return r;
         }
 
-        public bool IsTerminal(double[] estado, int id)
+        public bool IsTerminal(double[] estado, int id = -1)
         {
             (int x, int y) posicao = ((int)estado[0], (int)estado[1]);
             var info = mapa[posicao.x][posicao.y];
@@ -259,9 +262,12 @@ namespace SARSA
             {
                 return true;
             }
-            else if (sessoes[id].Voltas >= 3)
+            else if (id >= 0 && id < sessoes.Count) //Terminal state por causa de metadados
             {
-                return true;
+                if (sessoes[id].Voltas >= 3) //terminal por ter feito 3 voltas
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -271,11 +277,18 @@ namespace SARSA
             fileStream.Write("tamanho:(" + mapa.Length + "," + mapa[0].Length + ")\n"); //tamanho
             fileStream.Write("start:(" + start.x + "," + start.y + ")\n"); //start
 
-            fileStream.Write("labirinto:\n");
+            fileStream.Write("pista:\n");
             for (int y = 0; y < mapa[0].Length; y++)
             {
                 var linha = Enumerable.Range(0, mapa.Length).Select(x => mapa[x][y]); //os dados na classe sao colunas, mas no ficheiro dá mais geito guardar por linhas, por isto esta tranformacao
                 fileStream.WriteLine("[" + string.Join(",", linha) + "]");
+            }
+
+            for(int c = 0; c < checkPoints.Count; c++)
+            {
+                fileStream.WriteLine("checkPoint(" + c + ")=" +
+                    "(" + checkPoints[c].Left + "," + checkPoints[c].Top + ")" +
+                    "(" + checkPoints[c].Width + "," + checkPoints[c].Height + ")");
             }
         }
 
@@ -289,11 +302,12 @@ namespace SARSA
             int[][] mapa = { };
             (int x, int y) start = (0, 0);
             int yAtual = 0;
+            Dictionary<int, Rectangle> checkPoints = new Dictionary<int, Rectangle>();
 
             foreach (string linha in File.ReadLines(caminho))
             {
                 string l = linha.Trim();
-                if (l.Length == 0 || l.StartsWith("labirinto:")) continue; //salta linhas vasias e "labirinto:"
+                if (l.Length == 0 || l.StartsWith("pista:")) continue; //salta linhas vasias e "labirinto:"
 
                 if (l.StartsWith("tamanho:")) //load mapa
                 {
@@ -315,9 +329,14 @@ namespace SARSA
                     yAtual++;
                 }
                 else if (l.StartsWith("start:")) start = ParseCoordenada(l); //lé o start
+                else if (l.StartsWith("checkPoint(")) //le o checkPoint(0)=(20,20)(1,20)
+                {
+                    var (id, checkPoint) = ParseCheckPoint(l);
+                    checkPoints[id] = checkPoint;
+                }
             }
 
-            return new PistaCorrida(mapa, start);
+            return new PistaCorrida(mapa, start, checkPoints);
         }
 
         //função apenas para ler cordenadas em "LoadAmbienteFromFile" com ajuda de AI
@@ -331,6 +350,21 @@ namespace SARSA
                        .Select(v => int.Parse(v.Trim()))
                        .ToArray();                  //tranforma num array
             return (p[0], p[1]);
+        }
+
+        //função feita para ler os dados de um checkpoint feito com a ajuda da Ai  
+        private static (int id, Rectangle checkPoint) ParseCheckPoint(string l)
+        {
+            var m = Regex.Match(l, @"checkPoint\((\d+)\)=\((-?\d+),(-?\d+)\)\((-?\d+),(-?\d+)\)");
+            if (!m.Success)
+                throw new FormatException("checkPoint inválido: " + l);
+
+            int[] n = m.Groups.Cast<Group>().Skip(1)       // salta o match completo
+                        .Select(g => int.Parse(g.Value))
+                        .ToArray();
+
+            // n = id, left, top, width, height (mesma ordem do Save)
+            return (n[0], new Rectangle(n[1], n[2], n[3], n[4]));
         }
 
         public Dictionary<int, Rectangle> GetCheckPoints()

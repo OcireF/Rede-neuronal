@@ -18,5 +18,14 @@
     <ItemGroup>
 	    <None Update="Assets\**\*.*" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
+	
+    <ItemGroup>
+      <None Update="Pista_Custom_1.ambiente">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Pista_Custom_2.ambiente">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 
 </Project>

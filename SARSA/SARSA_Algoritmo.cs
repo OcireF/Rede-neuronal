@@ -52,9 +52,9 @@ namespace SARSA
         public void CreatePolitica(double[] estado)
         {
 
-            //if (ambiente.IsTerminal(estado)) // não adiciona nenhuma polita (esta no estado terminal)
+            if (ambiente.IsTerminal(estado,-1)) // não adiciona nenhuma polita (esta no estado terminal)
             {
-                //return;
+                return;
             }
             if (Politica.ContainsKey(estado)) // o estado já existe na politica
             {

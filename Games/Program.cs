@@ -42,16 +42,20 @@ class Program
                 "(5) - Random Medium (15x15) Labirinto (Q-Learning)\n" +
                 "(6) - Random Medium (10x10) Labirinto Sarsa (vermelho) vs Q-Learning (Azul)\n" +
                 "Programa 2.3\n" +
-                "(7) - Pista de corrida (treino)\n" +
+                "(7) - Pista de Corrida (treino)\n" +
                 "(8) - Corrida com 3 carros (Com Pre Treino)\n" +
-                "(9) - Pista Custumisada (Pre Treino)\n" +
-                "\n Notes:\n" +
+                "(9) - Pista Costumisada (Com Pre Treino com decaimento de efen para 0.05)\n" +
+                "\n Notas:\n" +
                 "Algoritmo Primario - algorimo do primeiro agente" +
                 "\nBotões:\n" +
+                "(apenas labirinto)\n" +
                 "N - Novo labirinto Usando Agentes (Sarsa)\n" +
-                "P - Modifica o efen para 0 (apenas para o Algorimo Primario)\n" +
                 "A - Apresenta as Setas do algorimo (apenas para o Algorimo Primario)\n" +
-                "S - Salva o labirinto e a politica atual (apenas para o Algorimo Primario)\n"
+                "(geral)\n" +
+                "P - Modifica o efen para 0 (apenas para o Algorimo Primario)\n" +
+                "S - Salva o Ambiente e a politica atual (apenas para o Algorimo Primario)\n" +
+                "Up key - Acelera a simulação\n" +
+                "Down key - Desacelera a simulação\n"
                 );
             Console.Write("Choice: ");
             test = Convert.ToInt32(Console.ReadLine());
@@ -229,8 +233,14 @@ class Program
         Q_Learning q_Learning = new Q_Learning(pista, gamma, alfa, efen, valor_omissao);
 
         //pre treino
-        q_Learning.treino(500000, size.x * size.y);
-        q_Learning.efen = 0;
+        //q_Learning.treino(500000, size.x * size.y);
+        int passos = size.x * size.y;
+        for (int bloco = 0; bloco < 50; bloco++) //decaimento do efen
+        {   
+            q_Learning.efen = Math.Max(0.05, 0.3 * Math.Pow(0.9, bloco)); //0.3 -> 0.05 ao fim de ~17 blocos
+            q_Learning.treino(1000, passos);
+        }
+        q_Learning.efen = 0; //zerar o efen para o agente
 
         //agente
         Agente[] agentes = new Agente[1]; //Agente

@@ -15,5 +15,29 @@ namespace RaciocinioAutomatico
             this.maxValue = maxValue;
             this.gamma = gamma;
         }
+
+        public void FazerOnda(IProblema prob, List<double[]> estadosObjetivos)
+        {
+            List<double[]> frente_da_onda = new List<double[]>();
+            foreach(double[] obj in estadosObjetivos)
+            {
+                prob.SetStateValue(obj, maxValue);
+                frente_da_onda.Add(obj);
+            }
+            while (frente_da_onda.Count > 0)
+            {
+                var estado = frente_da_onda[0]; //get first
+                frente_da_onda.Remove(estado);  //remove para simular o "pop"
+                foreach (double[] adjacente in prob.sucessores(estado))
+                {
+                    double v = prob.avaliar(estado) * gamma; // v = V[s] * pow(gamma,dist(s,s')) //@note not emplemated distancia assumir 1
+                    if(v > prob.avaliar(adjacente)) //@not emplemente the -infinite
+                    {
+                        prob.SetStateValue(adjacente, v); // V[s'] = v
+                        frente_da_onda.Add(adjacente); // frente-de-onda.append(s’)
+                    }
+                }
+            }
+        }
     }
 }

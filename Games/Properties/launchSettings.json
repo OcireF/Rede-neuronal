@@ -3,6 +3,10 @@
     "Games": {
       "commandName": "Project",
       "debugEngines": "managed,native"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
     }
   }
 }

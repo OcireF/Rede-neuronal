@@ -24,6 +24,10 @@ namespace RaciocinioAutomatico
                 mapa[i] = new double[y];
             }
         }
+        public void FrenteOndaSetup(FrenteDeOnda frenteDeOnda, List<double[]> objs) //fazer montes usando "FrenteDeOnda"
+        {
+            frenteDeOnda.FazerOnda(this, objs);
+        }
 
         public Func<double[], double> avaliar()
         {
@@ -74,6 +78,18 @@ namespace RaciocinioAutomatico
                 }
             }
             return sucessores;
+        }
+
+        public double GetData(int x, int y)
+        {
+            return mapa[x][y];
+        }
+
+        public void SetStateValue(double[] estado, double value)
+        {
+            int x = (int)estado[0];
+            int y = (int)estado[1];
+            mapa[x][y] = value;
         }
     }
 }

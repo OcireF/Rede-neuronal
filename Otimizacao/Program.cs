@@ -88,8 +88,9 @@ class Program
         FrenteDeOnda frenteDeOnda = new FrenteDeOnda(255, 0.9);
         monte.FrenteOndaSetup(frenteDeOnda, objs);
 
-        HillClimbing hillClimmer = new HillClimbing(monte);
-        var algoritmos = new HillClimbing[1] { hillClimmer };
+        /*HillClimbing hillClimmer = new HillClimbing(monte);
+        var algoritmos = new HillClimbing[1] { hillClimmer };*/
+        HillClimbing[] algoritmos = GetHillClibers(monte);
 
         ResizeWindow(size);
         DrawHills(size, monte, algoritmos);
@@ -119,11 +120,22 @@ class Program
             monte.FrenteOndaSetup(frenteDeOnda, objs);
         }
 
-        HillClimbing hillClimmer = new HillClimbing(monte);
-        var algoritmos = new HillClimbing[1] { hillClimmer };
+        /*HillClimbing hillClimmer = new HillClimbing(monte);
+        var algoritmos = new HillClimbing[1] { hillClimmer };*/
+        HillClimbing[] algoritmos = GetHillClibers(monte);
 
         ResizeWindow(size);
         DrawHills(size, monte, algoritmos);
+    }
+
+    static HillClimbing[] GetHillClibers(IProblema problema)
+    {
+        HillClimbing hillClimmer1 = new HillClimbing(problema);
+        HillClimbingEstocastico hillClimmer2 = new HillClimbingEstocastico(problema);
+        HillClimbingEstocasticoUnicoSucessor hillClimmer3 = new HillClimbingEstocasticoUnicoSucessor(problema);
+        var hillClimmers = new HillClimbing[] { hillClimmer1, hillClimmer2, hillClimmer3 };
+
+        return hillClimmers;
     }
 
     static void DrawHills((int x, int y) size, Montes monte, HillClimbing[] hillClimmers)

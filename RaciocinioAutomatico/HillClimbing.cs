@@ -1,12 +1,11 @@
 ﻿namespace RaciocinioAutomatico
 {
-    public class HillClimbing
+    public class HillClimbing : IAlgoritmoHill
     {
-        private double[] estado;
-        private double valorEstado;
-        private bool complete = false;
-        private IProblema problema;
-        private Random r;
+        protected double[] estado;
+        protected double valorEstado;
+        protected bool completed = false;
+        protected IProblema problema;
 
         public HillClimbing(IProblema problema)
         {
@@ -40,9 +39,9 @@
             return estado;
         }*/
 
-        public void FaserPasso()
+        public virtual void FaserPasso()
         {
-            if (complete) //hillClibing completo
+            if (completed) //hillClibing completo
             {
                 return;
             }
@@ -57,7 +56,7 @@
 
             if (novoEstado == null || valorNovoEstado <= valorEstado) //região plana/maximo local ou não existem mais estados
             {
-                complete = true;
+                completed = true;
                 return;
             }
             else //uptade o novo estado e valor
@@ -96,13 +95,19 @@
         {
             estado = problema.estado_inicial(); // estado inicial
             valorEstado = double.MinValue; // - infinito
-            complete = false;
+            completed = false;
         }
 
         public double[] GetEstado()
         {
             return estado;
         }
+
+        public bool IsCompleted()
+        {
+            return completed;
+        }
+
 
     }
 }

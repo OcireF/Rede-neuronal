@@ -15,6 +15,8 @@ class Program
     static Texture2D tileset;// = Raylib.LoadTexture("Assets/Floor_TileSet.png");
     static Texture2D npcs;// = Raylib.LoadTexture("Assets/NPC.png");
 
+    //HillClimber com reinicios
+
     static void Main(string[] args)
     {
         int test = 0;
@@ -90,7 +92,7 @@ class Program
 
         /*HillClimbing hillClimmer = new HillClimbing(monte);
         var algoritmos = new HillClimbing[1] { hillClimmer };*/
-        HillClimbing[] algoritmos = GetHillClibers(monte);
+        IAlgoritmoHill[] algoritmos = GetHillClibers(monte,255);
 
         ResizeWindow(size);
         DrawHills(size, monte, algoritmos);
@@ -122,23 +124,24 @@ class Program
 
         /*HillClimbing hillClimmer = new HillClimbing(monte);
         var algoritmos = new HillClimbing[1] { hillClimmer };*/
-        HillClimbing[] algoritmos = GetHillClibers(monte);
+        IAlgoritmoHill[] algoritmos = GetHillClibers(monte,255);
 
         ResizeWindow(size);
         DrawHills(size, monte, algoritmos);
     }
 
-    static HillClimbing[] GetHillClibers(IProblema problema)
+    static IAlgoritmoHill[] GetHillClibers(IProblema problema, double valorAlvo)
     {
         HillClimbing hillClimmer1 = new HillClimbing(problema);
         HillClimbingEstocastico hillClimmer2 = new HillClimbingEstocastico(problema);
         HillClimbingEstocasticoUnicoSucessor hillClimmer3 = new HillClimbingEstocasticoUnicoSucessor(problema);
-        var hillClimmers = new HillClimbing[] { hillClimmer1, hillClimmer2, hillClimmer3 };
+        HillClimbingReinicioAleatorio hillClimmer4 = new HillClimbingReinicioAleatorio(valorAlvo, 20, new HillClimbing(problema), problema);
+        var hillClimmers = new IAlgoritmoHill[] { hillClimmer1, hillClimmer2, hillClimmer3 , hillClimmer4 };
 
         return hillClimmers;
     }
 
-    static void DrawHills((int x, int y) size, Montes monte, HillClimbing[] hillClimmers)
+    static void DrawHills((int x, int y) size, Montes monte, IAlgoritmoHill[] hillClimmers)
     {
         while (!Raylib.WindowShouldClose())
         {
@@ -147,7 +150,7 @@ class Program
             if (acumulador >= timer[timerIndex]) //para controlar a velocidade de update do player nos estados
             {
                 acumulador -= timer[timerIndex];
-                foreach (HillClimbing hc in hillClimmers)
+                foreach (IAlgoritmoHill hc in hillClimmers)
                 {
                     hc.FaserPasso();
                 }
@@ -179,7 +182,7 @@ class Program
             for (int i = 0; i < hillClimmers.Length; i++) //draw agentes
             {
                 var player = hillClimmers[i].GetEstado();
-                Rectangle playerSprite = new Rectangle(0, ((i % 3)) * 16, blockSize , blockSize);
+                Rectangle playerSprite = new Rectangle(0, ((i % hillClimmers.Length)) * 16, blockSize , blockSize);
                 Rectangle playerDestino = new Rectangle((int)player[0] * blockSize * zoom, (int)player[1] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
                 Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
             }
@@ -190,13 +193,14 @@ class Program
             //keys
             if (Raylib.IsKeyPressed(KeyboardKey.N)) //reniciar os hillClibers
             {
-                foreach (HillClimbing hc in hillClimmers)
+                foreach (IAlgoritmoHill hc in hillClimmers)
                 {
                     hc.Restart();
                 }
             }
         }
 
+        //função para ajudar a criar o gradiente de verde->amarelo->vermelho
         static Color Gradiente(float t)
         {
             t = Math.Clamp(t, 0f, 1f);

@@ -16,7 +16,7 @@ namespace RaciocinioAutomatico
             this.gamma = gamma;
         }
 
-        public void FazerOnda(IProblema prob, List<double[]> estadosObjetivos)
+        public void FazerOnda(Montes prob, List<double[]> estadosObjetivos)
         {
             List<double[]> frente_da_onda = new List<double[]>();
             foreach(double[] obj in estadosObjetivos)

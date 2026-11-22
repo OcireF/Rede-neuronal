@@ -26,8 +26,13 @@ class Program
 
             Console.WriteLine(
                 "Textes Parte 3.1\n" +
-                "(1) - Big hill  ( 25x25 ) hillClibling\n" +
-                "(2) - Maximos Locais ( 50x50 ) hillClibling\n"
+                "(1) - Big hill  ( 25x25 ) hillClimblers\n" +
+                "(2) - Maximos Locais ( 50x50 ) hillClimblers\n" +
+                "Notas:\n" +
+                "Vermelho = hillClimbler normal\n" +
+                "Azul = hillClimbler estocastico\n" +
+                "Roxo = hillClimbler estocastico com um unico sucessor\n" +
+                "Verde = hillClimbler com reinício aleatório\n"
                 );
             Console.Write("Choice: ");
             test = Convert.ToInt32(Console.ReadLine());

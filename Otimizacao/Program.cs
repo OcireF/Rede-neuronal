@@ -5,7 +5,7 @@ using System.Runtime.ConstrainedExecution;
 class Program
 {
     static float[] timer = { 0.001f, 0.05f, 0.1f, 0.5f }; //timer da velociade de atualização do player
-    static int timerIndex = 1; //default speed "0.05f"
+    static int timerIndex = 2; //default speed "0.05f"
     static float acumulador = 0; //acumulador para contar o tempo passado
 
     //window stuff
@@ -28,6 +28,7 @@ class Program
                 "Textes Parte 3.1\n" +
                 "(1) - Big hill  ( 25x25 ) hillClimblers\n" +
                 "(2) - Maximos Locais ( 50x50 ) hillClimblers\n" +
+                "(3) - Damas ( 8x8 ) hillClimblerNormal" +
                 "Notas:\n" +
                 "Vermelho = hillClimbler normal\n" +
                 "Azul = hillClimbler estocastico\n" +
@@ -44,6 +45,9 @@ class Program
                     break;
                 case 2:
                     maximosLocais((50, 50));
+                    break;
+                case 3:
+                    DamasConflitos((8,8));
                     break;
             }
         }
@@ -134,6 +138,15 @@ class Program
         ResizeWindow(size);
         DrawHills(size, monte, algoritmos);
     }
+    static void DamasConflitos((int x, int y) size)
+    {
+        Damas damas = new Damas(size.x,size.y);
+        IAlgoritmoHill hillclimbmer = new HillClimbingReinicioAleatorio(0, 30, new HillClimbing(damas), damas);
+
+        ResizeWindow(size);
+        DrawDamas(size, damas, hillclimbmer);
+
+    }
 
     static IAlgoritmoHill[] GetHillClibers(IProblema problema, double valorAlvo)
     {
@@ -204,15 +217,65 @@ class Program
                 }
             }
         }
+    }
 
-        //função para ajudar a criar o gradiente de verde->amarelo->vermelho
-        static Color Gradiente(float t)
+    static void DrawDamas((int x, int y) size, Damas damas, IAlgoritmoHill hillClimmer)
+    {
+        while (!Raylib.WindowShouldClose())
         {
-            t = Math.Clamp(t, 0f, 1f);
-            if (t < 0.5f)
-                return Color.Lerp(Color.Red, Color.Yellow, t * 2f);       // 0 → 0.5: vermelho → amarelo
-            else
-                return Color.Lerp(Color.Yellow, Color.Green, (t - 0.5f) * 2f); // 0.5 → 1: amarelo → verde
+            acumulador += Raylib.GetFrameTime();
+
+            if (acumulador >= timer[timerIndex]) //para controlar a velocidade de update do player nos estados
+            {
+                acumulador -= timer[timerIndex];
+                hillClimmer.FaserPasso();
+            }
+
+
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Black);
+
+            for (int x = 0; x < size.x; x++) //desenha mapa
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    //draw tile
+                    Rectangle tile = new Rectangle(0, 0, blockSize, blockSize);
+                    Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+
+                    Color cor = ((x + y) % 2) == 0 ? Color.Black : Color.White;
+
+                    Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, cor);
+                }
+            }
+
+            //draw Damas 
+            
+            double[] player = hillClimmer.GetEstado();
+            for (int i = 0; i < player.Length; i++) {
+                Rectangle playerSprite = new Rectangle(16, 0, blockSize, blockSize);
+                Rectangle playerDestino = new Rectangle(i * blockSize * zoom, (int)player[i] * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                Raylib.DrawTexturePro(npcs, playerSprite, playerDestino, Vector2.Zero, 0f, Color.White);
+            }
+
+
+            Raylib.EndDrawing();
+
+            //keys
+            if (Raylib.IsKeyPressed(KeyboardKey.N)) //reniciar os hillClibers
+            {
+                hillClimmer.Restart();
+            }
         }
+    }
+
+    //função para ajudar a criar o gradiente de verde->amarelo->vermelho
+    static Color Gradiente(float t)
+    {
+        t = Math.Clamp(t, 0f, 1f);
+        if (t < 0.5f)
+            return Color.Lerp(Color.Red, Color.Yellow, t * 2f);       // 0 → 0.5: vermelho → amarelo
+        else
+            return Color.Lerp(Color.Yellow, Color.Green, (t - 0.5f) * 2f); // 0.5 → 1: amarelo → verde
     }
 }

@@ -15,7 +15,7 @@ namespace RaciocinioAutomatico
 
         }
 
-        //Override escolha aleatoria, escolhe o primeiro sucessor que tiver maior valor que o atual, aleatoriamente
+        //Override escolha aleatoria, escolhe o primeiro sucessor que tiver maior valor que o atual
         public override double[] EscolherSucessor(List<double[]> sucessores, Func<double[], double> avaliador, double valorEstadoAtual) // IComparer<double[]> comparador
         {
             if (sucessores.Count == 0) //lista vasia

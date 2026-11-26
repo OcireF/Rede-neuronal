@@ -15,7 +15,7 @@ namespace RaciocinioAutomatico
 
         }
 
-        //Override escolha aleatoria, escolhe o primeiro sucessor que tiver maior valor que o atual, aleatoriamente
+        //Override escolha aleatoria, escolhe aleatoriamente entre os sucessores que tiverem maior valor que o atual
         public override double[] EscolherSucessor(List<double[]> sucessores, Func<double[], double> avaliador, double valorEstadoAtual) // IComparer<double[]> comparador
         {
             if (sucessores.Count == 0) //lista vasia
@@ -26,20 +26,17 @@ namespace RaciocinioAutomatico
             List<double[]> sucessoresEscolhidos = new List<double[]>();
             double valorDoEscolhido = valorEstadoAtual;
 
-            foreach (double[] sucessor in sucessores)
+            foreach (double[] sucessor in sucessores) //verifica todos os sucessores
             {
-                if (avaliador.Invoke(sucessor) - valorDoEscolhido > 0) //se o valor for maior é o novo sucessor escolhido
+                if (avaliador.Invoke(sucessor) - valorDoEscolhido > 0) //se o valor for maior é um sucessor escolhido
                 {
                     sucessoresEscolhidos.Add(sucessor);
                 }
             }
 
-            if (sucessoresEscolhidos.Count > 0)
+            if (sucessoresEscolhidos.Count > 0) //se existirem sucessores escolhidos, escolhe aleatoriamente entre eles
             {
-                int[] indexs = Enumerable.Range(0, sucessoresEscolhidos.Count).ToArray(); //cria index para dar suffle
-                r.Shuffle(indexs);
-
-                return sucessoresEscolhidos[indexs[0]]; //sucessor aleatorio
+                return sucessoresEscolhidos[r.Next(0, sucessoresEscolhidos.Count)]; //sucessor aleatorio
             }
             else
             {

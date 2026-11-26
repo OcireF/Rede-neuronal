@@ -28,12 +28,14 @@ class Program
                 "Textes Parte 3.1\n" +
                 "(1) - Big hill  ( 25x25 ) hillClimblers\n" +
                 "(2) - Maximos Locais ( 50x50 ) hillClimblers\n" +
-                "(3) - Damas ( 8x8 ) hillClimblerNormal" +
-                "Notas:\n" +
+                "(3) - Damas ( 8x8 ) hillClimblerNormal\n" +
+                "\nNotas no hill:\n" +
                 "Vermelho = hillClimbler normal\n" +
                 "Azul = hillClimbler estocastico\n" +
                 "Roxo = hillClimbler estocastico com um unico sucessor\n" +
-                "Verde = hillClimbler com reinício aleatório\n"
+                "Verde = hillClimbler com reinício aleatório\n" +
+                "\nBotões:\n" +
+                "N - recomeçar os algoritmos\n"
                 );
             Console.Write("Choice: ");
             test = Convert.ToInt32(Console.ReadLine());
@@ -103,7 +105,6 @@ class Program
         var algoritmos = new HillClimbing[1] { hillClimmer };*/
         IAlgoritmoHill[] algoritmos = GetHillClibers(monte,255);
 
-        ResizeWindow(size);
         DrawHills(size, monte, algoritmos);
     }
 
@@ -127,7 +128,7 @@ class Program
             objs.Add(new double[] { size.x     / 4, size.y * 3 / 4 }); //esquerda baixo
             objs.Add(new double[] { size.x * 3 / 4, size.y * 3 / 4 }); //direita baixo
 
-            FrenteDeOnda frenteDeOnda = new FrenteDeOnda(150, 0.9); //maximo local
+            FrenteDeOnda frenteDeOnda = new FrenteDeOnda(150, 0.9); //init maximos locais
             monte.FrenteOndaSetup(frenteDeOnda, objs);
         }
 
@@ -135,17 +136,16 @@ class Program
         var algoritmos = new HillClimbing[1] { hillClimmer };*/
         IAlgoritmoHill[] algoritmos = GetHillClibers(monte,255);
 
-        ResizeWindow(size);
-        DrawHills(size, monte, algoritmos);
+        DrawHills(size, monte, algoritmos); //desenhar a simulação
     }
     static void DamasConflitos((int x, int y) size)
     {
         Damas damas = new Damas(size.x,size.y);
-        IAlgoritmoHill hillclimbmer = new HillClimbingReinicioAleatorio(0, 30, new HillClimbing(damas), damas);
+        int objetivo = 0; //numero de conflitos que queremos atingir
+        int numeroReinicios = 30; //numero de reinicios aleatorios que queremos fazer
+        IAlgoritmoHill hillclimbmer = new HillClimbingReinicioAleatorio(objetivo, numeroReinicios, new HillClimbing(damas), damas);
 
-        ResizeWindow(size);
-        DrawDamas(size, damas, hillclimbmer);
-
+        DrawDamas(size, damas, hillclimbmer); //desenhar a simulação
     }
 
     static IAlgoritmoHill[] GetHillClibers(IProblema problema, double valorAlvo)
@@ -161,6 +161,7 @@ class Program
 
     static void DrawHills((int x, int y) size, Montes monte, IAlgoritmoHill[] hillClimmers)
     {
+        ResizeWindow(size);
         while (!Raylib.WindowShouldClose())
         {
             acumulador += Raylib.GetFrameTime();
@@ -197,7 +198,7 @@ class Program
             }
 
             //draw Player (sempre em cima de tudo o resto)
-            for (int i = 0; i < hillClimmers.Length; i++) //draw agentes
+            for (int i = 0; i < hillClimmers.Length; i++) //draw hillClimbers
             {
                 var player = hillClimmers[i].GetEstado();
                 Rectangle playerSprite = new Rectangle(0, ((i % hillClimmers.Length)) * 16, blockSize , blockSize);
@@ -221,6 +222,7 @@ class Program
 
     static void DrawDamas((int x, int y) size, Damas damas, IAlgoritmoHill hillClimmer)
     {
+        ResizeWindow(size);
         while (!Raylib.WindowShouldClose())
         {
             acumulador += Raylib.GetFrameTime();
@@ -243,7 +245,7 @@ class Program
                     Rectangle tile = new Rectangle(0, 0, blockSize, blockSize);
                     Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
 
-                    Color cor = ((x + y) % 2) == 0 ? Color.Black : Color.White;
+                    Color cor = ((x + y) % 2) == 0 ? Color.DarkGray : Color.LightGray;
 
                     Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, cor);
                 }
@@ -269,7 +271,7 @@ class Program
         }
     }
 
-    //função para ajudar a criar o gradiente de verde->amarelo->vermelho
+    //função para ajudar a criar o gradiente de verde->amarelo->vermelho, feita com ajuda da AI
     static Color Gradiente(float t)
     {
         t = Math.Clamp(t, 0f, 1f);

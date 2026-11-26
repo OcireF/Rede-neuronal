@@ -48,11 +48,7 @@
 
             List<double[]> sucessores = problema.sucessores(estado);    //vé tudo a volta
             double[] novoEstado = EscolherSucessor(sucessores, problema.avaliar(),valorEstado);  //vé o maior valor e escolhe o estado seguinte
-            double valorNovoEstado = double.MinValue; //valor para estadoSucessor Null
-            if (novoEstado != null) //estado terminal
-            {
-                valorNovoEstado = problema.avaliar(novoEstado);      //pega o novoValor do estado escolhido
-            }
+            double valorNovoEstado = problema.avaliar(novoEstado); //valor deste novo estado
 
             if (novoEstado == null || valorNovoEstado <= valorEstado) //região plana/maximo local ou não existem mais estados
             {
@@ -75,22 +71,22 @@
                 return null;
             }
 
-            //double[] sucessorEscolhido = sucessores[0]; //valor default
-            //double valorDoEscolhido = avaliador.Invoke(sucessorEscolhido); //pegar o primeiro valor
             double[] sucessorEscolhido = null;
             double valorDoEscolhido = valorEstadoAtual;
 
             foreach (double[] sucessor in sucessores)
             {
-                if( avaliador.Invoke(sucessor) - valorDoEscolhido > 0) //se o valor for maior é o novo sucessor escolhido
+                double valorSucessor = avaliador.Invoke(sucessor);
+                if (valorSucessor - valorDoEscolhido > 0) //se o valor for maior é o novo sucessor escolhido
                 {
                     sucessorEscolhido = sucessor;
-                    valorDoEscolhido = avaliador.Invoke(sucessor);
+                    valorDoEscolhido = valorSucessor;
                 }
             }
             return sucessorEscolhido;
         }
 
+        //renicia o hillClimbing, voltando ao estado inicial e valor minimo
         public void Restart()
         {
             estado = problema.estado_inicial(); // estado inicial
@@ -98,6 +94,7 @@
             completed = false;
         }
 
+        //estado atual do hillClimbing
         public double[] GetEstado()
         {
             return estado;

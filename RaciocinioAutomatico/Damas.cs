@@ -10,28 +10,14 @@ namespace RaciocinioAutomatico
     {
         //private double[][] tabuleiro;
         private (int x, int y) size;
-        private List<(int x, int y)> damas = new List<(int x, int y)>();
+        //private List<(int x, int y)> damas = new List<(int x, int y)>();
         private Random r = new Random();
 
 
         public Damas(int x, int y)
         {
             size = (x, y);
-            //initTabuleiro(x, y);
-            for(int i = 0; i < x; i++) //1 rainha por coluna
-            {
-                damas.Add((i,r.Next(0,y)));
-            }
         }
-
-        /*public void initTabuleiro(int x, int y)
-        {
-            tabuleiro = new double[x][];
-            for (int i = 0; i < x; i++)
-            {
-                tabuleiro[i] = new double[y];
-            }
-        }*/
 
         public Func<double[], double> avaliar()
         {
@@ -40,6 +26,11 @@ namespace RaciocinioAutomatico
 
         public double avaliar(double[] estado)
         {
+            if(estado == null) //estado null, não existe
+            {
+                return double.MinValue; //pontuação minima
+            }
+
             int numAtaques = 0;
             for(int r=0; r < size.x; r++)
             {
@@ -65,14 +56,14 @@ namespace RaciocinioAutomatico
             return -numAtaques; //valor negativo, a tentar ser 0
         }
 
-        public double[] estado_inicial() //exemplo [4,6,3,2,1,4,0] para um tabuleiro de 7x7
+        public double[] estado_inicial()
         {
             double[] estadoInicial = new double[size.x]; // onde vão ser armasenados a linha de cada rainha
             for (int i = 0; i < size.x; i++) //1 rainha por coluna
             {
-                estadoInicial[i] = r.Next(0, size.y);
+                estadoInicial[i] = r.Next(0, size.y); //random posição da rainha na coluna i
             }
-            return estadoInicial;
+            return estadoInicial;//exemplo [4,6,3,2,1,4,0] para um tabuleiro de 7x7
         }
 
         public List<double[]> sucessores(double[] estado)

@@ -36,6 +36,11 @@ namespace RaciocinioAutomatico
 
         public double avaliar(double[] estado)
         {
+            if(estado == null) //estado null, não existe
+            {
+                return double.MinValue; //pontuação minima
+            }
+
             return mapa[(int)estado[0]][(int)estado[1]];
         }
 

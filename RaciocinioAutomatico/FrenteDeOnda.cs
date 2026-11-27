@@ -10,16 +10,18 @@ namespace RaciocinioAutomatico
     {
         private double maxValue;
         private double gamma;
-        public FrenteDeOnda(double maxValue, double gamma)
+        private double minVal;
+        public FrenteDeOnda(double maxValue, double gamma, double minVal = double.MinValue)
         {
             this.maxValue = maxValue;
             this.gamma = gamma;
+            this.minVal = minVal;
         }
 
         public void FazerOnda(Montes prob, List<double[]> estadosObjetivos)
         {
             List<double[]> frente_da_onda = new List<double[]>();
-            foreach(double[] obj in estadosObjetivos)
+            foreach(double[] obj in estadosObjetivos) //max values nos objs
             {
                 prob.SetStateValue(obj, maxValue);
                 frente_da_onda.Add(obj);
@@ -31,6 +33,12 @@ namespace RaciocinioAutomatico
                 foreach (double[] adjacente in prob.sucessores(estado))
                 {
                     double v = prob.avaliar(estado) * gamma; // v = V[s] * pow(gamma,dist(s,s')) //@note not emplemated distancia assumir 1
+
+                    if(minVal > v) //flatted in minValue 
+                    {
+                        v = minVal;
+                    }
+
                     if(v > prob.avaliar(adjacente)) //@not emplemente the -infinite
                     {
                         prob.SetStateValue(adjacente, v); // V[s'] = v

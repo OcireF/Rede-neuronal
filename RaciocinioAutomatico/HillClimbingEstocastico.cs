@@ -12,7 +12,7 @@ namespace RaciocinioAutomatico
 
         public HillClimbingEstocastico(IProblema problema) : base(problema)
         {
-
+            algoritmoName = "Hill Climbing Estocastico";
         }
 
         //Override escolha aleatoria, escolhe aleatoriamente entre os sucessores que tiverem maior valor que o atual
@@ -43,6 +43,5 @@ namespace RaciocinioAutomatico
                 return null;
             }
         }
-
     }
 }

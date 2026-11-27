@@ -6,6 +6,10 @@
         protected double valorEstado;
         protected bool completed = false;
         protected IProblema problema;
+        public string algoritmoName = "Hill Climbing";
+        protected int passos = 0;
+
+        public bool suprimirPrints = false;
 
         public HillClimbing(IProblema problema)
         {
@@ -14,6 +18,10 @@
             this.problema = problema; //problema
         }
 
+        public void SuprimirPrints()
+        {
+            suprimirPrints = true;
+        }
         //exemplo do codigo do prof
         /*public double[] NormalHillClimbing(IProblema problema)
         {
@@ -41,6 +49,7 @@
 
         public virtual void FaserPasso()
         {
+            passos++;
             if (completed) //hillClibing completo
             {
                 return;
@@ -53,6 +62,9 @@
             if (novoEstado == null || valorNovoEstado <= valorEstado) //região plana/maximo local ou não existem mais estados
             {
                 completed = true;
+                if (!suprimirPrints) {
+                    PrintResults();
+                }
                 return;
             }
             else //uptade o novo estado e valor
@@ -90,8 +102,9 @@
         public void Restart()
         {
             estado = problema.estado_inicial(); // estado inicial
-            valorEstado = double.MinValue; // - infinito
+            valorEstado = double.MinValue;      // - infinito
             completed = false;
+            passos = 0;                         //reset passos
         }
 
         //estado atual do hillClimbing
@@ -105,6 +118,14 @@
             return completed;
         }
 
-
+        public virtual void PrintResults()
+        {
+            Console.WriteLine(
+                "\nAlgoritmo : " + algoritmoName +
+                "\n Passos feitos = " + passos +
+                "\n Valor do Estado = " + valorEstado +
+                "\n Estado = [" + string.Join(", ", estado) + "]"
+                );
+        }
     }
 }

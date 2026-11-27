@@ -11,5 +11,6 @@ namespace RaciocinioAutomatico
         public void FaserPasso(); //fazer um passo
         public double[] GetEstado(); //get estado atual
         public void Restart(); //restart algorimo
+        public void PrintResults();
     }
 }

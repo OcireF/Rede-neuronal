@@ -18,6 +18,7 @@ namespace RaciocinioAutomatico
         private double[] melhorEstado = null;
         private double valor_melhor_estado = double.MinValue;
         private double valorAlvo;
+        public int passos = 0;
 
         public HillClimbingReinicioAleatorio(double valorAlvo, int max_reinicios, HillClimbing hillClimber, IProblema problema)
         {
@@ -25,11 +26,13 @@ namespace RaciocinioAutomatico
             this.valorAlvo = valorAlvo;         //valor alvo que estamos a tentar chegar
             this.max_reinicios = max_reinicios; //maximo de reinicios para chegar no obj
             this.problema = problema;           //ambiente do problema
+            this.hillClimber.SuprimirPrints();
         }
 
         public void FaserPasso()
         {
-            if(foundBest || loop >= max_reinicios)
+            passos++;
+            if (foundBest || loop >= max_reinicios)
             {
                 return;
             }
@@ -49,6 +52,7 @@ namespace RaciocinioAutomatico
                     foundBest = true;                                   //melhor encontrado
                     melhorEstado = (double[])estadoHillClimber.Clone(); //clone o melhor estado
                     valor_melhor_estado = valorEstadoNovo;              //valor do melhor estado
+                    PrintResults();
                     return;//break;
                 }
                 else //não encontramos o objetivo neste loop
@@ -63,6 +67,11 @@ namespace RaciocinioAutomatico
                 //reset do hillClimber
                 hillClimber.Restart();  //renicia o hillCliber
                 loop++;                 //loop++
+
+                if(loop >= max_reinicios) //não vai ter mais loops por isso dar print dos resultados
+                {
+                    PrintResults();
+                }
             }
         }
 
@@ -83,6 +92,18 @@ namespace RaciocinioAutomatico
             melhorEstado = null;
             valor_melhor_estado = double.MinValue;
             hillClimber.Restart();
+            passos = 0;
+        }
+
+        public void PrintResults()
+        {
+            Console.WriteLine(
+                "\nAlgoritmo : Reinicio Aleatorio" +
+                "\n Passos feitos = " + passos +
+                "\n Reset feitos = " + loop +
+                "\n Valor do melhor Estado = " + valor_melhor_estado +
+                "\n Melhor Estado = [" + string.Join(", ", melhorEstado) + "]"
+                );
         }
     }
 }

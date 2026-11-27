@@ -39,7 +39,7 @@ class Program
 
                 "\nTextes Parte 3.2\n" +
                 "(4) - zonas Planas (150x50) hillClimblers + Simulated Annealing\n" +
-                "(5) - Rota cidades (40x20) (8 cidades) hillClimbler com reinício aleatório\n" +
+                "(5) - Rota cidades (40x20) (15 cidades) hillClimbler com reinício aleatório\n" +
                 "(6) - Rota cidades (40x20) (15 cidades) Simulated Annealing\n" +
 
                 "\nBotões:\n" +
@@ -63,7 +63,7 @@ class Program
                     zonasPlanas((100, 50));
                     break;
                 case 5:
-                    Cidades((40, 20), 8);
+                    Cidades((40, 20), 15);
                     break;
                 case 6:
                     CidadesFerver((40, 20), 15);

@@ -34,7 +34,7 @@ namespace RaciocinioAutomatico
                 return double.MinValue;
             }
             double distancia = 0.0;
-            for (int i = 0; i < estado.Length - 2; i++) //o -1 é para parar 1 cidade antes.
+            for (int i = 0; i < estado.Length - 1; i++) //o -1 é para parar 1 cidade antes.
             {
                 distancia += DistanciaEntreCidades((int) estado[i], (int) estado[i + 1]);
             }
@@ -71,7 +71,7 @@ namespace RaciocinioAutomatico
         public List<double[]> sucessores(double[] estado)
         {
             List<double[]> sucessores = new List<double[]>();
-            for(int i = 0; i < estado.Length - 1; i++)
+            /*for(int i = 0; i < estado.Length - 1; i++)
             {
                 var novoEstado = (double[])estado.Clone();
                 //swap cidades
@@ -87,7 +87,21 @@ namespace RaciocinioAutomatico
             ultimaTroca[estado.Length - 1] = ultimaTroca[0];
             ultimaTroca[0] = temp2;
 
-            sucessores.Add(ultimaTroca);
+            sucessores.Add(ultimaTroca);*/
+
+            //verifica todas as combinações de cidades para trocar
+            for (int i = 0; i < estado.Length - 1; i++)
+            {
+                for (int j = i + 1; j < estado.Length - 1; j++) 
+                {
+                    var novoEstado = (double[])estado.Clone();
+                    //swap cidades
+                    double temp = novoEstado[i];
+                    novoEstado[i] = novoEstado[j];
+                    novoEstado[j] = temp;
+                    sucessores.Add(novoEstado);
+                }
+            }
 
             return sucessores;
         }

@@ -40,7 +40,7 @@ class Program
                 "\nTextes Parte 3.2\n" +
                 "(4) - zonas Planas (150x50) hillClimblers + Simulated Annealing\n" +
                 "(5) - Rota cidades (40x20) (8 cidades) hillClimbler com reinício aleatório\n" +
-                "(6) - Rota cidades (40x20) (8 cidades) Simulated Annealing\n" +
+                "(6) - Rota cidades (40x20) (15 cidades) Simulated Annealing\n" +
 
                 "\nBotões:\n" +
                 "N - recomeçar os algoritmos\n"
@@ -66,7 +66,7 @@ class Program
                     Cidades((40, 20), 8);
                     break;
                 case 6:
-                    CidadesFerver((40, 20), 8);
+                    CidadesFerver((40, 20), 15);
                     break;
 
             }
@@ -209,7 +209,7 @@ class Program
     static void CidadesFerver((int x, int y) size, int numCidades)
     {
         RotaCidades cidades = new RotaCidades(size, numCidades);
-        SimulatedAnnealing annealing = new SimulatedAnnealing(cidades, 0, 100, (t) => t * 0.999);
+        SimulatedAnnealing annealing = new SimulatedAnnealing(cidades, 0, 80, (t) => t * 0.999);
         //HillClimbingReinicioAleatorio hillClimmer4 = new HillClimbingReinicioAleatorio(0, 20, new HillClimbing(cidades), cidades);
 
         //aumentar o speed do calculo

@@ -82,7 +82,14 @@ namespace RaciocinioAutomatico
 
         public double[] GetEstado()
         {
-            return hillClimber.GetEstado();
+            if(loop >= max_reinicios) //caso finalizou retorna o melhor estado encontrado
+            { 
+                return melhorEstado;
+            }
+            else //se não retorna o estado atual do hillClimber
+            {
+                return hillClimber.GetEstado();
+            }
         }
 
         public void Restart()

@@ -35,10 +35,12 @@ class Program
                 "\nTextes Parte 3.1\n" +
                 "(1) - Big hill  ( 25x25 ) hillClimblers + Simulated Annealing\n" +
                 "(2) - Maximos Locais ( 50x50 ) hillClimblers + Simulated Annealing\n" +
-                "(3) - Damas ( 8x8 ) hillClimblerNormal\n" +
+                "(3) - Damas ( 8x8 )  hillClimbler com reinício aleatório\n" +
 
                 "\nTextes Parte 3.2\n" +
                 "(4) - zonas Planas (150x50) hillClimblers + Simulated Annealing\n" +
+                "(5) - Rota cidades (40x20) (8 cidades) hillClimbler com reinício aleatório\n" +
+                "(6) - Rota cidades (40x20) (8 cidades) Simulated Annealing\n" +
 
                 "\nBotões:\n" +
                 "N - recomeçar os algoritmos\n"
@@ -59,6 +61,12 @@ class Program
                     break;
                 case 4:
                     zonasPlanas((100, 50));
+                    break;
+                case 5:
+                    Cidades((40, 20), 8);
+                    break;
+                case 6:
+                    CidadesFerver((40, 20), 8);
                     break;
 
             }
@@ -187,6 +195,28 @@ class Program
         IAlgoritmoHill[] algoritmos = GetHillClibers(monte, 255);
 
         DrawHills(size, monte, algoritmos); //desenhar a simulação
+    }
+
+    static void Cidades((int x, int y) size, int numCidades)
+    {
+        RotaCidades cidades = new RotaCidades(size, numCidades);
+        //SimulatedAnnealing annealing = new SimulatedAnnealing(cidades, valorAlvo, 100, (t) => t * 0.999);
+        HillClimbingReinicioAleatorio hillClimmer4 = new HillClimbingReinicioAleatorio(0, 20, new HillClimbing(cidades), cidades);
+
+        DrawCidades(size, cidades, hillClimmer4);
+    }
+
+    static void CidadesFerver((int x, int y) size, int numCidades)
+    {
+        RotaCidades cidades = new RotaCidades(size, numCidades);
+        SimulatedAnnealing annealing = new SimulatedAnnealing(cidades, 0, 100, (t) => t * 0.999);
+        //HillClimbingReinicioAleatorio hillClimmer4 = new HillClimbingReinicioAleatorio(0, 20, new HillClimbing(cidades), cidades);
+
+        //aumentar o speed do calculo
+        timerIndex = 0;     //max speed
+        frameSkiper = 10;    //skip 5 frames para acelarar o visual
+
+        DrawCidades(size, cidades, annealing);
     }
 
     static void DamasConflitos((int x, int y) size)
@@ -338,6 +368,102 @@ class Program
                 updateSpeed(1);
             }
             else if(Raylib.IsKeyPressed(KeyboardKey.Down))
+            {
+                updateSpeed(-1);
+            }
+        }
+    }
+
+    static void DrawCidades((int x, int y) size, RotaCidades rotaCidades, IAlgoritmoHill hillClimmer)
+    {
+        ResizeWindow(size);
+
+        Dictionary<int,(int x ,int y)> cidades = rotaCidades.getCidades();
+        List<int> keysCidades = cidades.Keys.ToList();
+
+        while (!Raylib.WindowShouldClose())
+        {
+            acumulador += Raylib.GetFrameTime();
+
+            if (acumulador >= timer[timerIndex]) //para controlar a velocidade de update do player nos estados
+            {
+                acumulador -= timer[timerIndex];
+                hillClimmer.FaserPasso();
+            }
+
+
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Black);
+
+            for (int x = 0; x < size.x; x++) //desenha mapa
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    //draw tile
+                    Rectangle tile = new Rectangle(0, 0, blockSize, blockSize);
+                    Rectangle destino = new Rectangle(x * blockSize * zoom, y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+
+                    Raylib.DrawTexturePro(tileset, tile, destino, Vector2.Zero, 0f, Color.White);
+                }
+            }
+
+
+
+
+            //draw ROTAS 
+            double[] rotas = hillClimmer.GetEstado();
+            for (int i = 0; i < rotas.Length - 1; i++)
+            {
+                double cidade1 = rotas[i];
+                double cidade2 = rotas[i + 1];
+                (int x, int y) c1 = cidades[(int)cidade1];
+                (int x, int y) c2 = cidades[(int)cidade2];
+
+                Raylib.DrawLineEx(
+                    new Vector2((c1.x * blockSize + 8) * zoom, (c1.y * blockSize + 8) * zoom),
+                    new Vector2((c2.x * blockSize + 8) * zoom, (c2.y * blockSize + 8) * zoom),
+                    5f,
+                    Color.Orange
+                    );
+            }
+
+            //ultimo ligado com o primeiro
+            double ultimacidade = rotas[rotas.Length-1];
+            double primeiracidade = rotas[0];
+            (int x, int y) cu1 = cidades[(int)ultimacidade];
+            (int x, int y) cp2 = cidades[(int)primeiracidade];
+
+            Raylib.DrawLineEx(
+                new Vector2((cu1.x * blockSize + 8) * zoom, (cu1.y * blockSize + 8) * zoom),
+                new Vector2((cp2.x * blockSize + 8) * zoom, (cp2.y * blockSize + 8) * zoom),
+                5f,
+                Color.Orange
+                );
+
+            //draw citys
+            foreach (int c in keysCidades)
+            {
+                (int x, int y) cidade = cidades[c];
+                Rectangle citySprite = new Rectangle(32, 0, blockSize, blockSize);
+                Rectangle cityDestino = new Rectangle(cidade.x * blockSize * zoom, cidade.y * blockSize * zoom, blockSize * zoom, blockSize * zoom);
+                Raylib.DrawTexturePro(npcs, citySprite, cityDestino, Vector2.Zero, 0f, Color.White);
+            }
+
+
+            Raylib.EndDrawing();
+
+            //keys
+            if (Raylib.IsKeyPressed(KeyboardKey.N)) //reniciar os hillClibers
+            {
+                Console.WriteLine("\nReset");
+                rotaCidades.NewCitys(); //novas cidades
+                hillClimmer.Restart();
+            }
+            else if (Raylib.IsKeyPressed(KeyboardKey.Up))
+            {
+                updateSpeed(1);
+            }
+            else if (Raylib.IsKeyPressed(KeyboardKey.Down))
             {
                 updateSpeed(-1);
             }
